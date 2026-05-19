@@ -16,12 +16,13 @@ COPY apps/svc-deals        ./apps/svc-deals
 RUN pnpm --filter @crm/shared-types build
 RUN pnpm --filter @crm/shared-core  build
 RUN pnpm --filter @crm/svc-deals    build
+RUN pnpm --filter @crm/svc-deals deploy --prod /deploy
 
 FROM node:20-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 RUN addgroup --system --gid 1001 nestjs && adduser --system --uid 1001 nestjs
 COPY --from=builder --chown=nestjs:nestjs /app/apps/svc-deals/dist ./dist
-COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder --chown=nestjs:nestjs /deploy/node_modules ./node_modules
 USER nestjs
 CMD ["node", "dist/main.js"]
