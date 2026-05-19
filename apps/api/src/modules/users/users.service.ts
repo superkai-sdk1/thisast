@@ -5,7 +5,7 @@ import {
   ConflictException,
   ForbiddenException,
 } from '@nestjs/common';
-import * as bcrypt from 'bcrypt';
+import bcrypt from 'bcrypt';
 import type { Pool } from 'pg';
 import { DB_POOL } from '../../common/decorators/inject-connection.decorator';
 import type { CreateUserDto } from './dto/create-user.dto';

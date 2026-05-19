@@ -4,7 +4,7 @@ import {
   ConflictException,
   ForbiddenException,
 } from '@nestjs/common';
-import * as bcrypt from 'bcrypt';
+import bcrypt from 'bcrypt';
 import type { Pool } from 'pg';
 import { InjectDb } from '@crm/shared-core';
 import type { JwtPayload } from '@crm/shared-core';

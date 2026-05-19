@@ -5,7 +5,7 @@ import {
   Inject,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcrypt';
+import bcrypt from 'bcrypt';
 import { randomBytes, createHash } from 'crypto';
 import type { Pool } from 'pg';
 import { DB_POOL } from '../../common/decorators/inject-connection.decorator';

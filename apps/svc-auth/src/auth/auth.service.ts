@@ -4,7 +4,7 @@ import {
   Inject,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcrypt';
+import bcrypt from 'bcrypt';
 import { randomBytes, createHash } from 'crypto';
 import type { Pool } from 'pg';
 import { InjectDb } from '@crm/shared-core';
