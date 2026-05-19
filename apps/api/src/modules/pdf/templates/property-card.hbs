@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Карточка объекта</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      color: #1a1a1a;
+      background: #fff;
+    }
+
+    /* COVER PAGE */
+    .cover {
+      position: relative;
+      width: 100%;
+      height: 420px;
+      overflow: hidden;
+      background: #1a1a2e;
+    }
+
+    .cover-photo {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0.85;
+    }
+
+    .cover-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 32px;
+      background: linear-gradient(transparent, rgba(0,0,0,0.75));
+      color: #fff;
+    }
+
+    .cover-price {
+      font-size: 36px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 8px;
+    }
+
+    .cover-address {
+      font-size: 16px;
+      font-weight: 400;
+      opacity: 0.9;
+    }
+
+    .cover-no-photo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #fff;
+    }
+
+    /* CONTENT */
+    .content { padding: 32px; }
+
+    /* SPECS */
+    .specs-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .spec-item {
+      background: #f5f5f7;
+      border-radius: 12px;
+      padding: 16px;
+    }
+
+    .spec-label {
+      font-size: 12px;
+      color: #8e8e93;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+
+    .spec-value {
+      font-size: 18px;
+      font-weight: 600;
+      color: #1a1a1a;
+    }
+
+    /* GALLERY */
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 32px;
+    }
+
+    .gallery img {
+      width: 100%;
+      height: 140px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+
+    /* DESCRIPTION */
+    .section-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #8e8e93;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+    }
+
+    .description {
+      font-size: 14px;
+      line-height: 1.6;
+      color: #3c3c43;
+      margin-bottom: 32px;
+    }
+
+    /* FOOTER / AGENT */
+    .footer {
+      border-top: 1px solid #e5e5ea;
+      padding-top: 24px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .agent-photo {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: #e5e5ea;
+    }
+
+    .agent-photo-placeholder {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .agent-info { flex: 1; }
+
+    .agent-name {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .agent-phone {
+      font-size: 14px;
+      color: #007AFF;
+    }
+
+    .agent-qr img { width: 80px; height: 80px; }
+
+    .watermark {
+      text-align: center;
+      margin-top: 16px;
+      font-size: 11px;
+      color: #c7c7cc;
+    }
+  </style>
+</head>
+<body>
+
+<!-- COVER -->
+<div class="cover">
+  {{#if property.cover_photo}}
+    <img class="cover-photo" src="{{property.cover_photo}}" alt="Фото объекта">
+  {{else}}
+    <div class="cover-no-photo">
+      <span style="font-size:64px">🏠</span>
+    </div>
+  {{/if}}
+  <div class="cover-overlay">
+    <div class="cover-price">{{property.price_formatted}}</div>
+    <div class="cover-address">
+      {{property.city}}{{#if property.district}}, {{property.district}}{{/if}}
+      {{#if property.street}}, {{property.street}}{{/if}}
+    </div>
+  </div>
+</div>
+
+<!-- SPECS -->
+<div class="content">
+  <div class="specs-grid">
+    {{#if property.rooms_label}}
+    <div class="spec-item">
+      <div class="spec-label">Комнаты</div>
+      <div class="spec-value">{{property.rooms_label}}</div>
+    </div>
+    {{/if}}
+    {{#if property.area_label}}
+    <div class="spec-item">
+      <div class="spec-label">Площадь</div>
+      <div class="spec-value">{{property.area_label}}</div>
+    </div>
+    {{/if}}
+    {{#if property.floor_label}}
+    <div class="spec-item">
+      <div class="spec-label">Этаж</div>
+      <div class="spec-value">{{property.floor_label}}</div>
+    </div>
+    {{/if}}
+    {{#if property.price_per_sqm}}
+    <div class="spec-item">
+      <div class="spec-label">Цена за м²</div>
+      <div class="spec-value">{{formatNum property.price_per_sqm}} ₽</div>
+    </div>
+    {{/if}}
+  </div>
+
+  <!-- GALLERY -->
+  {{#if property.gallery_photos.length}}
+  <div class="gallery">
+    {{#each property.gallery_photos}}
+    <img src="{{this.url}}" alt="Фото {{@index}}">
+    {{/each}}
+  </div>
+  {{/if}}
+
+  <!-- DESCRIPTION -->
+  {{#if property.description}}
+  <div class="section-title">Описание</div>
+  <div class="description">{{property.description}}</div>
+  {{/if}}
+
+  <!-- AGENT FOOTER -->
+  <div class="footer">
+    {{#if agent.photo_url}}
+    <img class="agent-photo" src="{{agent.photo_url}}" alt="{{agent.full_name}}">
+    {{else}}
+    <div class="agent-photo-placeholder">{{agent.initials}}</div>
+    {{/if}}
+    <div class="agent-info">
+      <div class="agent-name">{{agent.full_name}}</div>
+      <div class="agent-phone">{{agent.phone}}</div>
+    </div>
+    <div class="agent-qr">
+      <img src="{{agent.qr_code}}" alt="QR">
+    </div>
+  </div>
+
+  <div class="watermark">Сформировано автоматически · Данные актуальны на дату выгрузки</div>
+</div>
+
+</body>
+</html>
