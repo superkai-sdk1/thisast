@@ -12,6 +12,7 @@ export const REDIS_CLIENT = 'REDIS_CLIENT';
       options: {
         host: process.env.REDIS_HOST ?? 'redis',
         port: Number(process.env.REDIS_PORT ?? 6379),
+        password: process.env.REDIS_PASSWORD,
       },
     }]),
   ],
