@@ -95,7 +95,7 @@ export class AuthService {
   async validate(token: string) {
     try {
       const payload = this.jwtService.verify<JwtPayload>(token, {
-        secret: process.env.JWT_ACCESS_SECRET,
+        secret: process.env.JWT_SECRET,
       });
       return payload;
     } catch {
@@ -118,7 +118,7 @@ export class AuthService {
 
     const accessToken = this.jwtService.sign(payload, {
       expiresIn: process.env.JWT_ACCESS_EXPIRES_IN ?? '15m',
-      secret: process.env.JWT_ACCESS_SECRET,
+      secret: process.env.JWT_SECRET,
     });
 
     const rawRefresh = randomBytes(64).toString('hex');

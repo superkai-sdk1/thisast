@@ -11,7 +11,7 @@ import { UsersModule } from './users/users.module';
     ConfigModule.forRoot({ isGlobal: true }),
     JwtModule.register({
       global: true,
-      secret: process.env.JWT_ACCESS_SECRET ?? 'dev-secret-change-in-prod',
+      secret: process.env.JWT_SECRET ?? 'dev-secret-change-in-prod',
     }),
     RedisClientModule,
     DatabaseModule,
