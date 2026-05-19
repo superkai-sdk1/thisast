@@ -2,14 +2,14 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { JwtModule } from '@nestjs/jwt';
-import { AuthModule }         from './modules/auth/auth.module.js';
-import { UsersModule }        from './modules/users/users.module.js';
-import { PropertiesModule }   from './modules/properties/properties.module.js';
-import { OwnersModule }       from './modules/owners/owners.module.js';
-import { DemandsModule }      from './modules/demands/demands.module.js';
-import { DealsModule }        from './modules/deals/deals.module.js';
-import { NotificationsModule } from './modules/notifications/notifications.module.js';
-import { AdminModule }        from './modules/admin/admin.module.js';
+import { AuthModule }         from './modules/auth/auth.module';
+import { UsersModule }        from './modules/users/users.module';
+import { PropertiesModule }   from './modules/properties/properties.module';
+import { OwnersModule }       from './modules/owners/owners.module';
+import { DemandsModule }      from './modules/demands/demands.module';
+import { DealsModule }        from './modules/deals/deals.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
+import { AdminModule }        from './modules/admin/admin.module';
 
 export const REDIS_CLIENT = 'REDIS_CLIENT';
 

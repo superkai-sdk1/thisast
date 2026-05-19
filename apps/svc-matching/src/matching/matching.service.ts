@@ -14,7 +14,7 @@ import {
   EVT_PROPERTY_PRICE_DROP,
   EVT_NOTIFICATION_SEND,
 } from '@crm/shared-types';
-import { REDIS_CLIENT } from '../app.module.js';
+import { REDIS_CLIENT } from '../app.module';
 
 @Injectable()
 export class MatchingService implements OnModuleInit, OnModuleDestroy {

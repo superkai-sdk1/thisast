@@ -9,7 +9,7 @@ import {
   MSG_USERS_UPLOAD_AVATAR,
 } from '@crm/shared-types';
 import type { JwtPayload } from '@crm/shared-core';
-import { UsersService } from './users.service.js';
+import { UsersService } from './users.service';
 
 @Controller()
 export class UsersController {

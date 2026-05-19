@@ -3,8 +3,8 @@ import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { DatabaseModule } from '@crm/shared-core';
-import { AuthModule } from './auth/auth.module.js';
-import { UsersModule } from './users/users.module.js';
+import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
 
 export const REDIS_CLIENT = 'REDIS_CLIENT';
 

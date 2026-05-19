@@ -1,12 +1,12 @@
 import { Controller, Post, Body, Req, UseGuards, Get } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import type { Request } from 'express';
-import { AuthService } from './auth.service.js';
-import { LoginDto } from './dto/login.dto.js';
-import { RefreshTokenDto } from './dto/refresh-token.dto.js';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard.js';
-import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
-import type { JwtPayload } from '../../common/types/jwt-payload.type.js';
+import { AuthService } from './auth.service';
+import { LoginDto } from './dto/login.dto';
+import { RefreshTokenDto } from './dto/refresh-token.dto';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import type { JwtPayload } from '../../common/types/jwt-payload.type';
 
 @ApiTags('auth')
 @Controller('auth')

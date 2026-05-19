@@ -1,15 +1,15 @@
 import { Injectable, Inject, NotFoundException, ForbiddenException } from '@nestjs/common';
 import type { Pool } from 'pg';
-import { DB_POOL } from '../../common/decorators/inject-connection.decorator.js';
-import type { CreatePropertyDto } from './dto/create-property.dto.js';
-import type { JwtPayload } from '../../common/types/jwt-payload.type.js';
-import { Role } from '../../common/enums/role.enum.js';
-import { SearchService } from '../search/search.service.js';
+import { DB_POOL } from '../../common/decorators/inject-connection.decorator';
+import type { CreatePropertyDto } from './dto/create-property.dto';
+import type { JwtPayload } from '../../common/types/jwt-payload.type';
+import { Role } from '../../common/enums/role.enum';
+import { SearchService } from '../search/search.service';
 import { InjectQueue } from '@nestjs/bullmq';
 import type { Queue } from 'bullmq';
-import { MATCHING_QUEUE } from '../../queue/queue.constants.js';
-import { AuditLogService } from '../audit-log/audit-log.service.js';
-import { AuditAction } from '../../common/enums/audit-action.enum.js';
+import { MATCHING_QUEUE } from '../../queue/queue.constants';
+import { AuditLogService } from '../audit-log/audit-log.service';
+import { AuditAction } from '../../common/enums/audit-action.enum';
 
 interface PropertyFilter {
   type?: string;

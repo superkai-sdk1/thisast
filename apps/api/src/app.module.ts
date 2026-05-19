@@ -1,18 +1,18 @@
 import { Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
-import { DatabaseModule } from './database/database.module.js';
-import { AuthModule } from './modules/auth/auth.module.js';
-import { UsersModule } from './modules/users/users.module.js';
-import { PropertiesModule } from './modules/properties/properties.module.js';
-import { OwnersModule } from './modules/owners/owners.module.js';
-import { DemandsModule } from './modules/demands/demands.module.js';
-import { DealsModule } from './modules/deals/deals.module.js';
-import { MatchingModule } from './modules/matching/matching.module.js';
-import { NotificationsModule } from './modules/notifications/notifications.module.js';
-import { AuditLogModule } from './modules/audit-log/audit-log.module.js';
-import { StorageModule } from './modules/storage/storage.module.js';
-import { SearchModule } from './modules/search/search.module.js';
-import { PdfModule } from './modules/pdf/pdf.module.js';
+import { DatabaseModule } from './database/database.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { UsersModule } from './modules/users/users.module';
+import { PropertiesModule } from './modules/properties/properties.module';
+import { OwnersModule } from './modules/owners/owners.module';
+import { DemandsModule } from './modules/demands/demands.module';
+import { DealsModule } from './modules/deals/deals.module';
+import { MatchingModule } from './modules/matching/matching.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
+import { AuditLogModule } from './modules/audit-log/audit-log.module';
+import { StorageModule } from './modules/storage/storage.module';
+import { SearchModule } from './modules/search/search.module';
+import { PdfModule } from './modules/pdf/pdf.module';
 
 @Module({
   imports: [

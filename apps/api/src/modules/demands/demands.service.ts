@@ -1,12 +1,12 @@
 import { Injectable, Inject, NotFoundException, ForbiddenException } from '@nestjs/common';
 import type { Pool } from 'pg';
-import { DB_POOL } from '../../common/decorators/inject-connection.decorator.js';
-import type { CreateDemandDto } from './dto/create-demand.dto.js';
-import type { JwtPayload } from '../../common/types/jwt-payload.type.js';
-import { Role } from '../../common/enums/role.enum.js';
+import { DB_POOL } from '../../common/decorators/inject-connection.decorator';
+import type { CreateDemandDto } from './dto/create-demand.dto';
+import type { JwtPayload } from '../../common/types/jwt-payload.type';
+import { Role } from '../../common/enums/role.enum';
 import { InjectQueue } from '@nestjs/bullmq';
 import type { Queue } from 'bullmq';
-import { MATCHING_QUEUE, MATCHING_JOBS } from '../../queue/queue.constants.js';
+import { MATCHING_QUEUE, MATCHING_JOBS } from '../../queue/queue.constants';
 
 @Injectable()
 export class DemandsService {

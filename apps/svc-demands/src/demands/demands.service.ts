@@ -4,7 +4,7 @@ import { InjectDb } from '@crm/shared-core';
 import type { JwtPayload } from '@crm/shared-core';
 import { ClientProxy } from '@nestjs/microservices';
 import { EVT_DEMAND_CREATED, EVT_DEMAND_UPDATED } from '@crm/shared-types';
-import { REDIS_CLIENT } from '../app.module.js';
+import { REDIS_CLIENT } from '../app.module';
 
 const Role = {
   AGENT: 'agent',

@@ -1,6 +1,6 @@
 import { Module, Global } from '@nestjs/common';
 import { Pool } from 'pg';
-import { DB_POOL } from '../common/decorators/inject-connection.decorator.js';
+import { DB_POOL } from '../common/decorators/inject-connection.decorator';
 
 @Global()
 @Module({

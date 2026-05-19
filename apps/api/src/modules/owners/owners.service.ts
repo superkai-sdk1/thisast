@@ -1,9 +1,9 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import type { Pool } from 'pg';
-import { DB_POOL } from '../../common/decorators/inject-connection.decorator.js';
-import { AuditLogService } from '../audit-log/audit-log.service.js';
-import { AuditAction } from '../../common/enums/audit-action.enum.js';
-import type { JwtPayload } from '../../common/types/jwt-payload.type.js';
+import { DB_POOL } from '../../common/decorators/inject-connection.decorator';
+import { AuditLogService } from '../audit-log/audit-log.service';
+import { AuditAction } from '../../common/enums/audit-action.enum';
+import type { JwtPayload } from '../../common/types/jwt-payload.type';
 
 export class CreateOwnerDto {
   full_name: string;

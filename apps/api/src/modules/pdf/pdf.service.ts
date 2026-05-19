@@ -5,7 +5,7 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 import * as QRCode from 'qrcode';
 import type { Pool } from 'pg';
-import { DB_POOL } from '../../common/decorators/inject-connection.decorator.js';
+import { DB_POOL } from '../../common/decorators/inject-connection.decorator';
 
 @Injectable()
 export class PdfService {

@@ -12,7 +12,7 @@ import {
   MSG_DEMANDS_ADD_ACTIVITY,
 } from '@crm/shared-types';
 import type { JwtPayload } from '@crm/shared-core';
-import { DemandsService } from './demands.service.js';
+import { DemandsService } from './demands.service';
 
 @Controller()
 export class DemandsController {

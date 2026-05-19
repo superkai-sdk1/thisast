@@ -4,12 +4,8 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "paths": {
-      "@crm/shared-types": ["../../packages/shared-types/src/index.ts"],
-      "@crm/shared-core": ["../../packages/shared-core/src/index.ts"]
-    }
+    "emitDecoratorMetadata": true
   },
-  "include": ["src/**/*", "../../apps/api/src/database/**/*"],
+  "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
 }

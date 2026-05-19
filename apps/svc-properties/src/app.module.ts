@@ -2,11 +2,11 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { DatabaseModule } from '@crm/shared-core';
-import { PropertiesModule } from './properties/properties.module.js';
-import { OwnersModule } from './owners/owners.module.js';
-import { StorageModule } from './storage/storage.module.js';
-import { SearchModule } from './search/search.module.js';
-import { PdfModule } from './pdf/pdf.module.js';
+import { PropertiesModule } from './properties/properties.module';
+import { OwnersModule } from './owners/owners.module';
+import { StorageModule } from './storage/storage.module';
+import { SearchModule } from './search/search.module';
+import { PdfModule } from './pdf/pdf.module';
 
 export const REDIS_CLIENT = 'REDIS_CLIENT';
 

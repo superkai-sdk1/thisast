@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, ForbiddenException, Logger } from '@nestjs/common';
 import { InjectDb } from '@crm/shared-core';
 import type { Pool } from 'pg';
-import { SearchService } from '../search/search.service.js';
+import { SearchService } from '../search/search.service';
 
 export interface PropertyFilter {
   type?: string;

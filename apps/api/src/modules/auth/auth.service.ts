@@ -8,11 +8,11 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { randomBytes, createHash } from 'crypto';
 import type { Pool } from 'pg';
-import { DB_POOL } from '../../common/decorators/inject-connection.decorator.js';
-import type { JwtPayload } from '../../common/types/jwt-payload.type.js';
-import type { LoginDto } from './dto/login.dto.js';
-import { AuditLogService } from '../audit-log/audit-log.service.js';
-import { AuditAction } from '../../common/enums/audit-action.enum.js';
+import { DB_POOL } from '../../common/decorators/inject-connection.decorator';
+import type { JwtPayload } from '../../common/types/jwt-payload.type';
+import type { LoginDto } from './dto/login.dto';
+import { AuditLogService } from '../audit-log/audit-log.service';
+import { AuditAction } from '../../common/enums/audit-action.enum';
 
 @Injectable()
 export class AuthService {

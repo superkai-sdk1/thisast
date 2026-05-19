@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { DatabaseModule } from '@crm/shared-core';
-import { DemandsModule } from './demands/demands.module.js';
+import { DemandsModule } from './demands/demands.module';
 
 export const REDIS_CLIENT = 'REDIS_CLIENT';
 

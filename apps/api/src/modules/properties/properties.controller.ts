@@ -3,14 +3,14 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import type { Response } from 'express';
-import { PropertiesService } from './properties.service.js';
-import { CreatePropertyDto } from './dto/create-property.dto.js';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard.js';
-import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
-import type { JwtPayload } from '../../common/types/jwt-payload.type.js';
-import { PdfService } from '../pdf/pdf.service.js';
-import { AuditLogService } from '../audit-log/audit-log.service.js';
-import { AuditAction } from '../../common/enums/audit-action.enum.js';
+import { PropertiesService } from './properties.service';
+import { CreatePropertyDto } from './dto/create-property.dto';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import type { JwtPayload } from '../../common/types/jwt-payload.type';
+import { PdfService } from '../pdf/pdf.service';
+import { AuditLogService } from '../audit-log/audit-log.service';
+import { AuditAction } from '../../common/enums/audit-action.enum';
 
 @ApiTags('properties')
 @ApiBearerAuth()

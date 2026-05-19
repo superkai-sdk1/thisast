@@ -7,11 +7,11 @@ import {
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import type { Pool } from 'pg';
-import { DB_POOL } from '../../common/decorators/inject-connection.decorator.js';
-import type { CreateUserDto } from './dto/create-user.dto.js';
-import type { UpdateUserDto, UpdatePermissionsDto } from './dto/update-user.dto.js';
-import type { JwtPayload } from '../../common/types/jwt-payload.type.js';
-import { Role } from '../../common/enums/role.enum.js';
+import { DB_POOL } from '../../common/decorators/inject-connection.decorator';
+import type { CreateUserDto } from './dto/create-user.dto';
+import type { UpdateUserDto, UpdatePermissionsDto } from './dto/update-user.dto';
+import type { JwtPayload } from '../../common/types/jwt-payload.type';
+import { Role } from '../../common/enums/role.enum';
 
 const PUBLIC_FIELDS = `
   id, agency_id, email, role, full_name, phone, photo_url,

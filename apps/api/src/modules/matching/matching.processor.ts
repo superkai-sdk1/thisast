@@ -2,9 +2,9 @@ import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Logger, Inject } from '@nestjs/common';
 import type { Job } from 'bullmq';
 import type { Pool } from 'pg';
-import { DB_POOL } from '../../common/decorators/inject-connection.decorator.js';
-import { MATCHING_QUEUE, MATCHING_JOBS } from '../../queue/queue.constants.js';
-import { NotificationsService } from '../notifications/notifications.service.js';
+import { DB_POOL } from '../../common/decorators/inject-connection.decorator';
+import { MATCHING_QUEUE, MATCHING_JOBS } from '../../queue/queue.constants';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Processor(MATCHING_QUEUE)
 export class MatchingProcessor extends WorkerHost {

@@ -17,10 +17,10 @@ import {
   EVT_PROPERTY_PRICE_DROP,
   EVT_AUDIT_LOG,
 } from '@crm/shared-types';
-import { PropertiesService } from './properties.service.js';
-import { PdfService } from '../pdf/pdf.service.js';
-import { StorageService } from '../storage/storage.service.js';
-import { REDIS_CLIENT } from '../app.module.js';
+import { PropertiesService } from './properties.service';
+import { PdfService } from '../pdf/pdf.service';
+import { StorageService } from '../storage/storage.service';
+import { REDIS_CLIENT } from '../app.module';
 
 @Controller()
 export class PropertiesController {

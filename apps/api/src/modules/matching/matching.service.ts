@@ -2,9 +2,9 @@ import { Injectable, OnModuleInit, OnModuleDestroy, Logger, Inject } from '@nest
 import { InjectQueue } from '@nestjs/bullmq';
 import type { Queue } from 'bullmq';
 import { Client } from 'pg';
-import { DB_POOL } from '../../common/decorators/inject-connection.decorator.js';
+import { DB_POOL } from '../../common/decorators/inject-connection.decorator';
 import type { Pool } from 'pg';
-import { MATCHING_QUEUE, MATCHING_JOBS } from '../../queue/queue.constants.js';
+import { MATCHING_QUEUE, MATCHING_JOBS } from '../../queue/queue.constants';
 import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Injectable()

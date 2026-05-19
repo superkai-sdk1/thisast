@@ -8,8 +8,8 @@ import {
   MSG_OWNERS_DELETE,
   EVT_AUDIT_LOG,
 } from '@crm/shared-types';
-import { OwnersService } from './owners.service.js';
-import { REDIS_CLIENT } from '../app.module.js';
+import { OwnersService } from './owners.service';
+import { REDIS_CLIENT } from '../app.module';
 
 @Controller()
 export class OwnersController {

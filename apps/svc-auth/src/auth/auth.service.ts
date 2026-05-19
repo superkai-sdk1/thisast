@@ -11,7 +11,7 @@ import { InjectDb } from '@crm/shared-core';
 import type { JwtPayload } from '@crm/shared-core';
 import { ClientProxy } from '@nestjs/microservices';
 import { EVT_AUDIT_LOG } from '@crm/shared-types';
-import { REDIS_CLIENT } from '../app.module.js';
+import { REDIS_CLIENT } from '../app.module';
 
 interface LoginDto {
   email: string;
@@ -112,7 +112,8 @@ export class AuthService {
       sub: user.id,
       email: user.email,
       role: user.role as JwtPayload['role'],
-      agency_id: user.agency_id,
+      agencyId: user.agency_id ?? '',
+      permission_flags: {},
     };
 
     const accessToken = this.jwtService.sign(payload, {

@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
-import { JwtGuard } from '../../common/guards/jwt.guard.js';
-import { AuthController } from './auth.controller.js';
+import { JwtGuard } from '../../common/guards/jwt.guard';
+import { AuthController } from './auth.controller';
 
 @Module({
   controllers: [AuthController],

@@ -3,16 +3,16 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
-import { UsersService } from './users.service.js';
-import { CreateUserDto } from './dto/create-user.dto.js';
-import { UpdateUserDto, UpdatePermissionsDto } from './dto/update-user.dto.js';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard.js';
-import { RolesGuard } from '../../common/guards/roles.guard.js';
-import { Roles } from '../../common/decorators/roles.decorator.js';
-import { Role } from '../../common/enums/role.enum.js';
-import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
-import type { JwtPayload } from '../../common/types/jwt-payload.type.js';
-import { StorageService } from '../storage/storage.service.js';
+import { UsersService } from './users.service';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto, UpdatePermissionsDto } from './dto/update-user.dto';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { Role } from '../../common/enums/role.enum';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import type { JwtPayload } from '../../common/types/jwt-payload.type';
+import { StorageService } from '../storage/storage.service';
 
 @ApiTags('users')
 @ApiBearerAuth()

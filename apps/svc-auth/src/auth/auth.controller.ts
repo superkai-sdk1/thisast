@@ -6,7 +6,7 @@ import {
   MSG_AUTH_LOGOUT,
   MSG_AUTH_VALIDATE,
 } from '@crm/shared-types';
-import { AuthService } from './auth.service.js';
+import { AuthService } from './auth.service';
 
 @Controller()
 export class AuthController {

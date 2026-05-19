@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
-import { PropertiesController } from './properties.controller.js';
-import { PropertiesService } from './properties.service.js';
-import { SearchModule } from '../search/search.module.js';
-import { PdfModule } from '../pdf/pdf.module.js';
-import { AuditLogModule } from '../audit-log/audit-log.module.js';
-import { MATCHING_QUEUE } from '../../queue/queue.constants.js';
+import { PropertiesController } from './properties.controller';
+import { PropertiesService } from './properties.service';
+import { SearchModule } from '../search/search.module';
+import { PdfModule } from '../pdf/pdf.module';
+import { AuditLogModule } from '../audit-log/audit-log.module';
+import { MATCHING_QUEUE } from '../../queue/queue.constants';
 
 @Module({
   imports: [

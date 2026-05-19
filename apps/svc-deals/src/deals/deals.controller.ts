@@ -9,7 +9,7 @@ import {
   MSG_DEALS_SUMMARY,
 } from '@crm/shared-types';
 import type { JwtPayload } from '@crm/shared-core';
-import { DealsService } from './deals.service.js';
+import { DealsService } from './deals.service';
 
 @Controller()
 export class DealsController {

@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
-import { OwnersController } from './owners.controller.js';
-import { OwnersService } from './owners.service.js';
-import { AuditLogModule } from '../audit-log/audit-log.module.js';
+import { OwnersController } from './owners.controller';
+import { OwnersService } from './owners.service';
+import { AuditLogModule } from '../audit-log/audit-log.module';
 
 @Module({
   imports: [AuditLogModule],

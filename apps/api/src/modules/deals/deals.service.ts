@@ -1,8 +1,8 @@
 import { Injectable, Inject, NotFoundException, ForbiddenException } from '@nestjs/common';
 import type { Pool } from 'pg';
-import { DB_POOL } from '../../common/decorators/inject-connection.decorator.js';
-import type { JwtPayload } from '../../common/types/jwt-payload.type.js';
-import { Role } from '../../common/enums/role.enum.js';
+import { DB_POOL } from '../../common/decorators/inject-connection.decorator';
+import type { JwtPayload } from '../../common/types/jwt-payload.type';
+import { Role } from '../../common/enums/role.enum';
 
 export class CreateDealDto {
   demand_id?: string;

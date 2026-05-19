@@ -93,7 +93,7 @@ export class UsersService {
         role,
         dto.full_name,
         dto.phone ?? null,
-        dto.agency_id ?? actor.agency_id,
+        dto.agency_id ?? actor.agencyId,
         JSON.stringify(flags),
       ],
     );

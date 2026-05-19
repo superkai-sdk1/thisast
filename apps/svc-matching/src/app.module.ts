@@ -3,7 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { DatabaseModule } from '@crm/shared-core';
-import { MatchingModule } from './matching/matching.module.js';
+import { MatchingModule } from './matching/matching.module';
 
 export const REDIS_CLIENT = 'REDIS_CLIENT';
 

@@ -1,9 +1,9 @@
 import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { InjectConnection } from '../decorators/inject-connection.decorator.js';
+import { InjectConnection } from '../decorators/inject-connection.decorator';
 import type { Pool } from 'pg';
-import { PERMISSIONS_KEY, type PermissionFlag } from '../decorators/permissions.decorator.js';
-import type { JwtPayload } from '../types/jwt-payload.type.js';
+import { PERMISSIONS_KEY, type PermissionFlag } from '../decorators/permissions.decorator';
+import type { JwtPayload } from '../types/jwt-payload.type';
 
 @Injectable()
 export class PermissionsGuard implements CanActivate {

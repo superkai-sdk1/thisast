@@ -1,10 +1,10 @@
 import { Controller, Get, Post, Patch, Delete, Param, Body, Query, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
-import { DemandsService } from './demands.service.js';
-import { CreateDemandDto } from './dto/create-demand.dto.js';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard.js';
-import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
-import type { JwtPayload } from '../../common/types/jwt-payload.type.js';
+import { DemandsService } from './demands.service';
+import { CreateDemandDto } from './dto/create-demand.dto';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import type { JwtPayload } from '../../common/types/jwt-payload.type';
 
 @ApiTags('demands')
 @ApiBearerAuth()

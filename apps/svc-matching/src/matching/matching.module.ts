@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { MatchingController } from './matching.controller.js';
-import { MatchingService } from './matching.service.js';
+import { MatchingController } from './matching.controller';
+import { MatchingService } from './matching.service';
 
 @Module({
   controllers: [MatchingController],

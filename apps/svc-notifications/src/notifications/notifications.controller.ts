@@ -7,7 +7,7 @@ import {
   MSG_NOTIF_SUBSCRIBE,
   EVT_NOTIFICATION_SEND,
 } from '@crm/shared-types';
-import { NotificationsService } from './notifications.service.js';
+import { NotificationsService } from './notifications.service';
 
 @Controller()
 export class NotificationsController {

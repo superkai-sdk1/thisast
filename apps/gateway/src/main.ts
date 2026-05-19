@@ -4,7 +4,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import * as cookieParser from 'cookie-parser';
 import helmet from 'helmet';
-import { AppModule } from './app.module.js';
+import { AppModule } from './app.module';
 import { TransformInterceptor } from '@crm/shared-core';
 
 async function bootstrap() {

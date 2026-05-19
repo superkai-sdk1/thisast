@@ -8,7 +8,7 @@ import {
   MSG_MATCHING_GET_DEMAND_MATCHES,
   MSG_MATCHING_GET_PROPERTY_MATCHES,
 } from '@crm/shared-types';
-import { MatchingService } from './matching.service.js';
+import { MatchingService } from './matching.service';
 
 @Controller()
 export class MatchingController {

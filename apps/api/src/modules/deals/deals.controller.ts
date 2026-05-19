@@ -1,9 +1,9 @@
 import { Controller, Get, Post, Patch, Delete, Param, Body, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
-import { DealsService, CreateDealDto, CreateSplitDto } from './deals.service.js';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard.js';
-import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
-import type { JwtPayload } from '../../common/types/jwt-payload.type.js';
+import { DealsService, CreateDealDto, CreateSplitDto } from './deals.service';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import type { JwtPayload } from '../../common/types/jwt-payload.type';
 
 @ApiTags('deals')
 @ApiBearerAuth()

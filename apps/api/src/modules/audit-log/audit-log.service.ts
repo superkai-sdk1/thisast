@@ -1,7 +1,7 @@
 import { Injectable, Inject } from '@nestjs/common';
 import type { Pool } from 'pg';
-import { DB_POOL } from '../../common/decorators/inject-connection.decorator.js';
-import type { AuditAction } from '../../common/enums/audit-action.enum.js';
+import { DB_POOL } from '../../common/decorators/inject-connection.decorator';
+import type { AuditAction } from '../../common/enums/audit-action.enum';
 
 export interface AuditLogEntry {
   actor_id: string | null;
