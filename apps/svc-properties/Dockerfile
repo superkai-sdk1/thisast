@@ -18,9 +18,9 @@ RUN pnpm --filter @crm/shared-core  build
 RUN pnpm --filter @crm/svc-properties build
 RUN pnpm --filter @crm/svc-properties deploy --prod /deploy
 
-FROM node:20-slim AS runner
-RUN apt-get update && apt-get install -y chromium && rm -rf /var/lib/apt/lists/*
-ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+FROM node:20-alpine AS runner
+RUN apk add --no-cache chromium
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 ENV NODE_ENV=production
 WORKDIR /app
