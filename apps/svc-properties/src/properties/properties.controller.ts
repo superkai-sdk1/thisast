@@ -20,7 +20,7 @@ import {
 import { PropertiesService } from './properties.service';
 import { PdfService } from '../pdf/pdf.service';
 import { StorageService } from '../storage/storage.service';
-import { REDIS_CLIENT } from '../app.module';
+import { REDIS_CLIENT } from '../redis-client.module';
 
 @Controller()
 export class PropertiesController {

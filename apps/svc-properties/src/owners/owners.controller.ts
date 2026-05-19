@@ -9,7 +9,7 @@ import {
   EVT_AUDIT_LOG,
 } from '@crm/shared-types';
 import { OwnersService } from './owners.service';
-import { REDIS_CLIENT } from '../app.module';
+import { REDIS_CLIENT } from '../redis-client.module';
 
 @Controller()
 export class OwnersController {
