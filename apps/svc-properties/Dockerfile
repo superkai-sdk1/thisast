@@ -18,7 +18,7 @@ RUN pnpm --filter @crm/shared-core  build
 RUN pnpm --filter @crm/svc-properties build
 RUN pnpm --filter @crm/svc-properties deploy --prod /deploy --ignore-scripts
 
-FROM node:20-alpine AS runner
+FROM node:20-alpine3.19 AS runner
 RUN apk add --no-cache chromium
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
