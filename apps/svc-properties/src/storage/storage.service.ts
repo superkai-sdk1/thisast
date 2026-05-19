@@ -1,14 +1,14 @@
 import { Injectable } from '@nestjs/common';
-import Minio from 'minio';
+import { Client as MinioClient } from 'minio';
 import { randomUUID } from 'crypto';
 import { extname } from 'path';
 
 @Injectable()
 export class StorageService {
-  private client: Minio.Client;
+  private client: MinioClient;
 
   constructor() {
-    this.client = new Minio.Client({
+    this.client = new MinioClient({
       endPoint: process.env.MINIO_ENDPOINT ?? 'localhost',
       port: Number(process.env.MINIO_PORT ?? 9000),
       useSSL: process.env.MINIO_USE_SSL === 'true',
