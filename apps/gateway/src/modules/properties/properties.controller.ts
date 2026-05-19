@@ -21,32 +21,32 @@ export class PropertiesController {
 
   @Get()
   list(@Query() filter: Record<string, unknown>, @CurrentUser() user: JwtPayload) {
-    return firstValueFrom(this.client.send(P.MSG_PROPS_LIST, { filter, user }));
+    return firstValueFrom(this.client.send(P.MSG_PROPS_LIST, { filter, actor: user }));
   }
 
   @Get(':id')
   findOne(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
-    return firstValueFrom(this.client.send(P.MSG_PROPS_FIND_ONE, { id, user }));
+    return firstValueFrom(this.client.send(P.MSG_PROPS_FIND_ONE, { id, actor: user }));
   }
 
   @Post()
   create(@Body() dto: Record<string, unknown>, @CurrentUser() user: JwtPayload) {
-    return firstValueFrom(this.client.send(P.MSG_PROPS_CREATE, { dto, user }));
+    return firstValueFrom(this.client.send(P.MSG_PROPS_CREATE, { dto, actor: user }));
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() dto: Record<string, unknown>, @CurrentUser() user: JwtPayload) {
-    return firstValueFrom(this.client.send(P.MSG_PROPS_UPDATE, { id, dto, user }));
+    return firstValueFrom(this.client.send(P.MSG_PROPS_UPDATE, { id, dto, actor: user }));
   }
 
   @Delete(':id')
   remove(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
-    return firstValueFrom(this.client.send(P.MSG_PROPS_DELETE, { id, user }));
+    return firstValueFrom(this.client.send(P.MSG_PROPS_DELETE, { id, actor: user }));
   }
 
   @Patch(':id/visibility')
   updateVisibility(@Param('id') id: string, @Body() body: { visibility: string }, @CurrentUser() user: JwtPayload) {
-    return firstValueFrom(this.client.send(P.MSG_PROPS_UPDATE_VISIBILITY, { id, visibility: body.visibility, user }));
+    return firstValueFrom(this.client.send(P.MSG_PROPS_UPDATE_VISIBILITY, { id, visibility: body.visibility, actor: user }));
   }
 
   @Get(':id/matches')
@@ -57,7 +57,7 @@ export class PropertiesController {
   @Get(':id/pdf')
   async getPdf(@Param('id') id: string, @CurrentUser() user: JwtPayload, @Res() res: Response) {
     const pdf: Buffer = await firstValueFrom(
-      this.client.send(P.MSG_PROPS_PDF, { id, user }),
+      this.client.send(P.MSG_PROPS_PDF, { id, actor: user }),
     );
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="property-${id}.pdf"`);
@@ -93,7 +93,7 @@ export class PropertiesController {
     @CurrentUser() user: JwtPayload,
   ) {
     return firstValueFrom(
-      this.client.send(P.MSG_PROPS_PHOTO_DELETE, { propertyId: id, photoId, user }),
+      this.client.send(P.MSG_PROPS_PHOTO_DELETE, { propertyId: id, photoId, actor: user }),
     );
   }
 
@@ -104,7 +104,7 @@ export class PropertiesController {
     @CurrentUser() user: JwtPayload,
   ) {
     return firstValueFrom(
-      this.client.send(P.MSG_PROPS_PHOTO_REORDER, { propertyId: id, order: body.order, user }),
+      this.client.send(P.MSG_PROPS_PHOTO_REORDER, { propertyId: id, order: body.order, actor: user }),
     );
   }
 }

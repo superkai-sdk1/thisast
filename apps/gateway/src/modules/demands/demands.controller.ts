@@ -15,7 +15,7 @@ export class DemandsController {
 
   @Get()
   findAll(@Query('status') status: string, @CurrentUser() user: JwtPayload) {
-    return firstValueFrom(this.client.send(P.MSG_DEMANDS_LIST, { status, user }));
+    return firstValueFrom(this.client.send(P.MSG_DEMANDS_LIST, { status, actor: user }));
   }
 
   @Get(':id')
@@ -25,12 +25,12 @@ export class DemandsController {
 
   @Post()
   create(@Body() dto: Record<string, unknown>, @CurrentUser() user: JwtPayload) {
-    return firstValueFrom(this.client.send(P.MSG_DEMANDS_CREATE, { dto, user }));
+    return firstValueFrom(this.client.send(P.MSG_DEMANDS_CREATE, { dto, actor: user }));
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() dto: Record<string, unknown>, @CurrentUser() user: JwtPayload) {
-    return firstValueFrom(this.client.send(P.MSG_DEMANDS_UPDATE, { id, dto, user }));
+    return firstValueFrom(this.client.send(P.MSG_DEMANDS_UPDATE, { id, dto, actor: user }));
   }
 
   @Delete(':id')
@@ -56,7 +56,7 @@ export class DemandsController {
   @Post(':id/activity')
   addActivity(@Param('id') id: string, @Body() body: { type: string; body: string }, @CurrentUser() user: JwtPayload) {
     return firstValueFrom(
-      this.client.send(P.MSG_DEMANDS_ADD_ACTIVITY, { id, type: body.type, body: body.body, user }),
+      this.client.send(P.MSG_DEMANDS_ADD_ACTIVITY, { id, type: body.type, body: body.body, actor: user }),
     );
   }
 }

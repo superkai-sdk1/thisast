@@ -15,12 +15,12 @@ export class DealsController {
 
   @Get('summary')
   summary(@CurrentUser() user: JwtPayload) {
-    return firstValueFrom(this.client.send(P.MSG_DEALS_SUMMARY, { user }));
+    return firstValueFrom(this.client.send(P.MSG_DEALS_SUMMARY, { actor: user }));
   }
 
   @Get()
   findAll(@CurrentUser() user: JwtPayload) {
-    return firstValueFrom(this.client.send(P.MSG_DEALS_LIST, { user }));
+    return firstValueFrom(this.client.send(P.MSG_DEALS_LIST, { actor: user }));
   }
 
   @Get(':id')
@@ -30,7 +30,7 @@ export class DealsController {
 
   @Post()
   create(@Body() dto: Record<string, unknown>, @CurrentUser() user: JwtPayload) {
-    return firstValueFrom(this.client.send(P.MSG_DEALS_CREATE, { dto, user }));
+    return firstValueFrom(this.client.send(P.MSG_DEALS_CREATE, { dto, actor: user }));
   }
 
   @Patch(':id')

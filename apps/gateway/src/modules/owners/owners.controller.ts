@@ -20,12 +20,12 @@ export class OwnersController {
 
   @Get(':id')
   findOne(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
-    return firstValueFrom(this.client.send(P.MSG_OWNERS_FIND_ONE, { id, user }));
+    return firstValueFrom(this.client.send(P.MSG_OWNERS_FIND_ONE, { id, actor: user }));
   }
 
   @Post()
   create(@Body() dto: Record<string, unknown>, @CurrentUser() user: JwtPayload) {
-    return firstValueFrom(this.client.send(P.MSG_OWNERS_CREATE, { dto, user }));
+    return firstValueFrom(this.client.send(P.MSG_OWNERS_CREATE, { dto, actor: user }));
   }
 
   @Patch(':id')
