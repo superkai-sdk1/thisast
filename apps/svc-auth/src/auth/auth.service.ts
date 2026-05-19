@@ -11,7 +11,7 @@ import { InjectDb } from '@crm/shared-core';
 import type { JwtPayload } from '@crm/shared-core';
 import { ClientProxy } from '@nestjs/microservices';
 import { EVT_AUDIT_LOG } from '@crm/shared-types';
-import { REDIS_CLIENT } from '../app.module';
+import { REDIS_CLIENT } from '../redis-client.module';
 
 interface LoginDto {
   email: string;
