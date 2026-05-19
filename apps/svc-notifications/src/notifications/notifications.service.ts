@@ -1,7 +1,7 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { InjectDb } from '@crm/shared-core';
 import type { Pool } from 'pg';
-import * as webpush from 'web-push';
+import webpush from 'web-push';
 
 export interface CreateNotificationDto {
   user_id: string;

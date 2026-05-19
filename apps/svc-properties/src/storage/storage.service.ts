@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import * as Minio from 'minio';
+import Minio from 'minio';
 import { randomUUID } from 'crypto';
 import { extname } from 'path';
 

@@ -1,15 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDb } from '@crm/shared-core';
 import type { Pool } from 'pg';
-import * as puppeteer from 'puppeteer';
-import * as Handlebars from 'handlebars';
+import puppeteer from 'puppeteer';
+import Handlebars from 'handlebars';
 import { readFileSync } from 'fs';
-import { join, dirname } from 'path';
-import { fileURLToPath } from 'url';
-import * as QRCode from 'qrcode';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+import { join } from 'path';
+import QRCode from 'qrcode';
 
 @Injectable()
 export class PdfService {
