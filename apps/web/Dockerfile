@@ -21,7 +21,11 @@ COPY tsconfig.base.json ./
 # Build shared types
 RUN pnpm --filter @crm/shared-types build
 
-# Build Next.js app
+# Build Next.js app — NEXT_PUBLIC vars must be baked in at build time
+ARG NEXT_PUBLIC_API_URL=https://thisast.ru/api
+ARG NEXT_PUBLIC_VAPID_PUBLIC_KEY
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_VAPID_PUBLIC_KEY=$NEXT_PUBLIC_VAPID_PUBLIC_KEY
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN pnpm --filter @crm/web build
 

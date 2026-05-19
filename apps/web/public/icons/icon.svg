@@ -1,4 +1,20 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="114" fill="#007AFF"/>
-  <text x="256" y="340" font-family="system-ui, -apple-system, sans-serif" font-size="280" font-weight="700" fill="white" text-anchor="middle">Э</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1" gradientUnits="objectBoundingBox">
+      <stop offset="0%" stop-color="#007AFF"/>
+      <stop offset="100%" stop-color="#5856D6"/>
+    </linearGradient>
+    <linearGradient id="shine" x1="0" y1="0" x2="0" y2="1" gradientUnits="objectBoundingBox">
+      <stop offset="0%" stop-color="rgba(255,255,255,0.32)"/>
+      <stop offset="60%" stop-color="rgba(255,255,255,0)"/>
+    </linearGradient>
+  </defs>
+  <rect width="100" height="100" rx="24" fill="url(#bg)"/>
+  <rect width="100" height="58" rx="24" fill="url(#shine)"/>
+  <polygon points="50,14 16,44 84,44" fill="rgba(255,255,255,0.92)"/>
+  <rect x="20" y="42" width="60" height="40" rx="4" fill="rgba(255,255,255,0.92)"/>
+  <rect x="38" y="56" width="24" height="26" rx="3.5" fill="rgba(0,60,200,0.28)"/>
+  <rect x="23" y="47" width="14" height="11" rx="2.5" fill="rgba(0,122,255,0.22)"/>
+  <rect x="63" y="47" width="14" height="11" rx="2.5" fill="rgba(0,122,255,0.22)"/>
+  <circle cx="50" cy="69" r="2.5" fill="rgba(255,255,255,0.6)"/>
 </svg>

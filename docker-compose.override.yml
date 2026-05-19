@@ -1,0 +1,44 @@
+services:
+  gateway:
+    image: ""
+    build:
+      context: .
+      dockerfile: apps/gateway/Dockerfile
+  svc-auth:
+    image: ""
+    build:
+      context: .
+      dockerfile: apps/svc-auth/Dockerfile
+  svc-properties:
+    image: ""
+    build:
+      context: .
+      dockerfile: apps/svc-properties/Dockerfile
+  svc-demands:
+    image: ""
+    build:
+      context: .
+      dockerfile: apps/svc-demands/Dockerfile
+  svc-deals:
+    image: ""
+    build:
+      context: .
+      dockerfile: apps/svc-deals/Dockerfile
+  svc-matching:
+    image: ""
+    build:
+      context: .
+      dockerfile: apps/svc-matching/Dockerfile
+  svc-notifications:
+    image: ""
+    build:
+      context: .
+      dockerfile: apps/svc-notifications/Dockerfile
+  web:
+    image: ""
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://thisast.ru/api}
+        NEXT_PUBLIC_VAPID_PUBLIC_KEY: ${NEXT_PUBLIC_VAPID_PUBLIC_KEY}
