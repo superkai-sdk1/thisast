@@ -3,7 +3,7 @@ import { ClientProxy } from '@nestjs/microservices';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
-import { REDIS_CLIENT } from '../../app.module';
+import { REDIS_CLIENT } from '../../redis-client.module';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import type { JwtPayload } from '@crm/shared-core';
 import * as P from '@crm/shared-types';

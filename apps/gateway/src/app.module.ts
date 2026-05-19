@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { ClientsModule, Transport } from '@nestjs/microservices';
 import { JwtModule } from '@nestjs/jwt';
+import { RedisClientModule } from './redis-client.module';
 import { AuthModule }         from './modules/auth/auth.module';
 import { UsersModule }        from './modules/users/users.module';
 import { PropertiesModule }   from './modules/properties/properties.module';
@@ -11,16 +11,6 @@ import { DealsModule }        from './modules/deals/deals.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { AdminModule }        from './modules/admin/admin.module';
 
-export const REDIS_CLIENT = 'REDIS_CLIENT';
-
-const redisClientConfig = {
-  transport: Transport.REDIS as const,
-  options: {
-    host: process.env.REDIS_HOST ?? 'localhost',
-    port: Number(process.env.REDIS_PORT ?? 6379),
-  },
-};
-
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -28,7 +18,7 @@ const redisClientConfig = {
       global: true,
       secret: process.env.JWT_SECRET ?? 'dev-secret-change-in-prod',
     }),
-    ClientsModule.register([{ name: REDIS_CLIENT, ...redisClientConfig }]),
+    RedisClientModule,
     AuthModule,
     UsersModule,
     PropertiesModule,
