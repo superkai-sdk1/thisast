@@ -16,7 +16,7 @@ COPY apps/svc-properties   ./apps/svc-properties
 RUN pnpm --filter @crm/shared-types build
 RUN pnpm --filter @crm/shared-core  build
 RUN pnpm --filter @crm/svc-properties build
-RUN pnpm --filter @crm/svc-properties deploy --prod /deploy
+RUN pnpm --filter @crm/svc-properties deploy --prod /deploy --ignore-scripts
 
 FROM node:20-alpine AS runner
 RUN apk add --no-cache chromium
