@@ -2,9 +2,7 @@ import type { NextConfig } from 'next';
 
 const config: NextConfig = {
   output: 'standalone',
-  experimental: {
-    reactCompiler: true,
-  },
+  experimental: {},
   images: {
     formats: ['image/webp', 'image/avif'],
     remotePatterns: [
