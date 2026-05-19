@@ -27,6 +27,10 @@ async function bootstrap() {
     SwaggerModule.setup('api/docs', app, SwaggerModule.createDocument(app, doc));
   }
 
+  // health check endpoint (no auth required)
+  app.getHttpAdapter().get('/health', (_req: unknown, res: { json: (v: unknown) => void }) =>
+    res.json({ status: 'ok' }),
+  );
   await app.listen(process.env.PORT ?? 3001);
 }
 
