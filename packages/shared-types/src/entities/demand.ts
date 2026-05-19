@@ -1,4 +1,4 @@
-import type { PropertyType, PaymentForm } from './property.js';
+import type { PropertyType, PaymentForm } from './property';
 
 export type KanbanStatus =
   | 'new'

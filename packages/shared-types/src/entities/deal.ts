@@ -1,4 +1,4 @@
-import type { PaymentForm } from './property.js';
+import type { PaymentForm } from './property';
 
 export type DealStatus = 'in_progress' | 'closed';
 
