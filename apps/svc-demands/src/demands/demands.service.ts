@@ -26,7 +26,7 @@ export class DemandsService {
        FROM demands d
        JOIN users u ON u.id = d.agent_id
        WHERE ($1::boolean OR d.agent_id = $2)
-         AND ($3::text IS NULL OR d.kanban_status = $3)
+         AND ($3::text IS NULL OR d.kanban_status = $3::kanban_status)
        ORDER BY d.updated_at DESC`,
       [isAdmin, actor.sub, status ?? null],
     );
