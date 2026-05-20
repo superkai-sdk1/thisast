@@ -12,6 +12,16 @@ const Role = {
   SUPERADMIN: 'superadmin',
 } as const;
 
+function parseDemandRow(row: Record<string, unknown>): Record<string, unknown> {
+  for (const key of ['repair_types', 'payment_forms', 'internal_tags']) {
+    const val = row[key];
+    if (typeof val === 'string') {
+      row[key] = val === '{}' ? [] : val.slice(1, -1).split(',').filter(Boolean);
+    }
+  }
+  return row;
+}
+
 @Injectable()
 export class DemandsService {
   constructor(
@@ -30,7 +40,7 @@ export class DemandsService {
        ORDER BY d.updated_at DESC`,
       [isAdmin, actor.sub, status ?? null],
     );
-    return result.rows;
+    return result.rows.map(parseDemandRow);
   }
 
   async findOne(id: string, actor: JwtPayload) {
@@ -41,8 +51,8 @@ export class DemandsService {
       [id],
     );
     if (!result.rows[0]) throw new NotFoundException('Заявка не найдена');
-    const demand = result.rows[0];
-    if (demand.agent_id !== actor.sub && actor.role === Role.AGENT) {
+    const demand = parseDemandRow(result.rows[0]);
+    if (demand['agent_id'] !== actor.sub && actor.role === Role.AGENT) {
       throw new ForbiddenException('Нет доступа к этой заявке');
     }
     return demand;
@@ -74,9 +84,9 @@ export class DemandsService {
         dto['notes'] ?? null,
       ],
     );
-    const demand = result.rows[0];
+    const demand = parseDemandRow(result.rows[0]);
 
-    this.redisClient.emit(EVT_DEMAND_CREATED, { demandId: demand.id });
+    this.redisClient.emit(EVT_DEMAND_CREATED, { demandId: (demand as Record<string, unknown>)['id'] });
 
     return demand;
   }
@@ -111,7 +121,7 @@ export class DemandsService {
 
     this.redisClient.emit(EVT_DEMAND_UPDATED, { demandId: id });
 
-    return result.rows[0];
+    return parseDemandRow(result.rows[0]);
   }
 
   async updateKanbanStatus(id: string, status: string, actor: JwtPayload) {
@@ -120,7 +130,7 @@ export class DemandsService {
       'UPDATE demands SET kanban_status = $1 WHERE id = $2 RETURNING *',
       [status, id],
     );
-    return result.rows[0];
+    return parseDemandRow(result.rows[0]);
   }
 
   async delete(id: string, actor: JwtPayload) {

@@ -33,7 +33,13 @@ function useUsers() {
 function useAuditLogs() {
   return useQuery<AuditLog[]>({
     queryKey: ['admin', 'audit'],
-    queryFn: () => apiClient.get<{ data: AuditLog[] }>('/audit-log').then(r => r.data.data),
+    queryFn: () =>
+      apiClient
+        .get<{ data: AuditLog[] | { items: AuditLog[] } }>('/audit-log')
+        .then(r => {
+          const d = r.data.data;
+          return Array.isArray(d) ? d : (d as { items: AuditLog[] }).items ?? [];
+        }),
   });
 }
 

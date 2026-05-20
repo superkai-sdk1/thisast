@@ -3,7 +3,17 @@ import type { Deal } from '@crm/shared-types';
 
 export const dealsApi = {
   summary: () =>
-    apiClient.get<{ data: { in_progress_count: number; closed_count: number; gross_commission: number; net_commission: number } }>('/deals/summary').then(r => r.data.data),
+    apiClient
+      .get<{ data: Record<string, string | number> }>('/deals/summary')
+      .then(r => {
+        const d = r.data.data;
+        return {
+          gross_commission:  Number(d['total_gross']       ?? d['gross_commission'] ?? 0),
+          net_commission:    Number(d['total_net']         ?? d['net_commission']   ?? 0),
+          closed_count:      Number(d['closed_count']      ?? 0),
+          in_progress_count: Number(d['in_progress_count'] ?? 0),
+        };
+      }),
 
   list: () =>
     apiClient.get<{ data: Deal[] }>('/deals').then(r => r.data.data),

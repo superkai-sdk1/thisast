@@ -12,6 +12,7 @@ export function usePendingSharingRequests() {
     queryKey: sharingKeys.pending(),
     queryFn: sharingApi.listPending,
     staleTime: 60 * 1000,
+    retry: false,
   });
 }
 

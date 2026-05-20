@@ -43,6 +43,14 @@ export interface CreatePropertyDto {
   description?: string;
 }
 
+function parsePropertyRow(row: Record<string, unknown>): Record<string, unknown> {
+  if (typeof row['conditions'] === 'string') {
+    const s = row['conditions'] as string;
+    row['conditions'] = s === '{}' ? [] : s.slice(1, -1).split(',').filter(Boolean);
+  }
+  return row;
+}
+
 @Injectable()
 export class PropertiesService {
   private readonly logger = new Logger(PropertiesService.name);
@@ -100,7 +108,7 @@ export class PropertiesService {
     ]);
 
     return {
-      items: rows.rows,
+      items: rows.rows.map(parsePropertyRow),
       total: Number(count.rows[0].count),
       page,
       limit,
@@ -120,8 +128,8 @@ export class PropertiesService {
     );
     if (!result.rows[0]) throw new NotFoundException('Объект не найден');
 
-    const prop = result.rows[0];
-    if (prop.owner_agent_id !== actor.sub && prop.visibility_status === 'private' && actor.role === 'agent') {
+    const prop = parsePropertyRow(result.rows[0]);
+    if (prop['owner_agent_id'] !== actor.sub && prop['visibility_status'] === 'private' && actor.role === 'agent') {
       throw new ForbiddenException('Нет доступа к этому объекту');
     }
     return prop;
