@@ -203,9 +203,9 @@ function PropertyCard({ property: p }: { property: Property }) {
                 {p.area_sqm} м²
               </span>
             )}
-            {p.floor && p.total_floors && (
+            {p.floor && p.floor_total && (
               <span className="text-[13px]" style={{ color: 'var(--label-secondary)' }}>
-                {p.floor}/{p.total_floors} эт.
+                {p.floor}/{p.floor_total} эт.
               </span>
             )}
           </div>
@@ -254,10 +254,10 @@ function PropertyFilterForm({ value, onChange, onClose }: {
       <FilterSection label="Цена, ₽">
         <div className="grid grid-cols-2 gap-2">
           <input type="number" placeholder="От" className="input-field"
-            value={(local as Record<string, unknown>).price_min ?? ''}
+            value={String((local as Record<string, unknown>).price_min ?? '')}
             onChange={e => set('price_min' as keyof typeof local, e.target.value ? Number(e.target.value) : undefined as never)} />
           <input type="number" placeholder="До" className="input-field"
-            value={(local as Record<string, unknown>).price_max ?? ''}
+            value={String((local as Record<string, unknown>).price_max ?? '')}
             onChange={e => set('price_max' as keyof typeof local, e.target.value ? Number(e.target.value) : undefined as never)} />
         </div>
       </FilterSection>
