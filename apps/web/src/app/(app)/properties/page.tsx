@@ -138,7 +138,7 @@ function PropertyCard({ property: p }: { property: Property }) {
         {/* Photo */}
         <div className="relative h-48 bg-[var(--fill-tertiary)]">
           {cover ? (
-            <Image src={cover.url} alt={p.address_street ?? ''} fill className="object-cover" sizes="(max-width:768px) 100vw, 50vw" />
+            <Image src={cover.url} alt={p.street ?? ''} fill className="object-cover" sizes="(max-width:768px) 100vw, 50vw" />
           ) : (
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ background: 'var(--fill-secondary)' }}>
@@ -180,13 +180,13 @@ function PropertyCard({ property: p }: { property: Property }) {
         <div className="p-4 flex flex-col gap-2">
           <PermissionGate permission="clientSafeInverse">
             <p className="text-[15px] font-semibold leading-snug truncate" style={{ color: 'var(--label-primary)' }}>
-              {p.address_street ? `${p.address_street}${p.address_building ? `, ${p.address_building}` : ''}` : p.address_district ?? 'Адрес не указан'}
+              {p.street ? `${p.street}${p.house_number ? `, ${p.house_number}` : ''}` : p.district ?? 'Адрес не указан'}
             </p>
           </PermissionGate>
           <p className="text-[13px]" style={{ color: 'var(--label-secondary)' }}>
-            {p.address_district ?? ''}
-            {p.address_district && p.address_city ? ', ' : ''}
-            {p.address_city ?? ''}
+            {p.district ?? ''}
+            {p.district && p.city ? ', ' : ''}
+            {p.city ?? ''}
           </p>
 
           {/* Specs row */}

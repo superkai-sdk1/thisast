@@ -53,8 +53,8 @@ export default function PropertyDetailPage({ params }: Props) {
   const specs = [
     property.rooms      && { icon: BedDouble, label: 'Комнат',   value: `${property.rooms} комн.`     },
     property.area_sqm   && { icon: Maximize2, label: 'Площадь',  value: `${property.area_sqm} м²`     },
-    (property.floor && property.total_floors) && {
-      icon: Layers, label: 'Этаж', value: `${property.floor} / ${property.total_floors}`,
+    (property.floor && property.floor_total) && {
+      icon: Layers, label: 'Этаж', value: `${property.floor} / ${property.floor_total}`,
     },
     property.price      && { icon: null, label: 'Цена',       value: formatPrice(property.price)    },
   ].filter(Boolean) as { icon: React.ElementType | null; label: string; value: string }[];
@@ -92,7 +92,7 @@ export default function PropertyDetailPage({ params }: Props) {
             <div className="flex items-start gap-1.5 mt-1">
               <MapPin size={13} style={{ color: 'var(--label-tertiary)', flexShrink: 0, marginTop: 2 }} />
               <p className="text-[14px]" style={{ color: 'var(--label-secondary)' }}>
-                {[property.address_district, property.address_street, property.address_building]
+                {[property.district, property.street, property.house_number]
                   .filter(Boolean).join(', ') || 'Адрес не указан'}
               </p>
             </div>
@@ -163,7 +163,7 @@ export default function PropertyDetailPage({ params }: Props) {
 
         {/* Actions */}
         <div className="flex flex-wrap gap-2">
-          <PDFDownloadButton propertyId={id} address={property.address_street ?? undefined} />
+          <PDFDownloadButton propertyId={id} address={property.street ?? undefined} />
 
           <Button
             variant="secondary"
