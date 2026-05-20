@@ -3,28 +3,33 @@
 import { useState, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { SlidersHorizontal, Plus } from 'lucide-react';
+import { SlidersHorizontal, Plus, Search, BedDouble, Maximize2, MapPin } from 'lucide-react';
 import { usePropertiesInfinite } from '@/lib/hooks/queries/useProperties';
 import { GlassNavBar } from '@/components/organisms/GlassNavBar';
 import { BottomSheet } from '@/components/molecules/BottomSheet';
-import { SegmentedControl } from '@/components/molecules/SegmentedControl';
 import { Badge } from '@/components/atoms/Badge';
 import { Button } from '@/components/atoms/Button';
 import { PermissionGate } from '@/components/molecules/PermissionGate';
 import { formatPrice } from '@/lib/utils/format';
 import type { PropertyFilter } from '@/lib/api/properties';
-import type { PropertyType } from '@crm/shared-types';
+import type { Property, PropertyType } from '@crm/shared-types';
 
 const TYPES: { label: string; value: PropertyType | '' }[] = [
-  { label: 'Все',         value: ''             },
-  { label: 'Квартиры',   value: 'apartment'    },
-  { label: 'Вторичка',   value: 'resale'       },
-  { label: 'Новострой',  value: 'new_building' },
-  { label: 'Дома',        value: 'house'        },
-  { label: 'Участки',    value: 'land'         },
-  { label: 'Коммерция',  value: 'commercial'   },
-  { label: 'Аренда',     value: 'rent'         },
+  { label: 'Все',       value: ''             },
+  { label: 'Квартиры',  value: 'apartment'    },
+  { label: 'Вторичка',  value: 'resale'       },
+  { label: 'Новострой', value: 'new_building' },
+  { label: 'Дома',      value: 'house'        },
+  { label: 'Участки',   value: 'land'         },
+  { label: 'Коммерция', value: 'commercial'   },
+  { label: 'Аренда',    value: 'rent'         },
 ];
+
+const VISIBILITY_LABELS: Record<string, { label: string; variant: 'default' | 'success' | 'warning' | 'info' }> = {
+  private: { label: 'Скрытый',   variant: 'default' },
+  shared:  { label: 'Агентский', variant: 'info' },
+  public:  { label: 'Публичный', variant: 'success' },
+};
 
 export default function PropertiesPage() {
   const [activeType, setActiveType] = useState<PropertyType | ''>('');
@@ -37,350 +42,243 @@ export default function PropertiesPage() {
   };
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = usePropertiesInfinite(activeFilter);
+  const properties = data?.pages.flatMap(p => p.items) ?? [];
+  const hasActiveFilters = Object.values(filter).some(v => v !== undefined && (Array.isArray(v) ? v.length > 0 : true));
 
   const observer = useRef<IntersectionObserver | null>(null);
   const sentinelRef = useCallback((node: HTMLDivElement | null) => {
     if (observer.current) observer.current.disconnect();
-    if (!node) return;
-    observer.current = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
-        fetchNextPage();
-      }
-    });
-    observer.current.observe(node);
-  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
-
-  const items = data?.pages.flatMap((p) => p.items) ?? [];
+    if (node && hasNextPage) {
+      observer.current = new IntersectionObserver(entries => {
+        if (entries[0].isIntersecting && !isFetchingNextPage) fetchNextPage();
+      });
+      observer.current.observe(node);
+    }
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   return (
     <>
       <GlassNavBar
         title="Объекты"
         right={
-          <div className="flex gap-2">
-            <button onClick={() => setFilterOpen(true)} className="p-2 text-[var(--ios-blue)]">
-              <SlidersHorizontal className="w-5 h-5" />
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setFilterOpen(true)}
+              className="w-8 h-8 rounded-full flex items-center justify-center press-scale relative"
+              style={{ color: hasActiveFilters ? 'var(--ios-blue)' : 'var(--label-tertiary)' }}
+            >
+              <SlidersHorizontal size={18} />
+              {hasActiveFilters && (
+                <span className="absolute top-1 right-1 w-2 h-2 rounded-full" style={{ background: 'var(--ios-blue)' }} />
+              )}
             </button>
-            <PermissionGate permission="can_view_global_database">
-              <Link href="/properties/new" className="p-2 text-[var(--ios-blue)]">
-                <Plus className="w-5 h-5" />
-              </Link>
-            </PermissionGate>
           </div>
         }
       />
 
-      {/* Category tabs */}
-      <div className="px-4 py-3 overflow-x-auto no-scrollbar">
-        <SegmentedControl
-          options={TYPES.map(t => ({ value: t.value === '' ? '__all__' : t.value, label: t.label }))}
-          value={activeType === '' ? '__all__' : activeType}
-          onChange={(v) => setActiveType(v === '__all__' ? '' : v as PropertyType)}
-        />
+      {/* Category scroll */}
+      <div className="sticky top-[calc(44px+env(safe-area-inset-top))] z-10 glass-nav border-b-0 px-4 py-2.5">
+        <div className="flex gap-2 overflow-x-auto no-scrollbar">
+          {TYPES.map(t => (
+            <button
+              key={t.value}
+              onClick={() => setActiveType(t.value)}
+              className={`chip press-scale flex-shrink-0 ${activeType === t.value ? 'chip-active' : ''}`}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* Property grid */}
-      <div className="px-4 grid grid-cols-1 gap-4 pb-4">
-        {items.map((property) => (
-          <Link key={property.id} href={`/properties/${property.id}`}>
-            <article className="glass-card squircle-card overflow-hidden">
-              {/* Cover photo */}
-              <div className="relative h-48 bg-[var(--fill-tertiary)]">
-                {property.photos?.[0] && (
-                  <Image
-                    src={property.photos[0].url}
-                    alt={property.street ?? 'Объект'}
-                    fill
-                    className="object-cover"
-                  />
-                )}
-                <div className="absolute top-2 left-2 flex gap-1 flex-wrap">
-                  {property.tags?.includes('Срочно') && (
-                    <Badge variant="destructive" className="text-xs">Срочно</Badge>
-                  )}
-                  {property.tags?.includes('Эксклюзив') && (
-                    <Badge variant="default" className="text-xs">Эксклюзив</Badge>
-                  )}
-                </div>
-              </div>
+      <div className="gradient-mesh min-h-full">
+        <div className="px-4 pt-3 pb-6 flex flex-col gap-3">
 
-              {/* Info */}
-              <div className="p-4">
-                <p className="text-lg font-bold text-[var(--label-primary)]">
-                  {formatPrice(property.price)}
-                </p>
-                <PermissionGate hideInSafeMode fallback={
-                  <p className="text-sm text-[var(--label-secondary)] mt-0.5">
-                    {property.district}
-                  </p>
-                }>
-                  <p className="text-sm text-[var(--label-secondary)] mt-0.5 truncate">
-                    {property.street
-                      ? `${property.district}, ${property.street}`
-                      : property.district}
-                  </p>
-                </PermissionGate>
+          {properties.length === 0 && !isFetchingNextPage && (
+            <EmptyState />
+          )}
 
-                <div className="flex gap-3 mt-2 text-xs text-[var(--label-tertiary)]">
-                  {property.rooms && <span>{property.rooms}-комн.</span>}
-                  {property.area_sqm && <span>{property.area_sqm} м²</span>}
-                  {property.floor && <span>{property.floor} эт.</span>}
-                </div>
-              </div>
-            </article>
-          </Link>
-        ))}
+          {properties.map((p) => (
+            <PropertyCard key={p.id} property={p} />
+          ))}
 
-        {/* Infinite scroll sentinel */}
-        <div ref={sentinelRef} className="h-4" />
-        {isFetchingNextPage && (
-          <p className="text-center text-sm text-[var(--label-tertiary)] py-4">Загрузка...</p>
-        )}
+          <div ref={sentinelRef} />
+
+          {isFetchingNextPage && (
+            <div className="flex justify-center py-4">
+              <div className="w-5 h-5 border-2 rounded-full animate-spin"
+                style={{ borderColor: 'var(--separator)', borderTopColor: 'var(--ios-blue)' }} />
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Filter bottom sheet */}
-      <BottomSheet isOpen={filterOpen} onClose={() => setFilterOpen(false)} title="Фильтры">
-        <PropertyFilterForm
-          value={filter}
-          onChange={setFilter}
-          onClose={() => setFilterOpen(false)}
-          type={activeType}
-        />
+      {/* FAB */}
+      <Link href="/properties/new" className="fab" aria-label="Добавить объект">
+        <Plus size={24} strokeWidth={2.2} />
+      </Link>
+
+      {/* Filter sheet */}
+      <BottomSheet isOpen={filterOpen} onClose={() => setFilterOpen(false)} title="Фильтр" snapPoints={[0.75, 0.92]}>
+        <PropertyFilterForm value={filter} onChange={setFilter} onClose={() => setFilterOpen(false)} />
       </BottomSheet>
     </>
   );
 }
 
-const DISTRICTS = ['Центр', 'Горная', 'Искож', 'Дубки', 'Стрелка', 'Университет'];
-const TAGS = ['Срочно', 'Эксклюзив', 'Торг', 'Ипотека'];
+function PropertyCard({ property: p }: { property: Property }) {
+  const cover = p.photos?.find(ph => ph.is_cover) ?? p.photos?.[0];
+  const vis = VISIBILITY_LABELS[p.visibility_status] ?? VISIBILITY_LABELS.private;
 
-function FilterInput({
-  label, children,
-}: { label: string; children: React.ReactNode }) {
   return (
-    <div className="flex flex-col gap-1.5">
-      <label className="text-xs font-semibold text-[var(--label-tertiary)] uppercase tracking-wide">{label}</label>
-      {children}
+    <Link href={`/properties/${p.id}`}>
+      <article className="squircle-card overflow-hidden press-scale"
+        style={{ background: 'var(--bg-elevated)', border: '0.5px solid var(--separator)', boxShadow: 'var(--shadow-card)' }}>
+
+        {/* Photo */}
+        <div className="relative h-48 bg-[var(--fill-tertiary)]">
+          {cover ? (
+            <Image src={cover.url} alt={p.address_street ?? ''} fill className="object-cover" sizes="(max-width:768px) 100vw, 50vw" />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ background: 'var(--fill-secondary)' }}>
+                <MapPin size={20} style={{ color: 'var(--label-tertiary)' }} />
+              </div>
+            </div>
+          )}
+          {/* Overlay gradient */}
+          <div className="absolute inset-0 photo-overlay" />
+
+          {/* Price badge */}
+          <div className="absolute bottom-3 left-3">
+            <PermissionGate permission="clientSafeInverse">
+              <span className="text-white font-bold text-[17px] tracking-tight" style={{ textShadow: '0 1px 4px rgba(0,0,0,0.4)' }}>
+                {formatPrice(p.price)}
+              </span>
+            </PermissionGate>
+          </div>
+
+          {/* Visibility badge */}
+          <div className="absolute top-3 right-3">
+            <Badge variant={vis.variant} size="sm">{vis.label}</Badge>
+          </div>
+
+          {/* Tags */}
+          {p.tags && p.tags.length > 0 && (
+            <div className="absolute top-3 left-3 flex gap-1">
+              {p.tags.slice(0, 2).map(tag => (
+                <span key={tag} className="text-[11px] font-semibold px-2 py-0.5 rounded-full text-white"
+                  style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(8px)' }}>
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Info */}
+        <div className="p-4 flex flex-col gap-2">
+          <PermissionGate permission="clientSafeInverse">
+            <p className="text-[15px] font-semibold leading-snug truncate" style={{ color: 'var(--label-primary)' }}>
+              {p.address_street ? `${p.address_street}${p.address_building ? `, ${p.address_building}` : ''}` : p.address_district ?? 'Адрес не указан'}
+            </p>
+          </PermissionGate>
+          <p className="text-[13px]" style={{ color: 'var(--label-secondary)' }}>
+            {p.address_district ?? ''}
+            {p.address_district && p.address_city ? ', ' : ''}
+            {p.address_city ?? ''}
+          </p>
+
+          {/* Specs row */}
+          <div className="flex items-center gap-3 pt-0.5">
+            {p.rooms && (
+              <span className="flex items-center gap-1 text-[13px]" style={{ color: 'var(--label-secondary)' }}>
+                <BedDouble size={13} />
+                {p.rooms} комн.
+              </span>
+            )}
+            {p.area_sqm && (
+              <span className="flex items-center gap-1 text-[13px]" style={{ color: 'var(--label-secondary)' }}>
+                <Maximize2 size={12} />
+                {p.area_sqm} м²
+              </span>
+            )}
+            {p.floor && p.total_floors && (
+              <span className="text-[13px]" style={{ color: 'var(--label-secondary)' }}>
+                {p.floor}/{p.total_floors} эт.
+              </span>
+            )}
+          </div>
+        </div>
+      </article>
+    </Link>
+  );
+}
+
+function EmptyState() {
+  return (
+    <div className="flex flex-col items-center gap-3 py-16">
+      <div className="w-16 h-16 rounded-[20px] flex items-center justify-center"
+        style={{ background: 'var(--fill-tertiary)' }}>
+        <Search size={28} style={{ color: 'var(--label-tertiary)' }} />
+      </div>
+      <div className="text-center">
+        <p className="text-[15px] font-semibold" style={{ color: 'var(--label-primary)' }}>Объекты не найдены</p>
+        <p className="text-[13px] mt-1" style={{ color: 'var(--label-tertiary)' }}>Измените фильтры или добавьте новый объект</p>
+      </div>
+      <Link href="/properties/new">
+        <Button size="sm" className="mt-2">Добавить объект</Button>
+      </Link>
     </div>
   );
 }
 
-function RangeInputs({
-  fromVal, toVal, onFromChange, onToChange, placeholder = ['от', 'до'],
-}: {
-  fromVal: number | undefined;
-  toVal: number | undefined;
-  onFromChange: (v: number | undefined) => void;
-  onToChange: (v: number | undefined) => void;
-  placeholder?: [string, string];
-}) {
-  const cls = 'flex-1 px-4 py-3 rounded-[14px] bg-[var(--fill-tertiary)] text-sm text-[var(--label-primary)] outline-none';
-  return (
-    <div className="flex gap-2">
-      <input
-        type="number"
-        placeholder={placeholder[0]}
-        className={cls}
-        value={fromVal ?? ''}
-        onChange={e => onFromChange(e.target.value ? Number(e.target.value) : undefined)}
-      />
-      <input
-        type="number"
-        placeholder={placeholder[1]}
-        className={cls}
-        value={toVal ?? ''}
-        onChange={e => onToChange(e.target.value ? Number(e.target.value) : undefined)}
-      />
-    </div>
-  );
-}
-
-function ChipGroup<T extends string | number>({
-  options, active, onToggle, labelFn,
-}: {
-  options: T[];
-  active: T[];
-  onToggle: (val: T) => void;
-  labelFn?: (v: T) => string;
-}) {
-  return (
-    <div className="flex gap-2 flex-wrap">
-      {options.map((opt) => {
-        const isActive = active.includes(opt);
-        return (
-          <button
-            key={String(opt)}
-            onClick={() => onToggle(opt)}
-            className={`px-4 py-2 rounded-[14px] text-sm font-medium transition-colors ${
-              isActive
-                ? 'bg-[var(--ios-blue)] text-white'
-                : 'bg-[var(--fill-tertiary)] text-[var(--label-primary)]'
-            }`}
-          >
-            {labelFn ? labelFn(opt) : String(opt)}
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-
-function toggleItem<T>(arr: T[] | undefined, item: T): T[] {
-  const list = arr ?? [];
-  return list.includes(item) ? list.filter(x => x !== item) : [...list, item];
-}
-
-function PropertyFilterForm({
-  value, onChange, onClose, type,
-}: {
+function PropertyFilterForm({ value, onChange, onClose }: {
   value: Omit<PropertyFilter, 'page' | 'type'>;
   onChange: (v: Omit<PropertyFilter, 'page' | 'type'>) => void;
   onClose: () => void;
-  type: PropertyType | '';
 }) {
   const [local, setLocal] = useState(value);
-
-  function set<K extends keyof typeof local>(key: K, val: (typeof local)[K]) {
-    setLocal((prev) => ({ ...prev, [key]: val }));
+  function set<K extends keyof typeof local>(k: K, v: (typeof local)[K]) {
+    setLocal(p => ({ ...p, [k]: v }));
   }
-
-  const showRooms = type === 'apartment' || type === 'resale' || type === '' ;
-  const showFloor = type === 'apartment' || type === 'resale' || type === 'new_building' || type === '';
-  const showArea  = type !== 'land';
-  const showLandArea = type === 'land' || type === '';
 
   return (
     <div className="flex flex-col gap-5 py-2">
-      {/* Search */}
-      <FilterInput label="Поиск">
-        <input
-          type="text"
-          placeholder="Адрес, район, описание..."
-          className="w-full px-4 py-3 rounded-[14px] bg-[var(--fill-tertiary)] text-sm text-[var(--label-primary)] placeholder:text-[var(--label-tertiary)] outline-none"
+      <FilterSection label="Поиск">
+        <input type="text" placeholder="Улица, район..." className="input-field"
           value={local.q ?? ''}
-          onChange={e => set('q', e.target.value || undefined)}
-        />
-      </FilterInput>
+          onChange={e => set('q', e.target.value || undefined)} />
+      </FilterSection>
 
-      {/* Price */}
-      <FilterInput label="Цена, ₽">
-        <RangeInputs
-          fromVal={local.price_min}
-          toVal={local.price_max}
-          onFromChange={v => set('price_min', v)}
-          onToChange={v => set('price_max', v)}
-        />
-      </FilterInput>
-
-      {/* Area */}
-      {showArea && (
-        <FilterInput label="Площадь, м²">
-          <RangeInputs
-            fromVal={local.area_min}
-            toVal={local.area_max}
-            onFromChange={v => set('area_min', v)}
-            onToChange={v => set('area_max', v)}
-          />
-        </FilterInput>
-      )}
-
-      {/* Land area — same field, different label */}
-      {showLandArea && type === 'land' && (
-        <FilterInput label="Площадь участка, сот.">
-          <RangeInputs
-            fromVal={local.area_min}
-            toVal={local.area_max}
-            onFromChange={v => set('area_min', v)}
-            onToChange={v => set('area_max', v)}
-          />
-        </FilterInput>
-      )}
-
-      {/* Rooms */}
-      {showRooms && (
-        <FilterInput label="Комнат">
-          <ChipGroup
-            options={[1, 2, 3, 4, 5]}
-            active={local.rooms ?? []}
-            onToggle={(r) => set('rooms', toggleItem(local.rooms, r))}
-            labelFn={(r) => r === 5 ? '5+' : String(r)}
-          />
-        </FilterInput>
-      )}
-
-      {/* Floor */}
-      {showFloor && (
-        <FilterInput label="Этаж">
-          <RangeInputs
-            fromVal={local.floor_min}
-            toVal={local.floor_max}
-            onFromChange={v => set('floor_min', v)}
-            onToChange={v => set('floor_max', v)}
-            placeholder={['с', 'по']}
-          />
-        </FilterInput>
-      )}
-
-      {/* Districts */}
-      <FilterInput label="Район">
-        <ChipGroup
-          options={DISTRICTS}
-          active={local.district ? [local.district] : []}
-          onToggle={(d) => set('district', local.district === d ? undefined : d)}
-        />
-      </FilterInput>
-
-      {/* Visibility */}
-      <FilterInput label="Видимость">
-        <ChipGroup
-          options={['private', 'shared', 'public'] as const}
-          active={local.status ? [local.status] : []}
-          onToggle={(s) => set('status', local.status === s ? undefined : s)}
-          labelFn={(s) => ({ private: 'Личные', shared: 'Агентство', public: 'Публичные' }[s])}
-        />
-      </FilterInput>
-
-      {/* Tags */}
-      <FilterInput label="Метки">
-        <ChipGroup
-          options={TAGS}
-          active={local.tags ?? []}
-          onToggle={(t) => set('tags', toggleItem(local.tags, t))}
-        />
-      </FilterInput>
-
-      {/* My objects only */}
-      <label className="flex items-center justify-between py-1 cursor-pointer">
-        <span className="text-sm text-[var(--label-primary)]">Только мои объекты</span>
-        <button
-          role="switch"
-          aria-checked={!!local.is_mine}
-          onClick={() => set('is_mine', local.is_mine ? undefined : true)}
-          className={`relative w-12 h-7 rounded-full transition-colors ${
-            local.is_mine ? 'bg-[var(--ios-blue)]' : 'bg-[var(--fill-secondary)]'
-          }`}
-        >
-          <span className={`absolute top-0.5 w-6 h-6 rounded-full bg-white shadow transition-transform ${
-            local.is_mine ? 'translate-x-5.5' : 'translate-x-0.5'
-          }`} />
-        </button>
-      </label>
+      <FilterSection label="Цена, ₽">
+        <div className="grid grid-cols-2 gap-2">
+          <input type="number" placeholder="От" className="input-field"
+            value={(local as Record<string, unknown>).price_min ?? ''}
+            onChange={e => set('price_min' as keyof typeof local, e.target.value ? Number(e.target.value) : undefined as never)} />
+          <input type="number" placeholder="До" className="input-field"
+            value={(local as Record<string, unknown>).price_max ?? ''}
+            onChange={e => set('price_max' as keyof typeof local, e.target.value ? Number(e.target.value) : undefined as never)} />
+        </div>
+      </FilterSection>
 
       <div className="flex gap-3 pt-2">
-        <Button
-          variant="ghost"
-          className="flex-1"
-          onClick={() => { setLocal({}); onChange({}); onClose(); }}
-        >
+        <Button variant="secondary" className="flex-1" onClick={() => { setLocal({}); onChange({}); onClose(); }}>
           Сбросить
         </Button>
-        <Button
-          className="flex-1"
-          onClick={() => { onChange(local); onClose(); }}
-        >
+        <Button className="flex-1" onClick={() => { onChange(local); onClose(); }}>
           Применить
         </Button>
       </div>
+    </div>
+  );
+}
+
+function FilterSection({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="flex flex-col gap-2">
+      <span className="section-label">{label}</span>
+      {children}
     </div>
   );
 }

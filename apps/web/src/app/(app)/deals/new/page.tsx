@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ChevronLeft, Plus, Trash2 } from 'lucide-react';
+import { ChevronLeft, Plus, Trash2, TrendingUp } from 'lucide-react';
 import { useCreateDeal } from '@/lib/hooks/queries/useDeals';
 import { Button } from '@/components/atoms/Button';
 import { formatPrice } from '@/lib/utils/format';
@@ -22,6 +22,15 @@ interface SplitRow {
   partner_name: string;
   split_amount: string;
   split_percent: string;
+}
+
+function FormSection({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="flex flex-col gap-2">
+      <span className="section-label">{label}</span>
+      {children}
+    </div>
+  );
 }
 
 export default function NewDealPage() {
@@ -53,7 +62,6 @@ export default function NewDealPage() {
 
   async function handleSubmit() {
     if (!dealPrice) return;
-
     await createDeal.mutateAsync({
       is_external_property: isExternal,
       external_address: isExternal ? externalAddress : undefined,
@@ -63,145 +71,131 @@ export default function NewDealPage() {
       notes: notes || undefined,
       status: 'in_progress',
     } as Parameters<typeof createDeal.mutateAsync>[0]);
-
     router.back();
   }
 
-  const cls = {
-    input: 'w-full px-4 py-3 rounded-[14px] bg-[var(--fill-tertiary)] text-sm text-[var(--label-primary)] placeholder:text-[var(--label-tertiary)] outline-none',
-    label: 'text-xs font-semibold text-[var(--label-tertiary)] uppercase tracking-wide',
-    section: 'flex flex-col gap-1.5',
-  };
-
   return (
-    <div className="min-h-dvh bg-[var(--bg-primary)]">
-      {/* Header */}
-      <div className="glass-nav sticky top-0 z-20 pt-[env(safe-area-inset-top)]">
+    <div className="min-h-dvh" style={{ background: 'var(--bg-primary)' }}>
+      <div className="glass-nav sticky top-0 z-20" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         <div className="flex items-center justify-between h-11 px-4">
-          <button onClick={() => router.back()} className="text-[var(--ios-blue)]">
-            <ChevronLeft className="w-5 h-5" />
+          <button onClick={() => router.back()}
+            className="w-8 h-8 rounded-full flex items-center justify-center press-scale"
+            style={{ color: 'var(--ios-blue)' }}>
+            <ChevronLeft size={20} />
           </button>
-          <h1 className="text-base font-semibold text-[var(--label-primary)]">Новая сделка</h1>
+          <h1 className="text-[16px] font-semibold" style={{ color: 'var(--label-primary)' }}>Новая сделка</h1>
           <div className="w-8" />
         </div>
       </div>
 
-      <div className="px-4 py-5 flex flex-col gap-5 pb-20">
-        {/* Property type toggle */}
-        <div className={cls.section}>
-          <label className={cls.label}>Тип объекта</label>
+      <div className="px-4 py-4 pb-32 flex flex-col gap-5">
+
+        <FormSection label="Тип объекта">
           <div className="flex gap-2">
             {[{ val: false, label: 'Из базы' }, { val: true, label: 'Внешний' }].map(({ val, label }) => (
               <button
                 key={String(val)}
                 onClick={() => setIsExternal(val)}
-                className={`flex-1 py-2 rounded-[14px] text-sm font-medium transition-colors ${
-                  isExternal === val
-                    ? 'bg-[var(--ios-blue)] text-white'
-                    : 'bg-[var(--fill-tertiary)] text-[var(--label-primary)]'
-                }`}
+                className={`chip flex-1 press-scale ${isExternal === val ? 'chip-active' : ''}`}
               >
                 {label}
               </button>
             ))}
           </div>
-        </div>
+        </FormSection>
 
-        {/* External address */}
         {isExternal && (
-          <div className={cls.section}>
-            <label className={cls.label}>Адрес объекта</label>
+          <FormSection label="Адрес объекта">
             <input
-              className={cls.input}
+              className="input-field"
               placeholder="Улица, дом, квартира..."
               value={externalAddress}
               onChange={e => setExternalAddress(e.target.value)}
             />
-          </div>
+          </FormSection>
         )}
 
-        {/* Deal price */}
-        <div className={cls.section}>
-          <label className={cls.label}>Сумма сделки, ₽ *</label>
+        <FormSection label="Сумма сделки, ₽ *">
           <input
             type="number"
-            className={cls.input}
+            className="input-field"
             placeholder="0"
             value={dealPrice}
             onChange={e => setDealPrice(e.target.value)}
           />
-        </div>
+        </FormSection>
 
-        {/* Commission */}
-        <div className={cls.section}>
-          <label className={cls.label}>Моя комиссия, ₽</label>
+        <FormSection label="Моя комиссия, ₽">
           <input
             type="number"
-            className={cls.input}
+            className="input-field"
             placeholder="0"
             value={myCommission}
             onChange={e => setMyCommission(e.target.value)}
           />
-        </div>
+        </FormSection>
 
-        {/* Payment form */}
-        <div className={cls.section}>
-          <label className={cls.label}>Форма оплаты</label>
+        <FormSection label="Форма оплаты">
           <div className="flex gap-2 flex-wrap">
             {PAYMENT_OPTIONS.map(({ value, label }) => (
               <button
                 key={value}
                 onClick={() => setPaymentForm(paymentForm === value ? '' : value)}
-                className={`px-3 py-2 rounded-[12px] text-sm font-medium transition-colors ${
-                  paymentForm === value
-                    ? 'bg-[var(--ios-blue)] text-white'
-                    : 'bg-[var(--fill-tertiary)] text-[var(--label-primary)]'
-                }`}
+                className={`chip press-scale ${paymentForm === value ? 'chip-active' : ''}`}
               >
                 {label}
               </button>
             ))}
           </div>
-        </div>
+        </FormSection>
 
         {/* Commission splits */}
-        <div className={cls.section}>
+        <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between">
-            <label className={cls.label}>Раздел комиссии</label>
+            <span className="section-label" style={{ marginBottom: 0 }}>Раздел комиссии</span>
             <button
               onClick={addSplit}
-              className="text-xs text-[var(--ios-blue)] flex items-center gap-0.5"
+              className="flex items-center gap-1 text-[13px] font-semibold press-scale"
+              style={{ color: 'var(--ios-blue)' }}
             >
-              <Plus className="w-3 h-3" /> Добавить
+              <Plus size={14} /> Добавить
             </button>
           </div>
 
           {splits.length > 0 && (
             <div className="flex flex-col gap-3 mt-1">
               {splits.map((split) => (
-                <div key={split.id} className="glass-card squircle-card p-3 flex flex-col gap-2">
+                <div
+                  key={split.id}
+                  className="squircle-card p-3 flex flex-col gap-2"
+                  style={{ background: 'var(--bg-elevated)', border: '0.5px solid var(--separator)' }}
+                >
                   <div className="flex items-center gap-2">
                     <input
-                      className="flex-1 px-3 py-2 rounded-[12px] bg-[var(--fill-tertiary)] text-sm outline-none"
+                      className="input-field"
                       placeholder="Имя партнёра"
                       value={split.partner_name}
                       onChange={e => updateSplit(split.id, 'partner_name', e.target.value)}
                     />
-                    <button onClick={() => removeSplit(split.id)} className="text-[var(--ios-red)]">
-                      <Trash2 className="w-4 h-4" />
+                    <button
+                      onClick={() => removeSplit(split.id)}
+                      className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 press-scale"
+                      style={{ background: 'rgba(255,59,48,0.10)', color: 'var(--ios-red)' }}
+                    >
+                      <Trash2 size={14} />
                     </button>
                   </div>
                   <div className="flex gap-2">
                     <input
                       type="number"
-                      className="flex-1 px-3 py-2 rounded-[12px] bg-[var(--fill-tertiary)] text-sm outline-none"
+                      className="input-field"
                       placeholder="Сумма ₽"
                       value={split.split_amount}
                       onChange={e => updateSplit(split.id, 'split_amount', e.target.value)}
                     />
                     <input
                       type="number"
-                      className="flex-1 px-3 py-2 rounded-[12px] bg-[var(--fill-tertiary)] text-sm outline-none"
+                      className="input-field"
                       placeholder="% (опц.)"
                       value={split.split_percent}
                       onChange={e => updateSplit(split.id, 'split_percent', e.target.value)}
@@ -210,12 +204,20 @@ export default function NewDealPage() {
                 </div>
               ))}
 
-              {/* Net summary */}
-              {myCommission && (
-                <div className="glass-card squircle-card p-3 flex justify-between items-center">
-                  <span className="text-sm text-[var(--label-secondary)]">Итого мне:</span>
-                  <span className={`text-sm font-bold ${netAfterSplits && netAfterSplits < 0 ? 'text-[var(--ios-red)]' : 'text-[var(--ios-green)]'}`}>
-                    {netAfterSplits !== null ? formatPrice(netAfterSplits) : '—'}
+              {myCommission && netAfterSplits !== null && (
+                <div
+                  className="squircle-card p-3 flex items-center justify-between gap-3"
+                  style={{ background: 'var(--bg-elevated)', border: '0.5px solid var(--separator)' }}
+                >
+                  <div className="flex items-center gap-2">
+                    <TrendingUp size={14} style={{ color: netAfterSplits < 0 ? 'var(--ios-red)' : 'var(--ios-green)' }} />
+                    <span className="text-[14px]" style={{ color: 'var(--label-secondary)' }}>Итого мне:</span>
+                  </div>
+                  <span
+                    className="text-[15px] font-bold"
+                    style={{ color: netAfterSplits < 0 ? 'var(--ios-red)' : 'var(--ios-green)' }}
+                  >
+                    {formatPrice(netAfterSplits)}
                   </span>
                 </div>
               )}
@@ -223,21 +225,20 @@ export default function NewDealPage() {
           )}
         </div>
 
-        {/* Notes */}
-        <div className={cls.section}>
-          <label className={cls.label}>Заметки</label>
+        <FormSection label="Заметки">
           <textarea
-            className={`${cls.input} resize-none`}
+            className="input-field resize-none"
             rows={3}
             placeholder="Комментарий к сделке..."
             value={notes}
             onChange={e => setNotes(e.target.value)}
           />
-        </div>
+        </FormSection>
+
       </div>
 
-      {/* Sticky submit */}
-      <div className="fixed bottom-0 inset-x-0 pb-[calc(1rem+env(safe-area-inset-bottom))] px-4 pt-4 bg-gradient-to-t from-[var(--bg-primary)] to-transparent">
+      <div className="fixed bottom-0 inset-x-0 px-4 pt-4"
+        style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))', background: 'linear-gradient(to top, var(--bg-primary) 60%, transparent)' }}>
         <Button
           className="w-full"
           onClick={handleSubmit}

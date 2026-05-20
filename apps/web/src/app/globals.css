@@ -1,11 +1,7 @@
 @import "tailwindcss";
 
-/* iOS 26 class-based dark mode — must come before @theme */
+/* v4 — full redesign */
 @custom-variant dark (&:where(.dark, .dark *));
-
-/* =========================================================
-   Tailwind v4 Theme Tokens
-   ========================================================= */
 
 @theme {
   --color-ios-blue:   #007AFF;
@@ -16,218 +12,170 @@
   --color-ios-indigo: #5856D6;
   --color-ios-teal:   #5AC8FA;
   --color-ios-pink:   #FF2D55;
-
-  --radius-squircle-btn:  14px;
-  --radius-squircle-card: 22px;
-
-  --spacing-tab-bar: calc(56px + env(safe-area-inset-bottom));
-  --spacing-safe-top: env(safe-area-inset-top);
+  --color-ios-yellow: #FFCC00;
+  --radius-squircle-btn:     14px;
+  --radius-squircle-card:    18px;
+  --radius-squircle-card-lg: 24px;
+  --spacing-tab-bar:    calc(56px + env(safe-area-inset-bottom));
+  --spacing-safe-top:   env(safe-area-inset-top);
   --spacing-safe-bottom: env(safe-area-inset-bottom);
 }
 
-/* =========================================================
-   iOS 26 Design System — CSS Custom Properties
-   ========================================================= */
-
 :root {
-  --ios-blue:    #007AFF;
-  --ios-green:   #34C759;
-  --ios-orange:  #FF9500;
-  --ios-red:     #FF3B30;
-  --ios-purple:  #AF52DE;
-  --ios-indigo:  #5856D6;
-  --ios-teal:    #5AC8FA;
-  --ios-pink:    #FF2D55;
+  --ios-blue:   #007AFF;
+  --ios-green:  #34C759;
+  --ios-orange: #FF9500;
+  --ios-red:    #FF3B30;
+  --ios-purple: #AF52DE;
+  --ios-indigo: #5856D6;
+  --ios-teal:   #5AC8FA;
+  --ios-pink:   #FF2D55;
+  --ios-yellow: #FFCC00;
 
-  /* Light fills */
-  --fill-primary:    rgba(120, 120, 128, 0.20);
-  --fill-secondary:  rgba(120, 120, 128, 0.16);
-  --fill-tertiary:   rgba(118, 118, 128, 0.12);
+  --fill-primary:   rgba(120,120,128,0.20);
+  --fill-secondary: rgba(120,120,128,0.16);
+  --fill-tertiary:  rgba(118,118,128,0.12);
+  --fill-quaternary:rgba(118,118,128,0.08);
 
-  /* Light backgrounds */
   --bg-primary:   #F2F2F7;
   --bg-secondary: #FFFFFF;
   --bg-grouped:   #F2F2F7;
   --bg-elevated:  #FFFFFF;
 
-  /* Labels */
   --label-primary:    #000000;
-  --label-secondary:  rgba(60, 60, 67, 0.6);
-  --label-tertiary:   rgba(60, 60, 67, 0.3);
-  --label-quaternary: rgba(60, 60, 67, 0.18);
+  --label-secondary:  rgba(60,60,67,0.6);
+  --label-tertiary:   rgba(60,60,67,0.3);
+  --label-quaternary: rgba(60,60,67,0.18);
 
-  /* Separator */
-  --separator: rgba(60, 60, 67, 0.12);
+  --separator:        rgba(60,60,67,0.12);
   --separator-opaque: #C6C6C8;
 
-  /* Safe areas */
   --safe-top:    env(safe-area-inset-top);
   --safe-bottom: env(safe-area-inset-bottom);
   --safe-left:   env(safe-area-inset-left);
   --safe-right:  env(safe-area-inset-right);
   --tab-bar-height: calc(56px + env(safe-area-inset-bottom));
 
-  /* iOS 26 Shadows */
-  --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
-  --shadow-elevated: 0 8px 32px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.05);
-  --shadow-blue: 0 6px 20px rgba(0, 122, 255, 0.28);
-  --shadow-modal: 0 24px 64px rgba(0, 0, 0, 0.14), 0 8px 24px rgba(0, 0, 0, 0.08);
+  --shadow-xs:      0 1px 3px rgba(0,0,0,0.06);
+  --shadow-card:    0 2px 12px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04);
+  --shadow-elevated:0 8px 32px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.05);
+  --shadow-blue:    0 6px 20px rgba(0,122,255,0.28);
+  --shadow-modal:   0 24px 64px rgba(0,0,0,0.14), 0 8px 24px rgba(0,0,0,0.08);
 }
 
 .dark {
-  --fill-primary:    rgba(120, 120, 128, 0.36);
-  --fill-secondary:  rgba(120, 120, 128, 0.32);
-  --fill-tertiary:   rgba(118, 118, 128, 0.24);
+  --fill-primary:   rgba(120,120,128,0.36);
+  --fill-secondary: rgba(120,120,128,0.32);
+  --fill-tertiary:  rgba(118,118,128,0.24);
+  --fill-quaternary:rgba(118,118,128,0.16);
 
   --bg-primary:   #000000;
   --bg-secondary: #1C1C1E;
   --bg-grouped:   #000000;
-  --bg-elevated:  #2C2C2E;
+  --bg-elevated:  #1C1C1E;
 
   --label-primary:    #FFFFFF;
-  --label-secondary:  rgba(235, 235, 245, 0.6);
-  --label-tertiary:   rgba(235, 235, 245, 0.3);
-  --label-quaternary: rgba(235, 235, 245, 0.16);
+  --label-secondary:  rgba(235,235,245,0.6);
+  --label-tertiary:   rgba(235,235,245,0.3);
+  --label-quaternary: rgba(235,235,245,0.16);
 
-  --separator: rgba(84, 84, 88, 0.6);
+  --separator:        rgba(84,84,88,0.6);
   --separator-opaque: #38383A;
 
-  --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.2);
-  --shadow-elevated: 0 8px 32px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.24);
-  --shadow-blue: 0 6px 20px rgba(0, 122, 255, 0.4);
-  --shadow-modal: 0 24px 64px rgba(0, 0, 0, 0.5), 0 8px 24px rgba(0, 0, 0, 0.3);
+  --shadow-card:    0 2px 12px rgba(0,0,0,0.3), 0 1px 3px rgba(0,0,0,0.2);
+  --shadow-elevated:0 8px 32px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.24);
+  --shadow-blue:    0 6px 20px rgba(0,122,255,0.4);
+  --shadow-modal:   0 24px 64px rgba(0,0,0,0.5), 0 8px 24px rgba(0,0,0,0.3);
 }
 
-/* =========================================================
-   Base Styles
-   ========================================================= */
+* { -webkit-tap-highlight-color: transparent; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
 
-* {
-  -webkit-tap-highlight-color: transparent;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+html { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif; }
 
-html {
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text',
-               'Helvetica Neue', Arial, sans-serif;
-}
+body { background: var(--bg-primary); color: var(--label-primary); overflow-x: hidden; }
 
-body {
-  background: var(--bg-primary);
-  color: var(--label-primary);
-  overflow-x: hidden;
-}
+.app-main { padding-bottom: var(--tab-bar-height); min-height: 100dvh; }
 
-.app-main {
-  padding-bottom: var(--tab-bar-height);
-  min-height: 100dvh;
-}
-
-/* =========================================================
-   iOS 26 Liquid Glass — Core Material
-   ========================================================= */
-
+/* ── Glass ─────────────────────────────────────── */
 .glass-nav {
-  background: rgba(242, 242, 247, 0.82);
+  background: rgba(242,242,247,0.85);
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
   border-bottom: 0.5px solid var(--separator);
 }
-
-.dark .glass-nav {
-  background: rgba(0, 0, 0, 0.78);
-  border-bottom: 0.5px solid rgba(255, 255, 255, 0.06);
-}
+.dark .glass-nav { background: rgba(0,0,0,0.82); border-bottom: 0.5px solid rgba(255,255,255,0.06); }
 
 .glass-card {
-  background: rgba(255, 255, 255, 0.72);
+  background: rgba(255,255,255,0.75);
   backdrop-filter: blur(16px) saturate(160%);
   -webkit-backdrop-filter: blur(16px) saturate(160%);
-  border: 0.5px solid rgba(255, 255, 255, 0.8);
+  border: 0.5px solid rgba(255,255,255,0.85);
+  box-shadow: var(--shadow-card);
+}
+.dark .glass-card { background: rgba(28,28,30,0.88); border: 0.5px solid rgba(255,255,255,0.07); }
+
+.glass-sheet {
+  background: rgba(248,248,252,0.97);
+  backdrop-filter: blur(40px) saturate(200%);
+  -webkit-backdrop-filter: blur(40px) saturate(200%);
+  border-top: 0.5px solid rgba(255,255,255,0.9);
+}
+.dark .glass-sheet { background: rgba(28,28,30,0.97); border-top: 0.5px solid rgba(255,255,255,0.06); }
+
+.liquid-glass {
+  background: rgba(255,255,255,0.64);
+  backdrop-filter: blur(32px) saturate(180%) brightness(1.04);
+  -webkit-backdrop-filter: blur(32px) saturate(180%) brightness(1.04);
+  border: 0.5px solid rgba(255,255,255,0.72);
+  box-shadow: 0 0 0 0.5px rgba(255,255,255,0.2) inset, 0 1px 0 rgba(255,255,255,0.58) inset, var(--shadow-elevated);
+}
+.dark .liquid-glass {
+  background: rgba(30,30,32,0.74);
+  border: 0.5px solid rgba(255,255,255,0.09);
+  box-shadow: 0 0 0 0.5px rgba(255,255,255,0.03) inset, 0 1px 0 rgba(255,255,255,0.05) inset, var(--shadow-elevated);
+}
+
+/* ── Solid card (no glass, for lists) ───────────── */
+.solid-card {
+  background: var(--bg-elevated);
+  border: 0.5px solid var(--separator);
   box-shadow: var(--shadow-card);
 }
 
-.dark .glass-card {
-  background: rgba(44, 44, 46, 0.72);
-  border: 0.5px solid rgba(255, 255, 255, 0.07);
-}
-
-.glass-sheet {
-  background: rgba(248, 248, 252, 0.97);
-  backdrop-filter: blur(40px) saturate(200%);
-  -webkit-backdrop-filter: blur(40px) saturate(200%);
-  border-top: 0.5px solid rgba(255, 255, 255, 0.9);
-}
-
-.dark .glass-sheet {
-  background: rgba(28, 28, 30, 0.97);
-  border-top: 0.5px solid rgba(255, 255, 255, 0.06);
-}
-
-/* iOS 26 Liquid Glass — elevated panels, modals */
-.liquid-glass {
-  background: rgba(255, 255, 255, 0.62);
-  backdrop-filter: blur(28px) saturate(180%) brightness(1.04);
-  -webkit-backdrop-filter: blur(28px) saturate(180%) brightness(1.04);
-  border: 0.5px solid rgba(255, 255, 255, 0.7);
-  box-shadow:
-    0 0 0 0.5px rgba(255, 255, 255, 0.18) inset,
-    0 1px 0 rgba(255, 255, 255, 0.55) inset,
-    var(--shadow-elevated);
-}
-
-.dark .liquid-glass {
-  background: rgba(30, 30, 32, 0.72);
-  border: 0.5px solid rgba(255, 255, 255, 0.08);
-  box-shadow:
-    0 0 0 0.5px rgba(255, 255, 255, 0.03) inset,
-    0 1px 0 rgba(255, 255, 255, 0.04) inset,
-    var(--shadow-elevated);
-}
-
-/* =========================================================
-   Gradient Mesh Backgrounds — iOS 26 animated atmosphere
-   ========================================================= */
-
+/* ── Gradients ──────────────────────────────────── */
 .gradient-mesh {
   background-color: var(--bg-primary);
   background-image:
-    radial-gradient(ellipse 130% 80% at 50% -5%,  rgba(0, 122, 255, 0.11) 0%, transparent 55%),
-    radial-gradient(ellipse 70% 70%  at 85% 60%,  rgba(88, 86, 214, 0.07) 0%, transparent 55%),
-    radial-gradient(ellipse 60% 60%  at 15% 85%,  rgba(52, 199, 89, 0.05) 0%, transparent 55%);
+    radial-gradient(ellipse 130% 80% at 50% -5%,  rgba(0,122,255,0.10) 0%, transparent 55%),
+    radial-gradient(ellipse 70% 70%  at 85% 60%,  rgba(88,86,214,0.06) 0%, transparent 55%),
+    radial-gradient(ellipse 60% 60%  at 15% 85%,  rgba(52,199,89,0.05) 0%, transparent 55%);
 }
-
 .dark .gradient-mesh {
   background-color: var(--bg-primary);
   background-image:
-    radial-gradient(ellipse 130% 80% at 50% -5%,  rgba(0, 122, 255, 0.22) 0%, transparent 55%),
-    radial-gradient(ellipse 70% 70%  at 85% 60%,  rgba(88, 86, 214, 0.14) 0%, transparent 55%),
-    radial-gradient(ellipse 60% 60%  at 15% 85%,  rgba(52, 199, 89, 0.08) 0%, transparent 55%);
+    radial-gradient(ellipse 130% 80% at 50% -5%,  rgba(0,122,255,0.20) 0%, transparent 55%),
+    radial-gradient(ellipse 70% 70%  at 85% 60%,  rgba(88,86,214,0.12) 0%, transparent 55%),
+    radial-gradient(ellipse 60% 60%  at 15% 85%,  rgba(52,199,89,0.08) 0%, transparent 55%);
 }
 
 .gradient-mesh-login {
   background-color: var(--bg-primary);
   background-image:
-    radial-gradient(ellipse 100% 70% at 50% 0%,   rgba(0, 122, 255, 0.16) 0%, transparent 60%),
-    radial-gradient(ellipse 60%  60% at 90% 80%,  rgba(88, 86, 214, 0.10) 0%, transparent 60%),
-    radial-gradient(ellipse 50%  50% at 10% 90%,  rgba(52, 199, 89, 0.07)  0%, transparent 60%),
-    radial-gradient(ellipse 40%  40% at 70% 30%,  rgba(175, 82, 222, 0.06) 0%, transparent 60%);
+    radial-gradient(ellipse 120% 80% at 50% -10%, rgba(0,122,255,0.18) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 60%  at 90% 80%,  rgba(88,86,214,0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 50%  at 10% 90%,  rgba(52,199,89,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 40%  at 70% 30%,  rgba(175,82,222,0.07) 0%, transparent 60%);
 }
-
 .dark .gradient-mesh-login {
   background-color: var(--bg-primary);
   background-image:
-    radial-gradient(ellipse 100% 70% at 50% 0%,   rgba(0, 122, 255, 0.28) 0%, transparent 60%),
-    radial-gradient(ellipse 60%  60% at 90% 80%,  rgba(88, 86, 214, 0.18) 0%, transparent 60%),
-    radial-gradient(ellipse 50%  50% at 10% 90%,  rgba(52, 199, 89, 0.10)  0%, transparent 60%),
-    radial-gradient(ellipse 40%  40% at 70% 30%,  rgba(175, 82, 222, 0.10) 0%, transparent 60%);
+    radial-gradient(ellipse 120% 80% at 50% -10%, rgba(0,122,255,0.30) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 60%  at 90% 80%,  rgba(88,86,214,0.20) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 50%  at 10% 90%,  rgba(52,199,89,0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 40%  at 70% 30%,  rgba(175,82,222,0.12) 0%, transparent 60%);
 }
 
-/* =========================================================
-   Input Field — iOS 26 Style
-   ========================================================= */
-
+/* ── Form ───────────────────────────────────────── */
 .input-field {
   width: 100%;
   padding: 14px 16px;
@@ -236,65 +184,130 @@ body {
   font-weight: 400;
   background: var(--fill-tertiary);
   color: var(--label-primary);
-  border: 1px solid transparent;
+  border: 1.5px solid transparent;
   outline: none;
   transition: border-color 0.15s ease, background 0.15s ease;
   -webkit-appearance: none;
 }
+.input-field::placeholder { color: var(--label-tertiary); }
+.input-field:focus { border-color: var(--ios-blue); background: var(--fill-secondary); }
 
-.input-field::placeholder {
-  color: var(--label-tertiary);
-}
+/* ── Radius ─────────────────────────────────────── */
+.squircle-btn     { border-radius: 14px; }
+.squircle-card    { border-radius: 18px; }
+.squircle-card-lg { border-radius: 24px; }
 
-.input-field:focus {
-  border-color: var(--ios-blue);
-  background: var(--fill-secondary);
-}
+/* ── Tints ──────────────────────────────────────── */
+.tint-blue   { background: linear-gradient(135deg, rgba(0,122,255,0.10),  rgba(0,122,255,0.03)); }
+.tint-green  { background: linear-gradient(135deg, rgba(52,199,89,0.10),  rgba(52,199,89,0.03)); }
+.tint-orange { background: linear-gradient(135deg, rgba(255,149,0,0.10),  rgba(255,149,0,0.03)); }
+.tint-purple { background: linear-gradient(135deg, rgba(175,82,222,0.10), rgba(175,82,222,0.03)); }
+.tint-indigo { background: linear-gradient(135deg, rgba(88,86,214,0.10),  rgba(88,86,214,0.03)); }
+.tint-red    { background: linear-gradient(135deg, rgba(255,59,48,0.10),  rgba(255,59,48,0.03)); }
+.tint-yellow { background: linear-gradient(135deg, rgba(255,204,0,0.10),  rgba(255,204,0,0.03)); }
 
-/* =========================================================
-   Squircle Utilities
-   ========================================================= */
-
-.squircle-btn  { border-radius: 14px; }
-.squircle-card { border-radius: 22px; }
-.squircle-card-lg { border-radius: 28px; }
-
-/* =========================================================
-   Tinted card backgrounds (KPI widgets)
-   ========================================================= */
-
-.tint-blue   { background: linear-gradient(135deg, rgba(0,122,255,0.10), rgba(0,122,255,0.04)); }
-.tint-green  { background: linear-gradient(135deg, rgba(52,199,89,0.10), rgba(52,199,89,0.04)); }
-.tint-orange { background: linear-gradient(135deg, rgba(255,149,0,0.10), rgba(255,149,0,0.04)); }
-.tint-purple { background: linear-gradient(135deg, rgba(175,82,222,0.10), rgba(175,82,222,0.04)); }
-.tint-indigo { background: linear-gradient(135deg, rgba(88,86,214,0.10), rgba(88,86,214,0.04)); }
-.tint-red    { background: linear-gradient(135deg, rgba(255,59,48,0.10), rgba(255,59,48,0.04)); }
-
-/* =========================================================
-   Scrollbar hiding (iOS style)
-   ========================================================= */
-
+/* ── Utilities ──────────────────────────────────── */
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-/* =========================================================
-   Drag handle
-   ========================================================= */
+.sheet-handle { width: 36px; height: 5px; border-radius: 3px; background: var(--fill-secondary); margin: 8px auto 0; flex-shrink: 0; }
 
-.sheet-handle {
-  width: 36px;
-  height: 5px;
-  border-radius: 3px;
-  background: var(--fill-secondary);
-  margin: 8px auto 0;
-  flex-shrink: 0;
-}
-
-/* =========================================================
-   Active / Press states
-   ========================================================= */
-
-.press-scale {
-  transition: transform 0.1s ease;
-}
+.press-scale { transition: transform 0.12s ease; }
 .press-scale:active { transform: scale(0.97); }
+
+.scroll-safe { scroll-padding-bottom: var(--tab-bar-height); }
+
+/* ── Skeleton ───────────────────────────────────── */
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, var(--fill-tertiary) 25%, var(--fill-secondary) 50%, var(--fill-tertiary) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: 8px;
+}
+
+/* ── Photo overlay ──────────────────────────────── */
+.photo-overlay { background: linear-gradient(to top, rgba(0,0,0,0.68) 0%, rgba(0,0,0,0.22) 45%, transparent 75%); }
+
+/* ── FAB ────────────────────────────────────────── */
+.fab {
+  position: fixed;
+  bottom: calc(var(--tab-bar-height) + 16px);
+  right: 16px;
+  width: 52px; height: 52px;
+  border-radius: 16px;
+  background: var(--ios-blue);
+  color: white;
+  box-shadow: 0 6px 20px rgba(0,122,255,0.38), 0 2px 8px rgba(0,0,0,0.12);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 20;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+.fab:active { transform: scale(0.94); box-shadow: 0 3px 12px rgba(0,122,255,0.30); }
+
+/* ── Avatar circle ──────────────────────────────── */
+.avatar-circle {
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+/* ── Section header ─────────────────────────────── */
+.section-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--label-primary);
+  letter-spacing: -0.3px;
+  margin-bottom: 12px;
+}
+
+.section-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--label-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  margin-bottom: 8px;
+}
+
+/* ── Status badge colors ────────────────────────── */
+.badge-blue   { background: rgba(0,122,255,0.12);  color: var(--ios-blue); }
+.badge-green  { background: rgba(52,199,89,0.12);  color: var(--ios-green); }
+.badge-orange { background: rgba(255,149,0,0.12);  color: var(--ios-orange); }
+.badge-red    { background: rgba(255,59,48,0.12);  color: var(--ios-red); }
+.badge-purple { background: rgba(175,82,222,0.12); color: var(--ios-purple); }
+.badge-indigo { background: rgba(88,86,214,0.12);  color: var(--ios-indigo); }
+.badge-gray   { background: var(--fill-secondary); color: var(--label-secondary); }
+
+/* ── Chip toggle ────────────────────────────────── */
+.chip {
+  padding: 7px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  background: var(--fill-tertiary);
+  color: var(--label-secondary);
+  transition: background 0.12s ease, color 0.12s ease;
+  white-space: nowrap;
+}
+.chip-active {
+  background: var(--ios-blue);
+  color: white;
+}
+
+/* ── List row ───────────────────────────────────── */
+.list-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 16px;
+  background: var(--bg-elevated);
+  border-bottom: 0.5px solid var(--separator);
+  transition: background 0.1s;
+}
+.list-row:active { background: var(--fill-tertiary); }

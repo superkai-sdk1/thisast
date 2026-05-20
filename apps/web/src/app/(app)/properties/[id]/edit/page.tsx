@@ -24,13 +24,22 @@ const PAYMENT_OPTIONS: { value: PaymentForm; label: string }[] = [
   { value: 'military_mortgage', label: 'Воен. ипотека' },
 ];
 
-const VISIBILITY_OPTIONS: { value: VisibilityStatus; label: string }[] = [
-  { value: 'private', label: 'Личный'     },
-  { value: 'shared',  label: 'Агентство'  },
-  { value: 'public',  label: 'Публичный'  },
+const VISIBILITY_OPTIONS: { value: VisibilityStatus; label: string; badge: 'default' | 'info' | 'success' }[] = [
+  { value: 'private', label: 'Личный',    badge: 'default' },
+  { value: 'shared',  label: 'Агентство', badge: 'info'    },
+  { value: 'public',  label: 'Публичный', badge: 'success' },
 ];
 
 const DISTRICTS = ['Центр', 'Горная', 'Искож', 'Дубки', 'Стрелка', 'Университет'];
+
+function FormSection({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="flex flex-col gap-2">
+      <span className="section-label">{label}</span>
+      {children}
+    </div>
+  );
+}
 
 export default function EditPropertyPage({ params }: Props) {
   const { id } = use(params);
@@ -110,159 +119,148 @@ export default function EditPropertyPage({ params }: Props) {
     } as Parameters<typeof propertiesApi.update>[1]);
   }
 
-  const cls = {
-    input: 'w-full px-4 py-3 rounded-[14px] bg-[var(--fill-tertiary)] text-sm text-[var(--label-primary)] placeholder:text-[var(--label-tertiary)] outline-none',
-    label: 'text-xs font-semibold text-[var(--label-tertiary)] uppercase tracking-wide',
-    section: 'flex flex-col gap-1.5',
-  };
-
   if (isLoading) {
     return (
       <div className="min-h-dvh flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-[var(--ios-blue)] border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 rounded-full animate-spin"
+          style={{ borderColor: 'var(--separator)', borderTopColor: 'var(--ios-blue)' }} />
       </div>
     );
   }
 
   return (
-    <div className="min-h-dvh bg-[var(--bg-primary)]">
-      <div className="glass-nav sticky top-0 z-20 pt-[env(safe-area-inset-top)]">
+    <div className="min-h-dvh" style={{ background: 'var(--bg-primary)' }}>
+      <div className="glass-nav sticky top-0 z-20" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         <div className="flex items-center justify-between h-11 px-4">
-          <button onClick={() => router.back()} className="text-[var(--ios-blue)]">
-            <ChevronLeft className="w-5 h-5" />
+          <button onClick={() => router.back()}
+            className="w-8 h-8 rounded-full flex items-center justify-center press-scale"
+            style={{ color: 'var(--ios-blue)' }}>
+            <ChevronLeft size={20} />
           </button>
-          <h1 className="text-base font-semibold text-[var(--label-primary)]">Редактировать</h1>
+          <h1 className="text-[16px] font-semibold" style={{ color: 'var(--label-primary)' }}>Редактировать</h1>
           <div className="w-8" />
         </div>
       </div>
 
-      <div className="px-4 py-5 flex flex-col gap-5 pb-24">
+      <div className="px-4 py-4 pb-32 flex flex-col gap-5">
+
         {/* Photos */}
-        <div className={cls.section}>
-          <label className={cls.label}>Фотографии</label>
+        <FormSection label="Фотографии">
           <div className="flex gap-2 flex-wrap">
             {(property?.photos ?? []).map(photo => (
               <div key={photo.id} className="relative">
-                <img
-                  src={photo.url}
-                  alt=""
-                  className="w-20 h-20 object-cover rounded-[12px]"
-                />
+                <img src={photo.url} alt="" className="w-20 h-20 object-cover rounded-[14px]" />
                 {photo.is_cover && (
-                  <Badge variant="info" className="absolute top-1 left-1 text-[10px]">
+                  <Badge variant="info" size="sm" className="absolute top-1 left-1 text-[10px]">
                     Обложка
                   </Badge>
                 )}
                 <button
                   onClick={() => photoDeleteMutation.mutate(photo.id)}
-                  className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-[var(--ios-red)] text-white flex items-center justify-center"
+                  className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full flex items-center justify-center text-white press-scale"
+                  style={{ background: 'var(--ios-red)' }}
                 >
-                  <Trash2 className="w-3 h-3" />
+                  <Trash2 size={10} />
                 </button>
               </div>
             ))}
           </div>
           <ImageUploader onUpload={handlePhotoUpload} maxFiles={10} />
-        </div>
+        </FormSection>
 
         {/* Visibility */}
-        <div className={cls.section}>
-          <label className={cls.label}>Видимость</label>
+        <FormSection label="Видимость">
           <div className="flex gap-2">
-            {VISIBILITY_OPTIONS.map(({ value, label }) => (
+            {VISIBILITY_OPTIONS.map(({ value, label, badge }) => (
               <button
                 key={value}
                 onClick={() => setVisibility(value)}
-                className={`flex-1 py-2 rounded-[14px] text-sm font-medium transition-colors ${
-                  visibility === value
-                    ? 'bg-[var(--ios-blue)] text-white'
-                    : 'bg-[var(--fill-tertiary)] text-[var(--label-primary)]'
-                }`}
+                className="flex-1 py-2.5 rounded-[14px] text-[13px] font-semibold press-scale transition-colors"
+                style={{
+                  background: visibility === value ? 'var(--ios-blue)' : 'var(--fill-tertiary)',
+                  color: visibility === value ? 'white' : 'var(--label-primary)',
+                }}
               >
                 {label}
               </button>
             ))}
           </div>
-        </div>
+        </FormSection>
 
         {/* Price */}
-        <div className={cls.section}>
-          <label className={cls.label}>Цена, ₽</label>
-          <input type="number" className={cls.input} placeholder="0" value={price} onChange={e => setPrice(e.target.value)} />
-        </div>
+        <FormSection label="Цена, ₽">
+          <input type="number" className="input-field" placeholder="0"
+            value={price} onChange={e => setPrice(e.target.value)} />
+        </FormSection>
 
         {/* Location */}
-        <div className={cls.section}>
-          <label className={cls.label}>Район</label>
-          <div className="flex gap-2 flex-wrap mb-2">
+        <FormSection label="Район">
+          <div className="flex gap-2 flex-wrap mb-1">
             {DISTRICTS.map(d => (
-              <button
-                key={d}
+              <button key={d}
                 onClick={() => setDistrict(prev => prev === d ? '' : d)}
-                className={`px-3 py-2 rounded-[12px] text-sm font-medium transition-colors ${
-                  district === d ? 'bg-[var(--ios-blue)] text-white' : 'bg-[var(--fill-tertiary)] text-[var(--label-primary)]'
-                }`}
-              >
+                className={`chip press-scale ${district === d ? 'chip-active' : ''}`}>
                 {d}
               </button>
             ))}
           </div>
           <div className="flex gap-2">
-            <input className={cls.input} placeholder="Улица" value={street} onChange={e => setStreet(e.target.value)} />
-            <input className="w-24 px-4 py-3 rounded-[14px] bg-[var(--fill-tertiary)] text-sm outline-none" placeholder="Дом" value={houseNumber} onChange={e => setHouseNumber(e.target.value)} />
+            <input className="input-field" placeholder="Улица"
+              value={street} onChange={e => setStreet(e.target.value)} />
+            <input className="input-field" style={{ width: 96 }} placeholder="Дом"
+              value={houseNumber} onChange={e => setHouseNumber(e.target.value)} />
           </div>
-        </div>
+        </FormSection>
 
         {/* Area & rooms */}
-        <div className={cls.section}>
-          <label className={cls.label}>Площадь и комнаты</label>
+        <FormSection label="Площадь и комнаты">
           <div className="flex gap-2">
-            <input type="number" className={cls.input} placeholder="м²" value={areaSqm} onChange={e => setAreaSqm(e.target.value)} />
-            <input type="number" className="w-24 px-4 py-3 rounded-[14px] bg-[var(--fill-tertiary)] text-sm outline-none" placeholder="Комн." value={rooms} onChange={e => setRooms(e.target.value)} />
+            <input type="number" className="input-field" placeholder="м²"
+              value={areaSqm} onChange={e => setAreaSqm(e.target.value)} />
+            <input type="number" className="input-field" style={{ width: 96 }} placeholder="Комн."
+              value={rooms} onChange={e => setRooms(e.target.value)} />
           </div>
-        </div>
+        </FormSection>
 
         {/* Floor */}
-        <div className={cls.section}>
-          <label className={cls.label}>Этаж</label>
+        <FormSection label="Этаж">
           <div className="flex gap-2">
-            <input type="number" className={cls.input} placeholder="Этаж" value={floor} onChange={e => setFloor(e.target.value)} />
-            <input type="number" className={cls.input} placeholder="Всего" value={floorTotal} onChange={e => setFloorTotal(e.target.value)} />
+            <input type="number" className="input-field" placeholder="Этаж"
+              value={floor} onChange={e => setFloor(e.target.value)} />
+            <input type="number" className="input-field" placeholder="Всего этажей"
+              value={floorTotal} onChange={e => setFloorTotal(e.target.value)} />
           </div>
-        </div>
+        </FormSection>
 
         {/* Payment */}
-        <div className={cls.section}>
-          <label className={cls.label}>Форма оплаты</label>
+        <FormSection label="Форма оплаты">
           <div className="flex gap-2 flex-wrap">
             {PAYMENT_OPTIONS.map(({ value, label }) => (
-              <button
-                key={value}
+              <button key={value}
                 onClick={() => togglePayment(value)}
-                className={`px-3 py-2 rounded-[12px] text-sm font-medium transition-colors ${
-                  conditions.includes(value) ? 'bg-[var(--ios-blue)] text-white' : 'bg-[var(--fill-tertiary)] text-[var(--label-primary)]'
-                }`}
-              >
+                className={`chip press-scale ${conditions.includes(value) ? 'chip-active' : ''}`}>
                 {label}
               </button>
             ))}
           </div>
-        </div>
+        </FormSection>
 
         {/* Tags */}
-        <div className={cls.section}>
-          <label className={cls.label}>Метки</label>
-          <input className={cls.input} placeholder="Срочно, Эксклюзив, Торг" value={tags} onChange={e => setTags(e.target.value)} />
-        </div>
+        <FormSection label="Метки (через запятую)">
+          <input className="input-field" placeholder="Срочно, Эксклюзив, Торг"
+            value={tags} onChange={e => setTags(e.target.value)} />
+        </FormSection>
 
         {/* Description */}
-        <div className={cls.section}>
-          <label className={cls.label}>Описание</label>
-          <textarea className={`${cls.input} resize-none`} rows={4} value={description} onChange={e => setDescription(e.target.value)} />
-        </div>
+        <FormSection label="Описание">
+          <textarea className="input-field resize-none" rows={4}
+            value={description} onChange={e => setDescription(e.target.value)} />
+        </FormSection>
+
       </div>
 
-      <div className="fixed bottom-0 inset-x-0 pb-[calc(1rem+env(safe-area-inset-bottom))] px-4 pt-4 bg-gradient-to-t from-[var(--bg-primary)] to-transparent">
+      <div className="fixed bottom-0 inset-x-0 px-4 pt-4"
+        style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))', background: 'linear-gradient(to top, var(--bg-primary) 60%, transparent)' }}>
         <Button className="w-full" onClick={handleSubmit} loading={updateMutation.isPending}>
           Сохранить изменения
         </Button>

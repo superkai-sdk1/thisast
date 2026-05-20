@@ -3,7 +3,7 @@
 import { use, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ChevronLeft, Share2, Trash2, Lock, Pencil } from 'lucide-react';
+import { ChevronLeft, Share2, Trash2, Lock, Pencil, MapPin, BedDouble, Maximize2, Layers } from 'lucide-react';
 import { useProperty, useDeleteProperty } from '@/lib/hooks/queries/useProperties';
 import { useRequestAccess } from '@/lib/hooks/queries/useSharing';
 import { PropertyGallery } from '@/components/organisms/PropertyGallery';
@@ -17,6 +17,12 @@ interface Props {
   params: Promise<{ id: string }>;
 }
 
+const VISIBILITY_LABELS: Record<string, { label: string; variant: 'default' | 'success' | 'warning' | 'info' }> = {
+  private: { label: 'Скрытый',   variant: 'default' },
+  shared:  { label: 'Агентский', variant: 'info' },
+  public:  { label: 'Публичный', variant: 'success' },
+};
+
 export default function PropertyDetailPage({ params }: Props) {
   const { id } = use(params);
   const router = useRouter();
@@ -28,7 +34,8 @@ export default function PropertyDetailPage({ params }: Props) {
   if (isLoading) {
     return (
       <div className="min-h-dvh flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-[var(--ios-blue)] border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 rounded-full animate-spin"
+          style={{ borderColor: 'var(--separator)', borderTopColor: 'var(--ios-blue)' }} />
       </div>
     );
   }
@@ -36,76 +43,104 @@ export default function PropertyDetailPage({ params }: Props) {
   if (!property) return null;
 
   async function handleDelete() {
-    if (!confirm('Удалить объект?')) return;
+    if (!confirm('Удалить объект? Это действие нельзя отменить.')) return;
     await deleteMutation.mutateAsync(id);
     router.back();
   }
 
+  const vis = VISIBILITY_LABELS[property.visibility_status ?? 'private'] ?? VISIBILITY_LABELS.private;
+
   const specs = [
-    property.area_sqm   && { label: 'Площадь',  value: `${property.area_sqm} м²`     },
-    property.rooms      && { label: 'Комнат',    value: String(property.rooms)         },
-    property.floor      && { label: 'Этаж',      value: String(property.floor)         },
-    property.price      && { label: 'Цена',      value: formatPrice(property.price)    },
-  ].filter(Boolean) as { label: string; value: string }[];
+    property.rooms      && { icon: BedDouble, label: 'Комнат',   value: `${property.rooms} комн.`     },
+    property.area_sqm   && { icon: Maximize2, label: 'Площадь',  value: `${property.area_sqm} м²`     },
+    (property.floor && property.total_floors) && {
+      icon: Layers, label: 'Этаж', value: `${property.floor} / ${property.total_floors}`,
+    },
+    property.price      && { icon: null, label: 'Цена',       value: formatPrice(property.price)    },
+  ].filter(Boolean) as { icon: React.ElementType | null; label: string; value: string }[];
 
   return (
-    <div className="min-h-dvh bg-[var(--bg-primary)]">
+    <div className="min-h-dvh" style={{ background: 'var(--bg-primary)' }}>
       {/* Floating back button */}
       <button
         onClick={() => router.back()}
-        className="fixed top-[calc(1rem+env(safe-area-inset-top))] left-4 z-30 w-9 h-9 rounded-full bg-black/30 flex items-center justify-center text-white"
+        className="fixed top-[calc(12px+env(safe-area-inset-top))] left-4 z-30 w-9 h-9 rounded-full flex items-center justify-center text-white press-scale"
+        style={{ background: 'rgba(0,0,0,0.38)', backdropFilter: 'blur(12px)' }}
       >
-        <ChevronLeft className="w-5 h-5" />
+        <ChevronLeft size={20} />
       </button>
 
       {/* Gallery — full bleed */}
       <PropertyGallery
         photos={property.photos ?? []}
-        className="w-full h-[55vw] min-h-56 max-h-72 rounded-none"
+        className="w-full h-[55vw] min-h-56 max-h-80 rounded-none"
       />
 
       <div className="px-4 py-5 flex flex-col gap-5">
-        {/* Price + tags */}
+        {/* Title area */}
         <div>
-          <p className="text-2xl font-bold text-[var(--label-primary)]">
-            {formatPrice(property.price)}
-          </p>
+          <div className="flex items-start justify-between gap-3 mb-1">
+            <PermissionGate permission="clientSafeInverse">
+              <p className="text-[26px] font-bold leading-tight" style={{ color: 'var(--label-primary)' }}>
+                {formatPrice(property.price)}
+              </p>
+            </PermissionGate>
+            <Badge variant={vis.variant} size="sm" className="flex-shrink-0 mt-1">{vis.label}</Badge>
+          </div>
 
-          <PermissionGate hideInSafeMode fallback={
-            <p className="text-sm text-[var(--label-secondary)] mt-1">{property.district}</p>
-          }>
-            <p className="text-sm text-[var(--label-secondary)] mt-1">
-              {[property.district, property.street, property.house_number]
-                .filter(Boolean).join(', ')}
-            </p>
+          <PermissionGate hideInSafeMode>
+            <div className="flex items-start gap-1.5 mt-1">
+              <MapPin size={13} style={{ color: 'var(--label-tertiary)', flexShrink: 0, marginTop: 2 }} />
+              <p className="text-[14px]" style={{ color: 'var(--label-secondary)' }}>
+                {[property.address_district, property.address_street, property.address_building]
+                  .filter(Boolean).join(', ') || 'Адрес не указан'}
+              </p>
+            </div>
           </PermissionGate>
 
           {property.tags && property.tags.length > 0 && (
-            <div className="flex gap-1 mt-2 flex-wrap">
+            <div className="flex gap-1 mt-3 flex-wrap">
               {property.tags.map(tag => (
-                <Badge key={tag} variant="default" className="text-xs">{tag}</Badge>
+                <span key={tag} className="text-[12px] font-semibold px-2 py-0.5 rounded-full"
+                  style={{ background: 'var(--fill-secondary)', color: 'var(--label-secondary)' }}>
+                  {tag}
+                </span>
               ))}
             </div>
           )}
         </div>
 
         {/* Specs grid */}
-        <div className="glass-card squircle-card p-4">
-          <div className="grid grid-cols-2 gap-y-3">
-            {specs.map(({ label, value }) => (
-              <div key={label}>
-                <p className="text-xs text-[var(--label-tertiary)]">{label}</p>
-                <p className="text-sm font-semibold text-[var(--label-primary)]">{value}</p>
+        {specs.length > 0 && (
+          <div
+            className="squircle-card p-4 grid grid-cols-2 gap-4"
+            style={{ background: 'var(--bg-elevated)', border: '0.5px solid var(--separator)', boxShadow: 'var(--shadow-card)' }}
+          >
+            {specs.map(({ icon: Icon, label, value }) => (
+              <div key={label} className="flex items-center gap-2.5">
+                {Icon && (
+                  <div className="w-8 h-8 rounded-[10px] flex items-center justify-center flex-shrink-0"
+                    style={{ background: 'var(--fill-tertiary)' }}>
+                    <Icon size={14} style={{ color: 'var(--label-secondary)' }} />
+                  </div>
+                )}
+                <div>
+                  <p className="text-[11px]" style={{ color: 'var(--label-tertiary)' }}>{label}</p>
+                  <p className="text-[14px] font-semibold" style={{ color: 'var(--label-primary)' }}>{value}</p>
+                </div>
               </div>
             ))}
           </div>
-        </div>
+        )}
 
         {/* Description */}
         {property.description && (
-          <div>
-            <h2 className="text-sm font-semibold text-[var(--label-primary)] mb-2">Описание</h2>
-            <p className="text-sm text-[var(--label-secondary)] leading-relaxed whitespace-pre-wrap">
+          <div
+            className="squircle-card p-4"
+            style={{ background: 'var(--bg-elevated)', border: '0.5px solid var(--separator)', boxShadow: 'var(--shadow-card)' }}
+          >
+            <p className="section-label">Описание</p>
+            <p className="text-[14px] leading-relaxed whitespace-pre-wrap" style={{ color: 'var(--label-secondary)' }}>
               {property.description}
             </p>
           </div>
@@ -114,18 +149,21 @@ export default function PropertyDetailPage({ params }: Props) {
         {/* Owner contacts */}
         <PermissionGate hideInSafeMode>
           {property.owner_id && (
-            <div className="glass-card squircle-card p-4">
-              <p className="text-xs text-[var(--label-tertiary)] mb-1">Собственник</p>
-              <p className="text-sm font-semibold text-[var(--label-primary)]">
-                Контакты скрыты — откройте карточку собственника
+            <div
+              className="squircle-card p-4"
+              style={{ background: 'var(--bg-elevated)', border: '0.5px solid var(--separator)', boxShadow: 'var(--shadow-card)' }}
+            >
+              <p className="section-label">Собственник</p>
+              <p className="text-[14px]" style={{ color: 'var(--label-secondary)' }}>
+                Откройте карточку собственника для просмотра контактов
               </p>
             </div>
           )}
         </PermissionGate>
 
         {/* Actions */}
-        <div className="flex gap-3 flex-wrap">
-          <PDFDownloadButton propertyId={id} address={property.street ?? undefined} />
+        <div className="flex flex-wrap gap-2">
+          <PDFDownloadButton propertyId={id} address={property.address_street ?? undefined} />
 
           <Button
             variant="secondary"
@@ -136,37 +174,36 @@ export default function PropertyDetailPage({ params }: Props) {
               }
             }}
           >
-            <Share2 className="w-4 h-4" />
+            <Share2 size={14} />
             Поделиться
           </Button>
 
-          {/* Request access for private/agency objects */}
           {property.visibility_status === 'private' && (
             <Button
               variant="secondary"
               size="sm"
               disabled={accessRequested || requestAccess.isPending}
+              loading={requestAccess.isPending}
               onClick={async () => {
                 await requestAccess.mutateAsync(id);
                 setAccessRequested(true);
               }}
-              loading={requestAccess.isPending}
             >
-              <Lock className="w-4 h-4" />
+              <Lock size={14} />
               {accessRequested ? 'Запрос отправлен' : 'Запросить доступ'}
             </Button>
           )}
 
           <Link href={`/properties/${id}/edit`}>
             <Button variant="secondary" size="sm">
-              <Pencil className="w-4 h-4" />
+              <Pencil size={14} />
               Изменить
             </Button>
           </Link>
 
           <PermissionGate permission="can_delete_records">
             <Button variant="destructive" size="sm" onClick={handleDelete} loading={deleteMutation.isPending}>
-              <Trash2 className="w-4 h-4" />
+              <Trash2 size={14} />
             </Button>
           </PermissionGate>
         </div>

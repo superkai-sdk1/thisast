@@ -2,15 +2,15 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Building2, Users, Handshake, Settings } from 'lucide-react';
+import { LayoutDashboard, Building2, Users, Handshake, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 
 const TABS = [
-  { href: '/dashboard',  Icon: Home,       label: 'Главная'  },
-  { href: '/properties', Icon: Building2,  label: 'Объекты'  },
-  { href: '/demand',     Icon: Users,      label: 'Клиенты'  },
-  { href: '/deals',      Icon: Handshake,  label: 'Сделки'   },
-  { href: '/settings',   Icon: Settings,   label: 'Профиль'  },
+  { href: '/dashboard',  Icon: LayoutDashboard, label: 'Главная'  },
+  { href: '/properties', Icon: Building2,        label: 'Объекты'  },
+  { href: '/demand',     Icon: Users,            label: 'Клиенты'  },
+  { href: '/deals',      Icon: Handshake,        label: 'Сделки'   },
+  { href: '/settings',   Icon: Settings,         label: 'Профиль'  },
 ] as const;
 
 export function BottomTabBar() {
@@ -19,48 +19,36 @@ export function BottomTabBar() {
   return (
     <nav
       className="fixed inset-x-0 bottom-0 z-30 glass-nav"
-      style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+      style={{ paddingBottom: 'env(safe-area-inset-bottom)', borderTop: '0.5px solid var(--separator)' }}
     >
       <div className="flex h-[56px]">
         {TABS.map(({ href, Icon, label }) => {
-          const active = pathname.startsWith(href);
+          const active = pathname === href || pathname.startsWith(href + '/');
           return (
             <Link
               key={href}
               href={href}
-              className="flex-1 flex flex-col items-center justify-center gap-[3px] relative"
+              className="flex-1 flex flex-col items-center justify-center gap-[3px] relative press-scale"
             >
-              {/* Active indicator dot */}
+              {/* Active pill indicator */}
               {active && (
                 <span
-                  className="absolute top-[9px] w-1 h-1 rounded-full"
-                  style={{ background: 'var(--ios-blue)', opacity: 0 }}
+                  className="absolute top-[6px] w-8 h-[3px] rounded-full"
+                  style={{ background: 'var(--ios-blue)', opacity: 0.9 }}
                 />
               )}
 
-              <span
-                className={cn(
-                  'flex items-center justify-center transition-all duration-150',
-                  active ? 'scale-110' : 'scale-100',
-                )}
-              >
+              <span className={cn('flex items-center justify-center mt-1 transition-all duration-150', active ? 'scale-110' : 'scale-100')}>
                 <Icon
-                  size={24}
-                  strokeWidth={active ? 2.4 : 1.7}
-                  className={cn(
-                    'transition-colors duration-150',
-                    active ? 'text-[var(--ios-blue)]' : 'text-[var(--label-tertiary)]',
-                  )}
+                  size={23}
+                  strokeWidth={active ? 2.2 : 1.6}
+                  style={{ color: active ? 'var(--ios-blue)' : 'var(--label-tertiary)', transition: 'color 0.15s' }}
                 />
               </span>
 
               <span
-                className={cn(
-                  'text-[10px] transition-all duration-150 leading-none',
-                  active
-                    ? 'font-semibold text-[var(--ios-blue)]'
-                    : 'font-medium text-[var(--label-tertiary)]',
-                )}
+                className="text-[10px] leading-none font-medium transition-all duration-150"
+                style={{ color: active ? 'var(--ios-blue)' : 'var(--label-tertiary)', fontWeight: active ? 600 : 500 }}
               >
                 {label}
               </span>

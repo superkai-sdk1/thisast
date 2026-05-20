@@ -12,70 +12,70 @@ interface KPIWidgetProps {
   className?: string;
 }
 
-const tintIconColors: Record<TintColor, string> = {
-  blue:   'text-[var(--ios-blue)]',
-  green:  'text-[var(--ios-green)]',
-  orange: 'text-[var(--ios-orange)]',
-  purple: 'text-[var(--ios-purple)]',
-  indigo: 'text-[var(--ios-indigo)]',
-  red:    'text-[var(--ios-red)]',
+const tintConfig: Record<TintColor, { icon: string; bg: string; shadow: string }> = {
+  blue:   { icon: 'var(--ios-blue)',   bg: 'rgba(0,122,255,0.12)',   shadow: '0 4px 16px rgba(0,122,255,0.18)' },
+  green:  { icon: 'var(--ios-green)',  bg: 'rgba(52,199,89,0.12)',   shadow: '0 4px 16px rgba(52,199,89,0.18)' },
+  orange: { icon: 'var(--ios-orange)', bg: 'rgba(255,149,0,0.12)',   shadow: '0 4px 16px rgba(255,149,0,0.18)' },
+  purple: { icon: 'var(--ios-purple)', bg: 'rgba(175,82,222,0.12)',  shadow: '0 4px 16px rgba(175,82,222,0.18)' },
+  indigo: { icon: 'var(--ios-indigo)', bg: 'rgba(88,86,214,0.12)',   shadow: '0 4px 16px rgba(88,86,214,0.18)' },
+  red:    { icon: 'var(--ios-red)',    bg: 'rgba(255,59,48,0.12)',   shadow: '0 4px 16px rgba(255,59,48,0.18)' },
 };
 
 export function KPIWidget({ label, value, delta, deltaLabel, icon, tint, className }: KPIWidgetProps) {
   const isPositive = delta !== undefined && delta >= 0;
+  const cfg = tint ? tintConfig[tint] : null;
 
   return (
     <div
-      className={cn(
-        'relative overflow-hidden squircle-card p-5 flex flex-col gap-2',
-        'border-[0.5px]',
-        className,
-      )}
+      className={cn('relative overflow-hidden squircle-card p-4 flex flex-col gap-3', className)}
       style={{
         background: 'var(--bg-elevated)',
-        borderColor: 'var(--separator)',
+        border: '0.5px solid var(--separator)',
         boxShadow: 'var(--shadow-card)',
       }}
     >
-      {/* Tint overlay */}
+      {/* Subtle tint background */}
       {tint && (
-        <div className={cn('absolute inset-0 pointer-events-none', `tint-${tint}`)} />
+        <div className={cn('absolute inset-0 pointer-events-none opacity-60', `tint-${tint}`)} />
       )}
 
-      <div className="relative flex items-center justify-between">
-        <span className="text-[11px] font-semibold text-[var(--label-secondary)] uppercase tracking-[0.06em]">
+      <div className="relative flex items-start justify-between gap-2">
+        <span className="text-[12px] font-semibold uppercase tracking-[0.07em]"
+          style={{ color: 'var(--label-tertiary)' }}>
           {label}
         </span>
-        {icon && (
-          <span className={cn(
-            'w-8 h-8 rounded-[10px] flex items-center justify-center',
-            tint ? tintIconColors[tint] : 'text-[var(--label-tertiary)]',
-          )}
-            style={{ background: 'var(--fill-tertiary)' }}
+        {icon && cfg && (
+          <span
+            className="w-9 h-9 rounded-[11px] flex items-center justify-center flex-shrink-0"
+            style={{ background: cfg.bg, color: cfg.icon, boxShadow: cfg.shadow }}
           >
             {icon}
           </span>
         )}
       </div>
 
-      <span className="relative text-[28px] font-bold text-[var(--label-primary)] leading-none tabular-nums tracking-tight">
+      <span
+        className="relative text-[30px] font-bold leading-none tabular-nums tracking-tight"
+        style={{ color: 'var(--label-primary)' }}
+      >
         {value}
       </span>
 
       {delta !== undefined && (
         <div className="relative flex items-center gap-1.5">
           <span
-            className={cn(
-              'text-[12px] font-semibold px-1.5 py-0.5 rounded-md',
-              isPositive
-                ? 'text-[var(--ios-green)] bg-green-500/10'
-                : 'text-[var(--ios-red)] bg-red-500/10',
-            )}
+            className="text-[12px] font-semibold px-1.5 py-[3px] rounded-[7px]"
+            style={{
+              color: isPositive ? 'var(--ios-green)' : 'var(--ios-red)',
+              background: isPositive ? 'rgba(52,199,89,0.12)' : 'rgba(255,59,48,0.12)',
+            }}
           >
             {isPositive ? '↑' : '↓'} {Math.abs(delta)}%
           </span>
           {deltaLabel && (
-            <span className="text-[11px] text-[var(--label-tertiary)]">{deltaLabel}</span>
+            <span className="text-[11px]" style={{ color: 'var(--label-tertiary)' }}>
+              {deltaLabel}
+            </span>
           )}
         </div>
       )}

@@ -7,7 +7,6 @@ import { demandsApi } from '@/lib/api/demands';
 import { demandKeys } from '@/lib/hooks/queries/useDemands';
 import { useDraftForm } from '@/lib/hooks/useDraftForm';
 import { Button } from '@/components/atoms/Button';
-import { KANBAN_STAGES } from '@crm/shared-types';
 import type { PropertyType, PaymentForm, RepairType } from '@crm/shared-types';
 
 const DRAFT_ID = 'new-demand';
@@ -60,6 +59,33 @@ function toggleArr<T>(arr: T[], item: T): T[] {
   return arr.includes(item) ? arr.filter(x => x !== item) : [...arr, item];
 }
 
+function FormSection({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="flex flex-col gap-2">
+      <span className="section-label">{label}</span>
+      {children}
+    </div>
+  );
+}
+
+function ChipGroup<T extends string | number>({
+  options, active, onToggle,
+}: { options: { value: T; label: string }[]; active: T[]; onToggle: (v: T) => void }) {
+  return (
+    <div className="flex gap-2 flex-wrap">
+      {options.map(({ value, label }) => (
+        <button
+          key={String(value)}
+          onClick={() => onToggle(value)}
+          className={`chip press-scale ${active.includes(value) ? 'chip-active' : ''}`}
+        >
+          {label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export default function NewDemandPage() {
   const router = useRouter();
   const qc = useQueryClient();
@@ -102,162 +128,116 @@ export default function NewDemandPage() {
     } as Parameters<typeof demandsApi.create>[0]);
   }
 
-  const cls = {
-    input: 'w-full px-4 py-3 rounded-[14px] bg-[var(--fill-tertiary)] text-sm text-[var(--label-primary)] placeholder:text-[var(--label-tertiary)] outline-none',
-    label: 'text-xs font-semibold text-[var(--label-tertiary)] uppercase tracking-wide',
-    section: 'flex flex-col gap-1.5',
-  };
-
-  function ChipGroup<T extends string | number>({
-    options, active, onToggle, labelFn,
-  }: { options: { value: T; label: string }[]; active: T[]; onToggle: (v: T) => void; labelFn?: (v: T) => string }) {
-    return (
-      <div className="flex gap-2 flex-wrap">
-        {options.map(({ value, label }) => (
-          <button
-            key={String(value)}
-            onClick={() => onToggle(value)}
-            className={`px-3 py-2 rounded-[12px] text-sm font-medium transition-colors ${
-              active.includes(value) ? 'bg-[var(--ios-blue)] text-white' : 'bg-[var(--fill-tertiary)] text-[var(--label-primary)]'
-            }`}
-          >
-            {labelFn ? labelFn(value) : label}
-          </button>
-        ))}
-      </div>
-    );
-  }
+  const showRooms = !values.property_type || ['apartment', 'resale', 'new_building'].includes(values.property_type);
 
   if (!restored) return null;
 
   return (
-    <div className="min-h-dvh bg-[var(--bg-primary)]">
-      <div className="glass-nav sticky top-0 z-20 pt-[env(safe-area-inset-top)]">
+    <div className="min-h-dvh" style={{ background: 'var(--bg-primary)' }}>
+      <div className="glass-nav sticky top-0 z-20" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         <div className="flex items-center justify-between h-11 px-4">
-          <button onClick={() => router.back()} className="text-[var(--ios-blue)]">
-            <ChevronLeft className="w-5 h-5" />
+          <button onClick={() => router.back()}
+            className="w-8 h-8 rounded-full flex items-center justify-center press-scale"
+            style={{ color: 'var(--ios-blue)' }}>
+            <ChevronLeft size={20} />
           </button>
-          <h1 className="text-base font-semibold text-[var(--label-primary)]">Новый клиент</h1>
+          <h1 className="text-[16px] font-semibold" style={{ color: 'var(--label-primary)' }}>Новый клиент</h1>
           <div className="w-8" />
         </div>
       </div>
 
-      <div className="px-4 py-5 flex flex-col gap-5 pb-24">
-        {/* Contacts */}
-        <div className={cls.section}>
-          <label className={cls.label}>Клиент *</label>
+      <div className="px-4 py-4 pb-32 flex flex-col gap-5">
+
+        <FormSection label="Клиент *">
           <input
-            className={cls.input}
+            className="input-field"
             placeholder="Имя клиента"
             value={values.buyer_name}
             onChange={e => set('buyer_name', e.target.value)}
           />
           <input
-            className={cls.input}
+            className="input-field"
             placeholder="+7 (999) 000-00-00"
             type="tel"
             value={values.buyer_phone}
             onChange={e => set('buyer_phone', e.target.value)}
           />
-        </div>
+        </FormSection>
 
-        {/* Property type */}
-        <div className={cls.section}>
-          <label className={cls.label}>Тип недвижимости</label>
+        <FormSection label="Тип недвижимости">
           <ChipGroup
             options={TYPE_OPTIONS}
             active={values.property_type ? [values.property_type] : []}
             onToggle={(t) => set('property_type', values.property_type === t ? '' : t as PropertyType)}
           />
-        </div>
+        </FormSection>
 
-        {/* Budget */}
-        <div className={cls.section}>
-          <label className={cls.label}>Бюджет, ₽ *</label>
+        <FormSection label="Бюджет, ₽ *">
           <div className="flex gap-2">
-            <input
-              type="number"
-              className={cls.input}
-              placeholder="от"
-              value={values.budget_min}
-              onChange={e => set('budget_min', e.target.value)}
-            />
-            <input
-              type="number"
-              className={cls.input}
-              placeholder="до"
-              value={values.budget_max}
-              onChange={e => set('budget_max', e.target.value)}
-            />
+            <input type="number" className="input-field" placeholder="от"
+              value={values.budget_min} onChange={e => set('budget_min', e.target.value)} />
+            <input type="number" className="input-field" placeholder="до"
+              value={values.budget_max} onChange={e => set('budget_max', e.target.value)} />
           </div>
-        </div>
+        </FormSection>
 
-        {/* Rooms */}
-        {(values.property_type === 'apartment' || values.property_type === 'resale' ||
-          values.property_type === 'new_building' || values.property_type === '') && (
-          <div className={cls.section}>
-            <label className={cls.label}>Комнат</label>
+        {showRooms && (
+          <FormSection label="Комнат">
             <ChipGroup
               options={[1, 2, 3, 4, 5].map(r => ({ value: r, label: r === 5 ? '5+' : String(r) }))}
               active={values.rooms}
               onToggle={(r) => set('rooms', toggleArr(values.rooms, r as number))}
             />
-          </div>
+          </FormSection>
         )}
 
-        {/* Districts */}
-        <div className={cls.section}>
-          <label className={cls.label}>Районы</label>
+        <FormSection label="Районы">
           <ChipGroup
             options={DISTRICTS.map(d => ({ value: d, label: d }))}
             active={values.districts}
             onToggle={(d) => set('districts', toggleArr(values.districts, d as string))}
           />
-        </div>
+        </FormSection>
 
-        {/* Area */}
-        <div className={cls.section}>
-          <label className={cls.label}>Площадь, м²</label>
+        <FormSection label="Площадь, м²">
           <div className="flex gap-2">
-            <input type="number" className={cls.input} placeholder="от" value={values.area_min} onChange={e => set('area_min', e.target.value)} />
-            <input type="number" className={cls.input} placeholder="до" value={values.area_max} onChange={e => set('area_max', e.target.value)} />
+            <input type="number" className="input-field" placeholder="от"
+              value={values.area_min} onChange={e => set('area_min', e.target.value)} />
+            <input type="number" className="input-field" placeholder="до"
+              value={values.area_max} onChange={e => set('area_max', e.target.value)} />
           </div>
-        </div>
+        </FormSection>
 
-        {/* Payment forms */}
-        <div className={cls.section}>
-          <label className={cls.label}>Форма оплаты</label>
+        <FormSection label="Форма оплаты">
           <ChipGroup
             options={PAYMENT_OPTIONS}
             active={values.payment_forms}
             onToggle={(p) => set('payment_forms', toggleArr(values.payment_forms, p as PaymentForm))}
           />
-        </div>
+        </FormSection>
 
-        {/* Repair types */}
-        <div className={cls.section}>
-          <label className={cls.label}>Тип ремонта</label>
+        <FormSection label="Тип ремонта">
           <ChipGroup
             options={REPAIR_OPTIONS}
             active={values.repair_types}
             onToggle={(r) => set('repair_types', toggleArr(values.repair_types, r as RepairType))}
           />
-        </div>
+        </FormSection>
 
-        {/* Notes */}
-        <div className={cls.section}>
-          <label className={cls.label}>Заметки</label>
+        <FormSection label="Заметки">
           <textarea
-            className={`${cls.input} resize-none`}
+            className="input-field resize-none"
             rows={3}
             placeholder="Пожелания клиента..."
             value={values.notes}
             onChange={e => set('notes', e.target.value)}
           />
-        </div>
+        </FormSection>
+
       </div>
 
-      <div className="fixed bottom-0 inset-x-0 pb-[calc(1rem+env(safe-area-inset-bottom))] px-4 pt-4 bg-gradient-to-t from-[var(--bg-primary)] to-transparent">
+      <div className="fixed bottom-0 inset-x-0 px-4 pt-4"
+        style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))', background: 'linear-gradient(to top, var(--bg-primary) 60%, transparent)' }}>
         <Button
           className="w-full"
           onClick={handleSubmit}
