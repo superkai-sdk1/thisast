@@ -22,7 +22,7 @@ export function AppHeader() {
 
   const segments = pathname.split('/').filter(Boolean);
   const rootPath = '/' + (segments[0] ?? '');
-  const title    = PAGE_TITLES[rootPath] ?? 'Эста CRM';
+  const title    = PAGE_TITLES[rootPath] ?? 'Nexus CRM';
   const isDetail = segments.length > 1;
 
   const initials = user?.full_name
@@ -30,9 +30,9 @@ export function AppHeader() {
     : '?';
 
   function cycleTheme() {
-    if (theme === 'dark')   setTheme('light');
-    else if (theme === 'light') setTheme('system');
-    else                    setTheme('dark');
+    if (theme === 'dark')        setTheme('light');
+    else if (theme === 'light')  setTheme('system');
+    else                         setTheme('dark');
   }
 
   const ThemeIcon = theme === 'dark' ? Sun : theme === 'light' ? Moon : Monitor;
@@ -41,7 +41,7 @@ export function AppHeader() {
     <header
       className="hidden md:flex items-center gap-3 h-[52px] px-5 flex-shrink-0 sticky top-0 z-20 glass-nav"
     >
-      {/* Back or title */}
+      {/* Back button or title */}
       <div className="flex items-center gap-2 flex-1 min-w-0">
         {isDetail && (
           <button
@@ -55,7 +55,11 @@ export function AppHeader() {
         )}
         <h1
           className="text-[15px] font-semibold truncate"
-          style={{ color: 'var(--label-primary)', letterSpacing: '-0.2px' }}
+          style={{
+            color:          'var(--label-primary)',
+            letterSpacing:  '-0.2px',
+            fontFamily:     'var(--font-heading), sans-serif',
+          }}
         >
           {title}
         </h1>
@@ -101,7 +105,7 @@ export function AppHeader() {
       {/* User avatar */}
       <div
         className="w-7 h-7 rounded-[8px] flex items-center justify-center text-[11px] font-bold text-white flex-shrink-0"
-        style={{ background: 'linear-gradient(135deg, var(--neon-blue) 0%, #7C3AED 100%)' }}
+        style={{ background: 'linear-gradient(135deg, var(--neon-blue) 0%, var(--neon-purple) 100%)' }}
         title={user?.full_name}
       >
         {initials}

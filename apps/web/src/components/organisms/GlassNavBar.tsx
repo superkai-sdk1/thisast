@@ -26,7 +26,7 @@ export function GlassNavBar({
 
   return (
     <header
-      className={cn('sticky top-0 z-20 glass-nav', !border && 'border-b-0', className)}
+      className={cn('sticky top-0 z-20 glass-nav md:hidden', !border && 'border-b-0', className)}
       style={{ paddingTop: 'env(safe-area-inset-top)' }}
     >
       <div className="relative flex items-center justify-between h-11 px-4">

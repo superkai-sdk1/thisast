@@ -19,13 +19,13 @@ export function BottomTabBar() {
     <nav
       className="md:hidden fixed z-30 glass-dock"
       style={{
-        left:         '12px',
-        right:        '12px',
-        bottom:       'max(12px, env(safe-area-inset-bottom))',
-        borderRadius: '26px',
+        left:         '16px',
+        right:        '16px',
+        bottom:       'calc(24px + env(safe-area-inset-bottom))',
+        borderRadius: '24px',
       }}
     >
-      <div className="flex h-[60px] items-center px-1">
+      <div className="flex h-[64px] items-center px-1">
         {TABS.map(({ href, Icon, label }) => {
           const active =
             pathname === href ||
@@ -37,18 +37,16 @@ export function BottomTabBar() {
               href={href}
               className="flex-1 flex flex-col items-center justify-center gap-[3px] relative press-scale py-2"
             >
-              {/* Icon */}
               <Icon
                 size={22}
                 strokeWidth={active ? 2.2 : 1.6}
                 style={{
                   color:      active ? 'var(--neon-blue)' : 'var(--label-tertiary)',
-                  filter:     active ? 'drop-shadow(0 0 5px rgba(79,117,255,0.70))' : 'none',
+                  filter:     active ? 'drop-shadow(0 0 5px rgba(99,102,241,0.70))' : 'none',
                   transition: 'color 0.15s, filter 0.15s',
                 }}
               />
 
-              {/* Label */}
               <span
                 className="text-[9.5px] leading-none font-medium"
                 style={{
@@ -59,13 +57,12 @@ export function BottomTabBar() {
                 {label}
               </span>
 
-              {/* Active neon line indicator */}
               {active && (
                 <span
                   className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-5 h-[2px] rounded-full"
                   style={{
                     background: 'var(--neon-blue)',
-                    boxShadow:  '0 0 8px var(--neon-blue), 0 0 16px rgba(79,117,255,0.55)',
+                    boxShadow:  '0 0 8px var(--neon-blue), 0 0 16px rgba(99,102,241,0.55)',
                   }}
                 />
               )}
