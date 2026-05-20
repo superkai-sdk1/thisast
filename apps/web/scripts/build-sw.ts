@@ -55,7 +55,9 @@ async function main() {
       },
     ],
 
-    // Push notification handler injected into SW
+    skipWaiting: true,
+    clientsClaim: true,
+
     additionalManifestEntries: [],
     inlineWorkboxRuntime: true,
     sourcemap: false,
