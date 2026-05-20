@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAppStore } from '@/lib/store/useAppStore';
 import { BottomTabBar } from '@/components/organisms/BottomTabBar';
 import { Sidebar } from '@/components/organisms/Sidebar';
+import { AppHeader } from '@/components/organisms/AppHeader';
 import { PushNotificationPrompt } from '@/components/organisms/PushNotificationPrompt';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
@@ -19,19 +20,19 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex min-h-dvh" style={{ background: 'var(--bg-primary)' }}>
-      {/* Desktop sidebar */}
+      {/* Desktop sidebar — narrow icon rail, expands on hover */}
       <Sidebar />
 
-      {/* Main area */}
+      {/* Main column */}
       <div className="flex-1 min-w-0 flex flex-col relative">
-        {/* Client-safe mode banner (mobile: below notch, desktop: at top of content) */}
+        {/* Desktop global header */}
+        <AppHeader />
+
+        {/* Client-safe banner */}
         {clientSafeMode && (
           <div
-            className="sticky top-0 z-40 flex items-center justify-center gap-2 py-1.5 text-white text-[12px] font-semibold"
-            style={{
-              background: 'var(--ios-orange)',
-              paddingTop: 'max(0.375rem, env(safe-area-inset-top))',
-            }}
+            className="flex items-center justify-center gap-2 py-1.5 text-white text-[12px] font-semibold"
+            style={{ background: 'var(--ios-orange)' }}
           >
             <span>👁️</span>
             <span>Режим клиента — персональные данные скрыты</span>
@@ -43,14 +44,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           className="flex-1 flex flex-col"
           style={{ paddingBottom: 'var(--tab-bar-height)' }}
         >
-          {/* Desktop: constrain content width */}
-          <div className="flex-1 md:max-w-[960px] md:w-full md:mx-auto w-full flex flex-col">
+          <div className="flex-1 md:max-w-[1024px] md:w-full md:mx-auto w-full flex flex-col">
             {children}
           </div>
         </main>
       </div>
 
-      {/* Mobile bottom tab bar */}
+      {/* Mobile floating dock */}
       <BottomTabBar />
       <PushNotificationPrompt />
     </div>
