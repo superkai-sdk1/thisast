@@ -50,7 +50,8 @@ export class ComplexesController {
     @Payload() data: { complexId: string; buffer: number[]; originalname: string; mimetype: string; isCover: boolean },
   ) {
     const buffer = Buffer.from(data.buffer);
-    const url = await this.storageService.uploadFile(buffer, data.originalname, data.mimetype);
+    const objectName = await this.storageService.upload(buffer, data.originalname, data.mimetype, 'crm-photos');
+    const url = this.storageService.getPublicUrl('crm-photos', objectName);
     return this.complexesService.addPhoto(data.complexId, url, data.isCover ?? false);
   }
 

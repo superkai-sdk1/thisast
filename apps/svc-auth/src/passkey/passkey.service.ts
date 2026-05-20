@@ -61,7 +61,7 @@ export class PasskeyService {
       rpID: RP_ID,
       userName: user.email,
       userDisplayName: user.full_name ?? user.email,
-      userID: isoBase64URL.fromBuffer(Buffer.from(userId)),
+      userID: Buffer.from(userId),
       attestationType: 'none',
       excludeCredentials: existingCreds.rows.map(c => ({
         id: c.credential_id as string,
@@ -96,7 +96,7 @@ export class PasskeyService {
       throw new UnauthorizedException('Верификация Passkey не прошла');
     }
 
-    const { credential } = verification.registrationInfo;
+    const { credential, aaguid } = verification.registrationInfo;
 
     await this.db.query(
       `INSERT INTO webauthn_credentials (user_id, credential_id, public_key, counter, device_name, aaguid)
@@ -108,7 +108,7 @@ export class PasskeyService {
         isoBase64URL.fromBuffer(credential.publicKey),
         credential.counter,
         deviceName ?? null,
-        credential.aaguid ?? null,
+        aaguid ?? null,
       ],
     );
 
