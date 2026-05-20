@@ -126,7 +126,7 @@ export default function DashboardPage() {
                   glow="rgba(99,102,241,0.42)"
                 />
                 <QuickAction
-                  href="/demand/new"
+                  href="/clients/new"
                   label="Новый клиент"
                   icon={<Users size={19} />}
                   color="var(--neon-purple)"

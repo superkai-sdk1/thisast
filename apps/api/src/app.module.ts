@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
+import { ScheduleModule } from '@nestjs/schedule';
 import { DatabaseModule } from './database/database.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
@@ -13,15 +14,18 @@ import { AuditLogModule } from './modules/audit-log/audit-log.module';
 import { StorageModule } from './modules/storage/storage.module';
 import { SearchModule } from './modules/search/search.module';
 import { PdfModule } from './modules/pdf/pdf.module';
+import { TasksModule } from './modules/tasks/tasks.module';
+import { AnalyticsModule } from './modules/analytics/analytics.module';
 
 @Module({
   imports: [
-    // Queue infrastructure (shared)
+    // Queue & schedule infrastructure
     BullModule.forRoot({
       connection: {
         url: process.env.REDIS_URL ?? 'redis://localhost:6379',
       },
     }),
+    ScheduleModule.forRoot(),
 
     // Core
     DatabaseModule,
@@ -39,6 +43,8 @@ import { PdfModule } from './modules/pdf/pdf.module';
     DealsModule,
     MatchingModule,
     NotificationsModule,
+    TasksModule,
+    AnalyticsModule,
   ],
 })
 export class AppModule {}

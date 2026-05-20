@@ -14,8 +14,25 @@ export class DemandsController {
   constructor(private demandsService: DemandsService) {}
 
   @Get()
-  findAll(@CurrentUser() actor: JwtPayload, @Query('status') status?: string) {
-    return this.demandsService.findAll(actor, status);
+  findAll(
+    @CurrentUser() actor: JwtPayload,
+    @Query('status') status?: string,
+    @Query('client_type') client_type?: string,
+    @Query('temperature') temperature?: string,
+    @Query('is_active') is_active?: string,
+    @Query('property_type') property_type?: string,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+  ) {
+    return this.demandsService.findAll(actor, {
+      kanban_status: status,
+      client_type,
+      temperature,
+      is_active: is_active === 'true' ? true : is_active === 'false' ? false : undefined,
+      property_type,
+      page,
+      limit,
+    });
   }
 
   @Get(':id')
@@ -61,5 +78,10 @@ export class DemandsController {
     @CurrentUser() actor: JwtPayload,
   ) {
     return this.demandsService.addActivity(id, type, body, actor);
+  }
+
+  @Get(':id/events')
+  getEvents(@Param('id') id: string) {
+    return this.demandsService.getEvents(id);
   }
 }

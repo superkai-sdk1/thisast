@@ -2,13 +2,13 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Building2, Building, Users, Handshake, Settings } from 'lucide-react';
+import { LayoutDashboard, Building2, Building, Users, Handshake, Settings, ClipboardList } from 'lucide-react';
 
 const TABS = [
   { href: '/dashboard',  Icon: LayoutDashboard, label: 'Главная'  },
   { href: '/properties', Icon: Building2,        label: 'Объекты'  },
-  { href: '/complexes',  Icon: Building,         label: 'ЖК'       },
-  { href: '/demand',     Icon: Users,            label: 'Клиенты'  },
+  { href: '/clients',    Icon: Users,            label: 'Клиенты'  },
+  { href: '/tasks',      Icon: ClipboardList,    label: 'Задачи'   },
   { href: '/deals',      Icon: Handshake,        label: 'Сделки'   },
   { href: '/settings',   Icon: Settings,         label: 'Профиль'  },
 ] as const;

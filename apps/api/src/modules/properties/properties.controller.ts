@@ -27,18 +27,40 @@ export class PropertiesController {
   findAll(
     @Query('type') type?: string,
     @Query('base') base?: 'own' | 'global' | 'agency',
+    @Query('status') status?: string,
+    @Query('listing_type') listing_type?: string,
     @Query('price_min') price_min?: number,
     @Query('price_max') price_max?: number,
     @Query('district') district?: string,
     @Query('rooms') rooms?: number[],
     @Query('area_min') area_min?: number,
     @Query('area_max') area_max?: number,
+    @Query('renovation') renovation?: string,
+    @Query('has_loggia') has_loggia?: string,
+    @Query('has_balcony') has_balcony?: string,
+    @Query('has_wardrobe') has_wardrobe?: string,
+    @Query('has_panoramic') has_panoramic?: string,
+    @Query('from_realtor') from_realtor?: string,
+    @Query('display_id') display_id?: string,
+    @Query('complex_id') complex_id?: string,
     @Query('page') page?: number,
     @Query('limit') limit?: number,
     @CurrentUser() actor?: JwtPayload,
   ) {
     return this.propertiesService.findAll(
-      { type, base, price_min, price_max, district, rooms, area_min, area_max, page, limit },
+      {
+        type, base, status, listing_type,
+        price_min, price_max, district, rooms, area_min, area_max,
+        renovation,
+        has_loggia:    has_loggia === 'true'    ? true : undefined,
+        has_balcony:   has_balcony === 'true'   ? true : undefined,
+        has_wardrobe:  has_wardrobe === 'true'  ? true : undefined,
+        has_panoramic: has_panoramic === 'true' ? true : undefined,
+        from_realtor:  from_realtor === 'true'  ? true : undefined,
+        display_id:    display_id ? Number(display_id) : undefined,
+        complex_id,
+        page, limit,
+      },
       actor!,
     );
   }
@@ -75,6 +97,12 @@ export class PropertiesController {
   @Get(':id/matches')
   getMatches(@Param('id') id: string, @Query('limit') limit?: number) {
     return this.propertiesService.getMatches(id, limit);
+  }
+
+  @Get(':id/events')
+  getEvents(@Param('id') id: string, @CurrentUser() actor: JwtPayload) {
+    void actor;
+    return this.propertiesService.getEvents(id);
   }
 
   @Get(':id/pdf')

@@ -8,6 +8,8 @@ const MIGRATION_FILES = [
   '001_extensions.sql',
   '002_initial_schema.sql',
   '003_matching_functions.sql',
+  '005_complexes_passkey.sql',
+  '007_tz_full.sql',
 ];
 
 export async function runMigrations() {

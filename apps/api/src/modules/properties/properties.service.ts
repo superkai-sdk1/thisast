@@ -15,12 +15,22 @@ interface PropertyFilter {
   type?: string;
   visibility?: string;
   base?: 'own' | 'global' | 'agency';
+  status?: string;
+  listing_type?: string;
   price_min?: number;
   price_max?: number;
   district?: string;
   rooms?: number[];
   area_min?: number;
   area_max?: number;
+  renovation?: string;
+  has_loggia?: boolean;
+  has_balcony?: boolean;
+  has_wardrobe?: boolean;
+  has_panoramic?: boolean;
+  from_realtor?: boolean;
+  display_id?: number;
+  complex_id?: string;
   q?: string;
   page?: number;
   limit?: number;
@@ -61,6 +71,8 @@ export class PropertiesService {
       whereClause += ` AND p.property_type = $${idx++}`;
       params.push(filter.type);
     }
+    if (filter.status) { whereClause += ` AND p.status = $${idx++}`; params.push(filter.status); }
+    if (filter.listing_type) { whereClause += ` AND p.listing_type = $${idx++}`; params.push(filter.listing_type); }
     if (filter.price_min) { whereClause += ` AND p.price >= $${idx++}`; params.push(filter.price_min); }
     if (filter.price_max) { whereClause += ` AND p.price <= $${idx++}`; params.push(filter.price_max); }
     if (filter.district) { whereClause += ` AND p.district = $${idx++}`; params.push(filter.district); }
@@ -70,6 +82,14 @@ export class PropertiesService {
       whereClause += ` AND p.rooms = ANY($${idx++}::smallint[])`;
       params.push(filter.rooms);
     }
+    if (filter.renovation) { whereClause += ` AND p.renovation = $${idx++}`; params.push(filter.renovation); }
+    if (filter.has_loggia)    { whereClause += ` AND p.has_loggia = TRUE`; }
+    if (filter.has_balcony)   { whereClause += ` AND p.has_balcony = TRUE`; }
+    if (filter.has_wardrobe)  { whereClause += ` AND p.has_wardrobe = TRUE`; }
+    if (filter.has_panoramic) { whereClause += ` AND p.has_panoramic = TRUE`; }
+    if (filter.from_realtor)  { whereClause += ` AND p.from_realtor = TRUE`; }
+    if (filter.complex_id) { whereClause += ` AND p.complex_id = $${idx++}`; params.push(filter.complex_id); }
+    if (filter.display_id) { whereClause += ` AND p.display_id = $${idx++}`; params.push(filter.display_id); }
 
     const [rows, count] = await Promise.all([
       this.db.query(
@@ -118,43 +138,92 @@ export class PropertiesService {
     const result = await this.db.query(
       `INSERT INTO properties (
          owner_agent_id, owner_id, visibility_status, property_type,
+         status, listing_type,
          city, district, street, house_number, apartment_number,
-         price, area_sqm, rooms, floor, floor_total, ceiling_height,
-         conditions, tags, description
-       ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18)
-       RETURNING *`,
+         price, net_price, agent_commission, commission_type,
+         area_sqm, rooms, floor, floor_total, ceiling_height,
+         subtype, building_status, delivery_year, delivery_quarter,
+         kitchen_area, living_area, bathroom_type, room_type,
+         windows, renovation, warm_floor, furniture,
+         has_loggia, has_balcony, has_wardrobe, has_panoramic,
+         plot_area, second_house_area, house_floors, utilities, cadastral_number,
+         from_realtor, conditions, tags, description, complex_id,
+         created_at_manual, updated_at_manual
+       ) VALUES (
+         $1,$2,$3,$4,
+         $5,$6,
+         $7,$8,$9,$10,$11,
+         $12,$13,$14,$15,
+         $16,$17,$18,$19,$20,
+         $21,$22,$23,$24,
+         $25,$26,$27,$28,
+         $29,$30,$31,$32,
+         $33,$34,$35,$36,
+         $37,$38,$39,$40,$41,
+         $42,$43,$44,$45,$46,
+         $47,$48
+       ) RETURNING *`,
       [
         actor.sub,
         dto.owner_id ?? null,
         dto.visibility_status ?? 'private',
         dto.property_type,
+        dto.status ?? 'active',
+        dto.listing_type ?? 'sale',
         dto.city,
         dto.district ?? null,
         dto.street ?? null,
         dto.house_number ?? null,
         dto.apartment_number ?? null,
         dto.price,
+        dto.net_price ?? null,
+        dto.agent_commission ?? null,
+        dto.commission_type ?? 'fixed',
         dto.area_sqm ?? null,
         dto.rooms ?? null,
         dto.floor ?? null,
         dto.floor_total ?? null,
         dto.ceiling_height ?? null,
+        dto.subtype ?? null,
+        dto.building_status ?? null,
+        dto.delivery_year ?? null,
+        dto.delivery_quarter ?? null,
+        dto.kitchen_area ?? null,
+        dto.living_area ?? null,
+        dto.bathroom_type ?? null,
+        dto.room_type ?? null,
+        dto.windows ?? [],
+        dto.renovation ?? null,
+        dto.warm_floor ?? false,
+        dto.furniture ?? [],
+        dto.has_loggia ?? false,
+        dto.has_balcony ?? false,
+        dto.has_wardrobe ?? false,
+        dto.has_panoramic ?? false,
+        dto.plot_area ?? null,
+        dto.second_house_area ?? null,
+        dto.house_floors ?? null,
+        dto.utilities ?? [],
+        dto.cadastral_number ?? null,
+        dto.from_realtor ?? false,
         dto.conditions ?? [],
         dto.tags ?? [],
         dto.description ?? null,
+        dto.complex_id ?? null,
+        dto.created_at_manual ?? null,
+        dto.updated_at_manual ?? null,
       ],
     );
     const property = result.rows[0];
 
-    // Sync to Meilisearch
     await this.searchService.indexProperty(property).catch(console.error);
 
-    // Trigger matching for shared/public properties
     if (['shared', 'public'].includes(property.visibility_status)) {
       await this.matchingQueue.add('RECALC_PROPERTY', { propertyId: property.id });
     }
 
     await this.auditLog.log({ actor_id: actor.sub, action_type: AuditAction.CREATE_RECORD, target_type: 'property', target_id: property.id });
+    await this.writeEvent(property.id, 'created', actor.sub, 'Объект создан');
     return property;
   }
 
@@ -166,13 +235,20 @@ export class PropertiesService {
     }
 
     const oldPrice = property.price;
+    const oldStatus = property.status;
     const fields: string[] = [];
     const params: unknown[] = [];
     let idx = 1;
 
     const updatable: (keyof CreatePropertyDto)[] = [
-      'price', 'area_sqm', 'rooms', 'floor', 'floor_total', 'description',
+      'price', 'net_price', 'agent_commission', 'commission_type',
+      'area_sqm', 'rooms', 'floor', 'floor_total', 'ceiling_height', 'description',
       'district', 'street', 'house_number', 'conditions', 'tags', 'visibility_status',
+      'status', 'listing_type', 'subtype', 'building_status', 'delivery_year', 'delivery_quarter',
+      'kitchen_area', 'living_area', 'bathroom_type', 'room_type', 'windows', 'renovation',
+      'warm_floor', 'furniture', 'has_loggia', 'has_balcony', 'has_wardrobe', 'has_panoramic',
+      'plot_area', 'second_house_area', 'house_floors', 'utilities', 'cadastral_number',
+      'from_realtor', 'complex_id', 'created_at_manual', 'updated_at_manual',
     ];
 
     for (const key of updatable) {
@@ -194,7 +270,43 @@ export class PropertiesService {
     await this.searchService.indexProperty(updated).catch(console.error);
     await this.auditLog.log({ actor_id: actor.sub, action_type: AuditAction.UPDATE_RECORD, target_type: 'property', target_id: id, metadata: { old_price: oldPrice, new_price: updated.price } });
 
+    if (dto.status && dto.status !== oldStatus) {
+      await this.writeEvent(id, 'status_changed', actor.sub, `Статус: ${oldStatus} → ${dto.status}`, String(oldStatus), String(dto.status));
+    } else if (dto.price && Number(dto.price) !== Number(oldPrice)) {
+      await this.writeEvent(id, 'price_changed', actor.sub, `Цена: ${oldPrice} → ${dto.price}`, String(oldPrice), String(dto.price));
+    } else {
+      await this.writeEvent(id, 'updated', actor.sub, 'Объект обновлён');
+    }
+
     return updated;
+  }
+
+  async getEvents(propertyId: string) {
+    const result = await this.db.query(
+      `SELECT ee.*, u.full_name AS user_name
+       FROM entity_events ee
+       LEFT JOIN users u ON u.id = ee.user_id
+       WHERE ee.entity_type = 'property' AND ee.entity_id = $1
+       ORDER BY ee.created_at DESC
+       LIMIT 100`,
+      [propertyId],
+    );
+    return result.rows;
+  }
+
+  private async writeEvent(
+    propertyId: string,
+    eventType: string,
+    userId: string,
+    description: string,
+    oldValue?: string,
+    newValue?: string,
+  ) {
+    await this.db.query(
+      `INSERT INTO entity_events (entity_type, entity_id, event_type, user_id, description, old_value, new_value)
+       VALUES ('property', $1, $2, $3, $4, $5, $6)`,
+      [propertyId, eventType, userId, description, oldValue ?? null, newValue ?? null],
+    ).catch(() => null);
   }
 
   async updateVisibility(id: string, visibility: string, actor: JwtPayload) {

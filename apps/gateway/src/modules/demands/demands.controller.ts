@@ -59,4 +59,9 @@ export class DemandsController {
       this.client.send(P.MSG_DEMANDS_ADD_ACTIVITY, { id, type: body.type, body: body.body, actor: user }),
     );
   }
+
+  @Get(':id/events')
+  getEvents(@Param('id') id: string) {
+    return firstValueFrom(this.client.send(P.MSG_DEMANDS_GET_EVENTS, { demandId: id }));
+  }
 }

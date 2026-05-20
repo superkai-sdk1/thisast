@@ -80,6 +80,32 @@ export const MSG_COMPLEXES_DELETE       = 'complexes:delete';
 export const MSG_COMPLEXES_PHOTO_UPLOAD = 'complexes:photoUpload';
 export const MSG_COMPLEXES_PHOTO_DELETE = 'complexes:photoDelete';
 
+// ── Tasks (part of svc-demands) ──────────────────────────────────────────────
+export const MSG_TASKS_LIST         = 'tasks:list';
+export const MSG_TASKS_FIND_ONE     = 'tasks:findOne';
+export const MSG_TASKS_CREATE       = 'tasks:create';
+export const MSG_TASKS_UPDATE       = 'tasks:update';
+export const MSG_TASKS_DELETE       = 'tasks:delete';
+export const MSG_TASKS_GET_COMMENTS = 'tasks:getComments';
+export const MSG_TASKS_ADD_COMMENT  = 'tasks:addComment';
+
+// ── Analytics (part of svc-demands) ──────────────────────────────────────────
+export const MSG_ANALYTICS_DASHBOARD = 'analytics:dashboard';
+export const MSG_ANALYTICS_REPORTS   = 'analytics:reports';
+
+// ── Complex Apartments & Documents (part of svc-properties) ──────────────────
+export const MSG_COMPLEXES_APARTMENT_LIST   = 'complexes:apartment.list';
+export const MSG_COMPLEXES_APARTMENT_CREATE = 'complexes:apartment.create';
+export const MSG_COMPLEXES_APARTMENT_UPDATE = 'complexes:apartment.update';
+export const MSG_COMPLEXES_APARTMENT_DELETE = 'complexes:apartment.delete';
+export const MSG_COMPLEXES_DOCUMENT_LIST    = 'complexes:document.list';
+export const MSG_COMPLEXES_DOCUMENT_UPLOAD  = 'complexes:document.upload';
+export const MSG_COMPLEXES_DOCUMENT_DELETE  = 'complexes:document.delete';
+
+// ── Entity Events ─────────────────────────────────────────────────────────────
+export const MSG_PROPS_GET_EVENTS   = 'properties:getEvents';
+export const MSG_DEMANDS_GET_EVENTS = 'demands:getEvents';
+
 // ── WebAuthn / Passkey (part of svc-auth) ────────────────────────────────────
 export const MSG_PASSKEY_REG_OPTIONS  = 'passkey:regOptions';
 export const MSG_PASSKEY_REG_VERIFY   = 'passkey:regVerify';

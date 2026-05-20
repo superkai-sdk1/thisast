@@ -11,6 +11,8 @@ import { DealsModule }        from './modules/deals/deals.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { AdminModule }        from './modules/admin/admin.module';
 import { ComplexesModule }    from './modules/complexes/complexes.module';
+import { TasksModule }        from './modules/tasks/tasks.module';
+import { AnalyticsModule }    from './modules/analytics/analytics.module';
 
 @Module({
   imports: [
@@ -29,6 +31,8 @@ import { ComplexesModule }    from './modules/complexes/complexes.module';
     NotificationsModule,
     AdminModule,
     ComplexesModule,
+    TasksModule,
+    AnalyticsModule,
   ],
 })
 export class AppModule {}

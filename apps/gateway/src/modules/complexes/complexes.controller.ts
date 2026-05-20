@@ -66,4 +66,53 @@ export class ComplexesController {
   deletePhoto(@Param('photoId') photoId: string) {
     return firstValueFrom(this.client.send(P.MSG_COMPLEXES_PHOTO_DELETE, { photoId }));
   }
+
+  @Get(':id/apartments')
+  getApartments(@Param('id') complexId: string) {
+    return firstValueFrom(this.client.send(P.MSG_COMPLEXES_APARTMENT_LIST, { complexId }));
+  }
+
+  @Post(':id/apartments')
+  createApartment(@Param('id') complexId: string, @Body() dto: Record<string, unknown>) {
+    return firstValueFrom(this.client.send(P.MSG_COMPLEXES_APARTMENT_CREATE, { complexId, dto }));
+  }
+
+  @Patch('apartments/:apartmentId')
+  updateApartment(@Param('apartmentId') id: string, @Body() dto: Record<string, unknown>) {
+    return firstValueFrom(this.client.send(P.MSG_COMPLEXES_APARTMENT_UPDATE, { id, dto }));
+  }
+
+  @Delete('apartments/:apartmentId')
+  deleteApartment(@Param('apartmentId') id: string) {
+    return firstValueFrom(this.client.send(P.MSG_COMPLEXES_APARTMENT_DELETE, { id }));
+  }
+
+  @Get(':id/documents')
+  getDocuments(@Param('id') complexId: string) {
+    return firstValueFrom(this.client.send(P.MSG_COMPLEXES_DOCUMENT_LIST, { complexId }));
+  }
+
+  @Post(':id/documents')
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadDocument(
+    @Param('id') complexId: string,
+    @UploadedFile() file: Express.Multer.File,
+    @Body('name') name: string,
+  ) {
+    return firstValueFrom(
+      this.client.send(P.MSG_COMPLEXES_DOCUMENT_UPLOAD, {
+        complexId,
+        buffer: Array.from(file.buffer),
+        originalname: file.originalname,
+        mimetype: file.mimetype,
+        name: name ?? file.originalname,
+      }),
+    );
+  }
+
+  @Delete('documents/:documentId')
+  deleteDocument(@Param('documentId') id: string) {
+    return firstValueFrom(this.client.send(P.MSG_COMPLEXES_DOCUMENT_DELETE, { id }));
+  }
 }

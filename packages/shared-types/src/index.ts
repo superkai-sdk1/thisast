@@ -5,5 +5,6 @@ export * from './entities/demand';
 export * from './entities/deal';
 export * from './entities/owner';
 export * from './entities/notification';
+export * from './entities/task';
 export * from './dtos/pagination';
 export * from './microservices/patterns';
