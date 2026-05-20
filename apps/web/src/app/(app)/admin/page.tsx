@@ -165,15 +165,15 @@ function PermissionsSheet({ user, onClose }: { user: User; onClose: () => void }
               <p className="text-[12px] mt-0.5" style={{ color: 'var(--label-secondary)' }}>{desc}</p>
             </div>
             <button
-              onClick={() => setFlags(f => ({ ...f, [key]: !(f as Record<string, boolean>)[key] }))}
+              onClick={() => setFlags(f => ({ ...f, [key]: !(f as unknown as Record<string, boolean>)[key] }))}
               className="relative w-[51px] h-[31px] rounded-full flex-shrink-0 transition-colors duration-200"
-              style={{ background: (flags as Record<string, boolean>)[key] ? 'var(--ios-blue)' : 'var(--fill-primary)' }}
+              style={{ background: (flags as unknown as Record<string, boolean>)[key] ? 'var(--ios-blue)' : 'var(--fill-primary)' }}
             >
               <span
                 className="absolute top-[3px] w-[25px] h-[25px] rounded-full bg-white transition-transform duration-200"
                 style={{
                   left: '3px',
-                  transform: (flags as Record<string, boolean>)[key] ? 'translateX(20px)' : 'translateX(0)',
+                  transform: (flags as unknown as Record<string, boolean>)[key] ? 'translateX(20px)' : 'translateX(0)',
                   boxShadow: '0 1px 4px rgba(0,0,0,0.22)',
                 }}
               />
