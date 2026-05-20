@@ -12,7 +12,7 @@ import type { Deal } from '@crm/shared-types';
 
 export default function DealsPage() {
   const { data: summary } = useDealsSummary();
-  const { data: deals = [] } = useDeals();
+  const { data: deals = [], isLoading } = useDeals();
 
   const closed     = deals.filter(d => d.status === 'closed');
   const inProgress = deals.filter(d => d.status === 'in_progress');
@@ -78,7 +78,14 @@ export default function DealsPage() {
             </section>
           )}
 
-          {deals.length === 0 && (
+          {isLoading && (
+            <div className="flex items-center justify-center py-16">
+              <div className="w-8 h-8 border-2 rounded-full animate-spin"
+                style={{ borderColor: 'var(--separator)', borderTopColor: 'var(--ios-blue)' }} />
+            </div>
+          )}
+
+          {!isLoading && deals.length === 0 && (
             <div className="flex flex-col items-center gap-3 py-16">
               <div className="w-16 h-16 rounded-[20px] flex items-center justify-center"
                 style={{ background: 'var(--fill-tertiary)' }}>

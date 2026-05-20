@@ -62,6 +62,13 @@ export default function NewDealPage() {
 
   async function handleSubmit() {
     if (!dealPrice) return;
+    const validSplits = splits
+      .filter(s => s.partner_name.trim() && Number(s.split_amount) > 0)
+      .map(s => ({
+        partner_name: s.partner_name.trim(),
+        split_amount: Number(s.split_amount),
+        split_percent: s.split_percent ? Number(s.split_percent) : null,
+      }));
     await createDeal.mutateAsync({
       is_external_property: isExternal,
       external_address: isExternal ? externalAddress : undefined,
@@ -70,6 +77,7 @@ export default function NewDealPage() {
       payment_form: paymentForm || undefined,
       notes: notes || undefined,
       status: 'in_progress',
+      commission_splits: validSplits.length > 0 ? validSplits : undefined,
     } as Parameters<typeof createDeal.mutateAsync>[0]);
     router.back();
   }

@@ -45,7 +45,7 @@ export default function DemandPage() {
   const [view, setView] = useState<ViewMode>('list');
   const [filterOpen, setFilterOpen] = useState(false);
   const [filter, setFilter] = useState<DemandFilter>({});
-  const { data: demands = [] } = useDemands(filter);
+  const { data: demands = [], isLoading } = useDemands(filter);
 
   const hasActiveFilters = Object.values(filter).some(v =>
     v !== undefined && (Array.isArray(v) ? v.length > 0 : true),
@@ -81,9 +81,9 @@ export default function DemandPage() {
 
       <div className="gradient-mesh min-h-full">
         {view === 'list' ? (
-          <DemandList demands={demands} />
+          <DemandList demands={demands} isLoading={isLoading} />
         ) : (
-          <DemandKanban demands={demands} />
+          <DemandKanban demands={demands} isLoading={isLoading} />
         )}
       </div>
 
@@ -102,7 +102,15 @@ export default function DemandPage() {
   );
 }
 
-function DemandList({ demands }: { demands: Demand[] }) {
+function DemandList({ demands, isLoading }: { demands: Demand[]; isLoading?: boolean }) {
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-16">
+        <div className="w-8 h-8 border-2 rounded-full animate-spin"
+          style={{ borderColor: 'var(--separator)', borderTopColor: 'var(--ios-blue)' }} />
+      </div>
+    );
+  }
   if (demands.length === 0) {
     return (
       <div className="flex flex-col items-center gap-3 py-16 px-4">
@@ -182,7 +190,7 @@ function DemandCard({ demand }: { demand: Demand }) {
   );
 }
 
-function DemandKanban({ demands }: { demands: Demand[] }) {
+function DemandKanban({ demands, isLoading }: { demands: Demand[]; isLoading?: boolean }) {
   const updateStatus = useUpdateDemandStatus();
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
 
@@ -192,6 +200,15 @@ function DemandKanban({ demands }: { demands: Demand[] }) {
     const demand = demands.find(d => d.id === active.id);
     if (!demand) return;
     updateStatus.mutate({ id: demand.id, status: over.id as string });
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-16">
+        <div className="w-8 h-8 border-2 rounded-full animate-spin"
+          style={{ borderColor: 'var(--separator)', borderTopColor: 'var(--ios-blue)' }} />
+      </div>
+    );
   }
 
   return (

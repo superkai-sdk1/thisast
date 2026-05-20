@@ -3,6 +3,12 @@ import type { Pool } from 'pg';
 import { InjectDb } from '@crm/shared-core';
 import type { JwtPayload } from '@crm/shared-core';
 
+interface SplitDto {
+  partner_name: string;
+  split_amount: number;
+  split_percent?: number | null;
+}
+
 interface CreateDealDto {
   demand_id?: string;
   property_id?: string;
@@ -14,6 +20,7 @@ interface CreateDealDto {
   my_commission?: number;
   payment_form?: string;
   notes?: string;
+  commission_splits?: SplitDto[];
 }
 
 const Role = {
@@ -81,7 +88,20 @@ export class DealsService {
         dto.notes ?? null,
       ],
     );
-    return result.rows[0];
+    const deal = result.rows[0];
+
+    if (dto.commission_splits?.length) {
+      for (const s of dto.commission_splits) {
+        if (!s.partner_name || !s.split_amount) continue;
+        await this.db.query(
+          `INSERT INTO commission_splits (deal_id, partner_name, split_amount, split_percent)
+           VALUES ($1, $2, $3, $4)`,
+          [deal.id, s.partner_name, s.split_amount, s.split_percent ?? null],
+        );
+      }
+    }
+
+    return deal;
   }
 
   async update(id: string, dto: Record<string, unknown>, actor: JwtPayload) {

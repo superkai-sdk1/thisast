@@ -30,6 +30,7 @@ export default function PropertyDetailPage({ params }: Props) {
   const deleteMutation = useDeleteProperty();
   const requestAccess = useRequestAccess();
   const [accessRequested, setAccessRequested] = useState(false);
+  const [accessError, setAccessError] = useState(false);
 
   if (isLoading) {
     return (
@@ -182,15 +183,19 @@ export default function PropertyDetailPage({ params }: Props) {
             <Button
               variant="secondary"
               size="sm"
-              disabled={accessRequested || requestAccess.isPending}
+              disabled={accessRequested || accessError || requestAccess.isPending}
               loading={requestAccess.isPending}
               onClick={async () => {
-                await requestAccess.mutateAsync(id);
-                setAccessRequested(true);
+                try {
+                  await requestAccess.mutateAsync(id);
+                  setAccessRequested(true);
+                } catch {
+                  setAccessError(true);
+                }
               }}
             >
               <Lock size={14} />
-              {accessRequested ? 'Запрос отправлен' : 'Запросить доступ'}
+              {accessError ? 'Недоступно' : accessRequested ? 'Запрос отправлен' : 'Запросить доступ'}
             </Button>
           )}
 
