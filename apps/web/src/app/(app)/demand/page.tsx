@@ -169,22 +169,27 @@ function DemandCard({ demand }: { demand: Demand }) {
         </div>
 
         {/* Tags row */}
-        {((demand.districts && demand.districts.length > 0) || (demand.payment_forms && demand.payment_forms.length > 0)) && (
-          <div className="flex gap-1 flex-wrap">
-            {demand.districts?.slice(0, 2).map(d => (
-              <span key={d} className="text-[11px] px-2 py-0.5 rounded-full font-medium"
-                style={{ background: 'var(--fill-tertiary)', color: 'var(--label-secondary)' }}>
-                {d}
-              </span>
-            ))}
-            {demand.payment_forms?.slice(0, 2).map(p => (
-              <span key={p} className="text-[11px] px-2 py-0.5 rounded-full font-medium"
-                style={{ background: 'rgba(0,122,255,0.10)', color: 'var(--ios-blue)' }}>
-                {PAYMENT_LABELS[p] ?? p}
-              </span>
-            ))}
-          </div>
-        )}
+        {(() => {
+          const districts = Array.isArray(demand.districts) ? demand.districts : [];
+          const paymentForms = Array.isArray(demand.payment_forms) ? demand.payment_forms : [];
+          if (districts.length === 0 && paymentForms.length === 0) return null;
+          return (
+            <div className="flex gap-1 flex-wrap">
+              {districts.slice(0, 2).map(d => (
+                <span key={d} className="text-[11px] px-2 py-0.5 rounded-full font-medium"
+                  style={{ background: 'var(--fill-tertiary)', color: 'var(--label-secondary)' }}>
+                  {d}
+                </span>
+              ))}
+              {paymentForms.slice(0, 2).map(p => (
+                <span key={p} className="text-[11px] px-2 py-0.5 rounded-full font-medium"
+                  style={{ background: 'rgba(0,122,255,0.10)', color: 'var(--ios-blue)' }}>
+                  {PAYMENT_LABELS[p] ?? p}
+                </span>
+              ))}
+            </div>
+          );
+        })()}
       </div>
     </article>
   );
@@ -252,12 +257,12 @@ function DemandKanban({ demands, isLoading }: { demands: Demand[]; isLoading?: b
                         <p className="text-[12px] mt-1" style={{ color: 'var(--label-secondary)' }}>
                           до {formatPrice(demand.budget_max)}
                         </p>
-                        {demand.districts && demand.districts.length > 0 && (
+                        {Array.isArray(demand.districts) && demand.districts.length > 0 && (
                           <p className="text-[11px] mt-1 truncate" style={{ color: 'var(--label-tertiary)' }}>
                             {demand.districts.join(', ')}
                           </p>
                         )}
-                        {demand.payment_forms && demand.payment_forms.length > 0 && (
+                        {Array.isArray(demand.payment_forms) && demand.payment_forms.length > 0 && (
                           <div className="flex gap-1 flex-wrap mt-1.5">
                             {demand.payment_forms.slice(0, 2).map(p => (
                               <span key={p} className="text-[10px] px-1.5 py-0.5 rounded-full font-medium"

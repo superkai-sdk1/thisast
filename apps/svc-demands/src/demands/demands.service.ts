@@ -12,11 +12,19 @@ const Role = {
   SUPERADMIN: 'superadmin',
 } as const;
 
+function parsePostgresArray(val: unknown): unknown[] {
+  if (Array.isArray(val)) return val;
+  if (typeof val === 'string') {
+    if (val === '{}' || val === '') return [];
+    return val.replace(/^{|}$/g, '').split(',').map(s => s.trim()).filter(Boolean);
+  }
+  return [];
+}
+
 function parseDemandRow(row: Record<string, unknown>): Record<string, unknown> {
-  for (const key of ['repair_types', 'payment_forms', 'internal_tags']) {
-    const val = row[key];
-    if (typeof val === 'string') {
-      row[key] = val === '{}' ? [] : val.slice(1, -1).split(',').filter(Boolean);
+  for (const key of ['repair_types', 'payment_forms', 'internal_tags', 'districts', 'rooms']) {
+    if (row[key] !== undefined) {
+      row[key] = parsePostgresArray(row[key]);
     }
   }
   return row;
