@@ -80,7 +80,7 @@ export default function PropertyDetailPage({ params }: Props) {
         {/* Title area */}
         <div>
           <div className="flex items-start justify-between gap-3 mb-1">
-            <PermissionGate permission="clientSafeInverse">
+            <PermissionGate hideInSafeMode>
               <p className="text-[26px] font-bold leading-tight" style={{ color: 'var(--label-primary)' }}>
                 {formatPrice(property.price)}
               </p>

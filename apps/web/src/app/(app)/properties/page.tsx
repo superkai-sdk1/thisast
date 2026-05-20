@@ -151,7 +151,7 @@ function PropertyCard({ property: p }: { property: Property }) {
 
           {/* Price badge */}
           <div className="absolute bottom-3 left-3">
-            <PermissionGate permission="clientSafeInverse">
+            <PermissionGate hideInSafeMode>
               <span className="text-white font-bold text-[17px] tracking-tight" style={{ textShadow: '0 1px 4px rgba(0,0,0,0.4)' }}>
                 {formatPrice(p.price)}
               </span>
@@ -178,7 +178,7 @@ function PropertyCard({ property: p }: { property: Property }) {
 
         {/* Info */}
         <div className="p-4 flex flex-col gap-2">
-          <PermissionGate permission="clientSafeInverse">
+          <PermissionGate hideInSafeMode>
             <p className="text-[15px] font-semibold leading-snug truncate" style={{ color: 'var(--label-primary)' }}>
               {p.street ? `${p.street}${p.house_number ? `, ${p.house_number}` : ''}` : p.district ?? 'Адрес не указан'}
             </p>
