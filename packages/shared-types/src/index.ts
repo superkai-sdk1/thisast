@@ -1,5 +1,6 @@
 export * from './entities/user';
 export * from './entities/property';
+export * from './entities/complex';
 export * from './entities/demand';
 export * from './entities/deal';
 export * from './entities/owner';

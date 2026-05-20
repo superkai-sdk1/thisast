@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { SlidersHorizontal, Plus, Search, BedDouble, Maximize2, MapPin } from 'lucide-react';
+import { SlidersHorizontal, Plus, LayoutList, LayoutGrid, Grid3X3, BedDouble, Maximize2, MapPin, Search } from 'lucide-react';
 import { usePropertiesInfinite } from '@/lib/hooks/queries/useProperties';
 import { GlassNavBar } from '@/components/organisms/GlassNavBar';
 import { BottomSheet } from '@/components/molecules/BottomSheet';
@@ -31,10 +31,29 @@ const VISIBILITY_LABELS: Record<string, { label: string; variant: 'default' | 's
   public:  { label: 'Публичный', variant: 'success' },
 };
 
+type ViewMode = 'list' | 'grid2' | 'grid3';
+
+const VIEW_ICONS: { mode: ViewMode; Icon: React.ElementType; title: string }[] = [
+  { mode: 'list',  Icon: LayoutList, title: '1 столбец'  },
+  { mode: 'grid2', Icon: LayoutGrid, title: '2 столбца'  },
+  { mode: 'grid3', Icon: Grid3X3,    title: '3 столбца'  },
+];
+
 export default function PropertiesPage() {
   const [activeType, setActiveType] = useState<PropertyType | ''>('');
   const [filterOpen, setFilterOpen] = useState(false);
   const [filter, setFilter] = useState<Omit<PropertyFilter, 'page' | 'type'>>({});
+  const [viewMode, setViewMode] = useState<ViewMode>('grid2');
+
+  useEffect(() => {
+    const saved = localStorage.getItem('props-view-mode') as ViewMode | null;
+    if (saved) setViewMode(saved);
+  }, []);
+
+  function changeView(mode: ViewMode) {
+    setViewMode(mode);
+    localStorage.setItem('props-view-mode', mode);
+  }
 
   const activeFilter: Omit<PropertyFilter, 'page'> = {
     ...(activeType && { type: activeType }),
@@ -62,6 +81,25 @@ export default function PropertiesPage() {
         title="Объекты"
         right={
           <div className="flex items-center gap-1">
+            {/* View mode toggle */}
+            <div className="flex items-center gap-0.5 rounded-[10px] p-0.5 mr-1"
+              style={{ background: 'var(--fill-tertiary)' }}>
+              {VIEW_ICONS.map(({ mode, Icon, title }) => (
+                <button
+                  key={mode}
+                  title={title}
+                  onClick={() => changeView(mode)}
+                  className="w-7 h-7 rounded-[8px] flex items-center justify-center press-scale transition-colors"
+                  style={{
+                    background: viewMode === mode ? 'var(--bg-elevated)' : 'transparent',
+                    color: viewMode === mode ? 'var(--ios-blue)' : 'var(--label-tertiary)',
+                    boxShadow: viewMode === mode ? 'var(--shadow-card)' : 'none',
+                  }}
+                >
+                  <Icon size={14} />
+                </button>
+              ))}
+            </div>
             <button
               onClick={() => setFilterOpen(true)}
               className="w-8 h-8 rounded-full flex items-center justify-center press-scale relative"
@@ -92,20 +130,26 @@ export default function PropertiesPage() {
       </div>
 
       <div className="gradient-mesh min-h-full">
-        <div className="px-4 pt-3 pb-6 flex flex-col gap-3">
+        <div className={`px-4 pt-3 pb-6 ${
+          viewMode === 'list'  ? 'flex flex-col gap-3' :
+          viewMode === 'grid2' ? 'grid grid-cols-2 gap-3' :
+                                 'grid grid-cols-3 gap-2'
+        }`}>
 
           {properties.length === 0 && !isFetchingNextPage && (
-            <EmptyState />
+            <div className={viewMode !== 'list' ? 'col-span-full' : ''}>
+              <EmptyState />
+            </div>
           )}
 
           {properties.map((p) => (
-            <PropertyCard key={p.id} property={p} />
+            <PropertyCard key={p.id} property={p} compact={viewMode !== 'list'} />
           ))}
 
-          <div ref={sentinelRef} />
+          <div ref={sentinelRef} className={viewMode !== 'list' ? 'col-span-full' : ''} />
 
           {isFetchingNextPage && (
-            <div className="flex justify-center py-4">
+            <div className={`flex justify-center py-4 ${viewMode !== 'list' ? 'col-span-full' : ''}`}>
               <div className="w-5 h-5 border-2 rounded-full animate-spin"
                 style={{ borderColor: 'var(--separator)', borderTopColor: 'var(--ios-blue)' }} />
             </div>
@@ -126,9 +170,65 @@ export default function PropertiesPage() {
   );
 }
 
-function PropertyCard({ property: p }: { property: Property }) {
+function PropertyCard({ property: p, compact = false }: { property: Property; compact?: boolean }) {
   const cover = p.photos?.find(ph => ph.is_cover) ?? p.photos?.[0];
   const vis = VISIBILITY_LABELS[p.visibility_status] ?? VISIBILITY_LABELS.private;
+
+  if (compact) {
+    return (
+      <Link href={`/properties/${p.id}`}>
+        <article className="squircle-card overflow-hidden press-scale flex flex-col h-full"
+          style={{ background: 'var(--bg-elevated)', border: '0.5px solid var(--separator)', boxShadow: 'var(--shadow-card)' }}>
+          {/* Photo */}
+          <div className="relative aspect-[4/3] bg-[var(--fill-tertiary)]">
+            {cover ? (
+              <Image src={cover.url} alt={p.street ?? ''} fill className="object-cover" sizes="50vw" />
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <MapPin size={16} style={{ color: 'var(--label-quaternary)' }} />
+              </div>
+            )}
+            <div className="absolute inset-0 photo-overlay" />
+            <div className="absolute top-1.5 right-1.5">
+              <Badge variant={vis.variant} size="sm" className="text-[9px] px-1.5 py-0.5">{vis.label}</Badge>
+            </div>
+            {p.tags && p.tags.length > 0 && (
+              <div className="absolute top-1.5 left-1.5">
+                <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full text-white"
+                  style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(8px)' }}>
+                  {p.tags[0]}
+                </span>
+              </div>
+            )}
+          </div>
+          {/* Info */}
+          <div className="p-2 flex flex-col gap-1 flex-1">
+            <PermissionGate hideInSafeMode>
+              <p className="text-[13px] font-bold leading-tight" style={{ color: 'var(--label-primary)' }}>
+                {formatPrice(p.price)}
+              </p>
+            </PermissionGate>
+            <p className="text-[11px] truncate" style={{ color: 'var(--label-tertiary)' }}>
+              {p.district ?? p.city}
+            </p>
+            <div className="flex items-center gap-2 flex-wrap">
+              {p.rooms && (
+                <span className="flex items-center gap-0.5 text-[11px]" style={{ color: 'var(--label-secondary)' }}>
+                  <BedDouble size={10} />{p.rooms}к
+                </span>
+              )}
+              {p.area_sqm && (
+                <span className="text-[11px]" style={{ color: 'var(--label-secondary)' }}>{p.area_sqm}м²</span>
+              )}
+              {p.floor && p.floor_total && (
+                <span className="text-[11px]" style={{ color: 'var(--label-secondary)' }}>{p.floor}/{p.floor_total}эт</span>
+              )}
+            </div>
+          </div>
+        </article>
+      </Link>
+    );
+  }
 
   return (
     <Link href={`/properties/${p.id}`}>

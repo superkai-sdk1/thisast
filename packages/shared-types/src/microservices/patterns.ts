@@ -71,6 +71,21 @@ export const MSG_NOTIF_SUBSCRIBE  = 'notifications:subscribe';
 // ── Audit log service (part of svc-notifications) ────────────────────────────
 export const MSG_AUDIT_LIST = 'audit:list';
 
+// ── Residential Complexes (part of svc-properties) ───────────────────────────
+export const MSG_COMPLEXES_LIST         = 'complexes:list';
+export const MSG_COMPLEXES_FIND_ONE     = 'complexes:findOne';
+export const MSG_COMPLEXES_CREATE       = 'complexes:create';
+export const MSG_COMPLEXES_UPDATE       = 'complexes:update';
+export const MSG_COMPLEXES_DELETE       = 'complexes:delete';
+export const MSG_COMPLEXES_PHOTO_UPLOAD = 'complexes:photoUpload';
+export const MSG_COMPLEXES_PHOTO_DELETE = 'complexes:photoDelete';
+
+// ── WebAuthn / Passkey (part of svc-auth) ────────────────────────────────────
+export const MSG_PASSKEY_REG_OPTIONS  = 'passkey:regOptions';
+export const MSG_PASSKEY_REG_VERIFY   = 'passkey:regVerify';
+export const MSG_PASSKEY_AUTH_OPTIONS = 'passkey:authOptions';
+export const MSG_PASSKEY_AUTH_VERIFY  = 'passkey:authVerify';
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Event patterns (fire-and-forget, @EventPattern)
 // ─────────────────────────────────────────────────────────────────────────────

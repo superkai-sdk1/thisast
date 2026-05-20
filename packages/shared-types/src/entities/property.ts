@@ -52,6 +52,7 @@ export interface Property {
   tags: string[];
   description: string | null;
   photos: PropertyPhoto[];
+  complex_id: string | null;
   match_score?: number;
   created_at: string;
   updated_at: string;

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { ChevronLeft } from 'lucide-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { propertiesApi } from '@/lib/api/properties';
@@ -9,6 +9,7 @@ import { propertyKeys } from '@/lib/hooks/queries/useProperties';
 import { useDraftForm } from '@/lib/hooks/useDraftForm';
 import { ImageUploader } from '@/components/molecules/ImageUploader';
 import { Button } from '@/components/atoms/Button';
+import { useComplexes } from '@/lib/hooks/queries/useComplexes';
 import type { PropertyType, PaymentForm } from '@crm/shared-types';
 
 const DRAFT_ID = 'new-property';
@@ -76,10 +77,14 @@ function FormSection({ label, children }: { label: string; children: React.React
 
 export default function NewPropertyPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const preselectedComplexId = searchParams.get('complex_id') ?? undefined;
   const qc = useQueryClient();
   const { values, setValues, restored, clearDraft } = useDraftForm<PropertyFormValues>(
     'property', DRAFT_ID, INITIAL,
   );
+  const [selectedComplexId, setSelectedComplexId] = useState<string | undefined>(preselectedComplexId);
+  const { data: complexes = [] } = useComplexes();
   const [pendingFiles, setPendingFiles] = useState<File[]>([]);
   const [uploadingPhotos, setUploadingPhotos] = useState(false);
 
@@ -127,6 +132,7 @@ export default function NewPropertyPage() {
       conditions: values.conditions,
       tags: values.tags ? values.tags.split(',').map(t => t.trim()).filter(Boolean) : [],
       visibility_status: 'private',
+      complex_id: selectedComplexId,
     } as Parameters<typeof propertiesApi.create>[0]);
   }
 
@@ -164,6 +170,21 @@ export default function NewPropertyPage() {
             ))}
           </div>
         </FormSection>
+
+        {complexes.length > 0 && (
+          <FormSection label="Жилой комплекс">
+            <select
+              className="input-field"
+              value={selectedComplexId ?? ''}
+              onChange={e => setSelectedComplexId(e.target.value || undefined)}
+            >
+              <option value="">— Не привязан к ЖК —</option>
+              {complexes.map(c => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+            </select>
+          </FormSection>
+        )}
 
         <FormSection label="Цена, ₽ *">
           <input

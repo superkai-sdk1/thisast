@@ -22,6 +22,8 @@ export interface PropertyFilter {
   date_to?: string;
   page?: number;
   limit?: number;
+  payment_form?: string;
+  complex_id?: string;
 }
 
 export const propertiesApi = {

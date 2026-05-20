@@ -16,6 +16,8 @@ export interface PropertyFilter {
   q?: string;
   page?: number;
   limit?: number;
+  complex_id?: string;
+  payment_form?: string;
 }
 
 export interface ActorPayload {
@@ -41,6 +43,7 @@ export interface CreatePropertyDto {
   conditions?: string[];
   tags?: string[];
   description?: string;
+  complex_id?: string;
 }
 
 function parsePropertyRow(row: Record<string, unknown>): Record<string, unknown> {
@@ -91,6 +94,8 @@ export class PropertiesService {
       whereClause += ` AND p.rooms = ANY($${idx++}::smallint[])`;
       params.push(filter.rooms);
     }
+    if (filter.complex_id) { whereClause += ` AND p.complex_id = $${idx++}`; params.push(filter.complex_id); }
+    if (filter.payment_form) { whereClause += ` AND $${idx++} = ANY(p.conditions::text[])`; params.push(filter.payment_form); }
 
     const [rows, count] = await Promise.all([
       this.db.query(
@@ -141,8 +146,8 @@ export class PropertiesService {
          owner_agent_id, owner_id, visibility_status, property_type,
          city, district, street, house_number, apartment_number,
          price, area_sqm, rooms, floor, floor_total, ceiling_height,
-         conditions, tags, description
-       ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18)
+         conditions, tags, description, complex_id
+       ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19)
        RETURNING *`,
       [
         actor.sub,
@@ -163,6 +168,7 @@ export class PropertiesService {
         dto.conditions ?? [],
         dto.tags ?? [],
         dto.description ?? null,
+        dto.complex_id ?? null,
       ],
     );
     const property = result.rows[0];
@@ -185,7 +191,7 @@ export class PropertiesService {
 
     const updatable: (keyof CreatePropertyDto)[] = [
       'price', 'area_sqm', 'rooms', 'floor', 'floor_total', 'description',
-      'district', 'street', 'house_number', 'conditions', 'tags', 'visibility_status',
+      'district', 'street', 'house_number', 'conditions', 'tags', 'visibility_status', 'complex_id',
     ];
 
     for (const key of updatable) {

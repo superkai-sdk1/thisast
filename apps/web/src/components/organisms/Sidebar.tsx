@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
-  LayoutDashboard, Building2, Users, Handshake, Settings,
+  LayoutDashboard, Building2, Building, Users, Handshake, Settings,
   Shield, Eye, EyeOff, LogOut, ChevronLeft,
 } from 'lucide-react';
 import { useAppStore } from '@/lib/store/useAppStore';
@@ -13,6 +13,7 @@ import { authApi } from '@/lib/api/auth';
 const NAV = [
   { href: '/dashboard',  Icon: LayoutDashboard, label: 'Дашборд'    },
   { href: '/properties', Icon: Building2,        label: 'Объекты'    },
+  { href: '/complexes',  Icon: Building,         label: 'ЖК'         },
   { href: '/demand',     Icon: Users,            label: 'Клиенты'    },
   { href: '/deals',      Icon: Handshake,        label: 'Сделки'     },
   { href: '/admin',      Icon: Shield,           label: 'Управление' },

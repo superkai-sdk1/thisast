@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { Bell } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Bell, X } from 'lucide-react';
 import { apiClient } from '@/lib/api/client';
 import { Button } from '@/components/atoms/Button';
 import { BottomSheet } from '@/components/molecules/BottomSheet';
@@ -18,7 +18,17 @@ function urlBase64ToUint8Array(base64String: string) {
 export function PushNotificationPrompt() {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [done, setDone] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
+  const [permission, setPermission] = useState<NotificationPermission>('default');
+
+  useEffect(() => {
+    if (typeof Notification !== 'undefined') {
+      setPermission(Notification.permission);
+    }
+    if (localStorage.getItem('push-dismissed')) {
+      setDismissed(true);
+    }
+  }, []);
 
   async function subscribe() {
     if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
@@ -30,24 +40,48 @@ export function PushNotificationPrompt() {
         applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
       });
       await apiClient.post('/notifications/subscribe', sub.toJSON());
-      setDone(true);
+      setPermission('granted');
       setOpen(false);
     } finally {
       setLoading(false);
     }
   }
 
-  if (done) return null;
+  function dismiss() {
+    localStorage.setItem('push-dismissed', '1');
+    setDismissed(true);
+    setOpen(false);
+  }
+
+  // Hide if already granted or dismissed by user
+  if (permission === 'granted' || permission === 'denied' || dismissed) return null;
 
   return (
     <>
+      {/* Compact floating bell button */}
       <button
         onClick={() => setOpen(true)}
-        className="flex items-center gap-2 px-4 py-2 rounded-[14px] bg-[var(--ios-blue)]/10 text-[var(--ios-blue)] text-sm font-medium"
+        className="fixed bottom-[calc(96px+env(safe-area-inset-bottom))] right-4 z-20 w-10 h-10 rounded-full flex items-center justify-center press-scale md:hidden"
+        style={{
+          background: 'var(--ios-blue)',
+          boxShadow: '0 4px 16px rgba(0,122,255,0.45)',
+        }}
+        aria-label="Включить уведомления"
       >
-        <Bell className="w-4 h-4" />
-        Включить уведомления
+        <Bell size={18} className="text-white" />
       </button>
+
+      {/* Desktop: small pill in top-right of sidebar area */}
+      <div className="hidden md:flex fixed top-4 right-4 z-20">
+        <button
+          onClick={() => setOpen(true)}
+          className="flex items-center gap-1.5 h-7 px-2.5 rounded-full press-scale text-[12px] font-medium text-white"
+          style={{ background: 'var(--ios-blue)', boxShadow: '0 2px 10px rgba(0,122,255,0.40)' }}
+        >
+          <Bell size={12} />
+          Уведомления
+        </button>
+      </div>
 
       <BottomSheet isOpen={open} onClose={() => setOpen(false)} title="Уведомления о подборах">
         <div className="flex flex-col gap-4 py-4">
@@ -57,8 +91,8 @@ export function PushNotificationPrompt() {
           <Button onClick={subscribe} loading={loading} className="w-full">
             Разрешить уведомления
           </Button>
-          <Button variant="ghost" onClick={() => setOpen(false)} className="w-full">
-            Позже
+          <Button variant="ghost" onClick={dismiss} className="w-full">
+            Больше не показывать
           </Button>
         </div>
       </BottomSheet>

@@ -7,6 +7,7 @@ import { OwnersModule } from './owners/owners.module';
 import { StorageModule } from './storage/storage.module';
 import { SearchModule } from './search/search.module';
 import { PdfModule } from './pdf/pdf.module';
+import { ComplexesModule } from './complexes/complexes.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { PdfModule } from './pdf/pdf.module';
     StorageModule,
     SearchModule,
     PdfModule,
+    ComplexesModule,
   ],
 })
 export class AppModule {}

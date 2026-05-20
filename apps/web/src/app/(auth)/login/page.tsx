@@ -5,9 +5,11 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Eye, EyeOff, Loader2, Building2 } from 'lucide-react';
+import { Eye, EyeOff, Loader2, Building2, Fingerprint } from 'lucide-react';
 import { authApi } from '@/lib/api/auth';
 import { useAppStore } from '@/lib/store/useAppStore';
+import { apiClient } from '@/lib/api/client';
+import { startAuthentication } from '@simplewebauthn/browser';
 
 const schema = z.object({
   email:    z.string().email('Введите корректный email'),
@@ -20,8 +22,9 @@ export default function LoginPage() {
   const setAuth = useAppStore((s) => s.setAuth);
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [passkeyLoading, setPasskeyLoading] = useState(false);
 
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>({
+  const { register, handleSubmit, getValues, formState: { errors, isSubmitting } } = useForm<FormData>({
     resolver: zodResolver(schema),
   });
 
@@ -33,6 +36,33 @@ export default function LoginPage() {
       router.replace('/dashboard');
     } catch {
       setError('Неверный email или пароль');
+    }
+  }
+
+  async function loginWithPasskey() {
+    setPasskeyLoading(true);
+    setError(null);
+    try {
+      const email = getValues('email') || undefined;
+      const optRes = await apiClient.post<{ data: { _challengeKey: string } & unknown }>(
+        '/auth/passkey/login-options',
+        { email },
+      );
+      const { _challengeKey, ...options } = optRes.data.data as { _challengeKey: string } & Record<string, unknown>;
+      const response = await startAuthentication({ optionsJSON: options as never });
+      const loginRes = await apiClient.post<{
+        data: { access_token: string; refresh_token: string; user: { id: string; email: string; role: string; full_name: string } };
+      }>('/auth/passkey/login', { challengeKey: _challengeKey, response });
+      const { user, access_token, refresh_token } = loginRes.data.data;
+      setAuth(user as never, access_token, refresh_token ?? '');
+      router.replace('/dashboard');
+    } catch (e: unknown) {
+      const msg = (e as Error).message ?? '';
+      if (!msg.includes('cancelled') && !msg.includes('abort')) {
+        setError('Passkey не найден или верификация не прошла');
+      }
+    } finally {
+      setPasskeyLoading(false);
     }
   }
 
@@ -128,17 +158,42 @@ export default function LoginPage() {
             </div>
           )}
 
+          {/* Passkey login */}
+          <button
+            type="button"
+            onClick={loginWithPasskey}
+            disabled={passkeyLoading}
+            className="press-scale h-[52px] squircle-btn w-full font-bold text-[16px] flex items-center justify-center gap-2 disabled:opacity-50 mt-1"
+            style={{
+              background: 'linear-gradient(135deg, #34C759 0%, #30D158 100%)',
+              boxShadow: '0 6px 20px rgba(52,199,89,0.36)',
+              color: 'white',
+            }}
+          >
+            {passkeyLoading
+              ? <Loader2 size={20} className="animate-spin" />
+              : <><Fingerprint size={20} /> Войти с Passkey</>
+            }
+          </button>
+
+          {/* Divider */}
+          <div className="flex items-center gap-3">
+            <div className="flex-1 h-px" style={{ background: 'var(--separator)' }} />
+            <span className="text-[12px] font-medium" style={{ color: 'var(--label-quaternary)' }}>или</span>
+            <div className="flex-1 h-px" style={{ background: 'var(--separator)' }} />
+          </div>
+
           {/* Submit */}
           <button
             onClick={handleSubmit(onSubmit)}
             disabled={isSubmitting}
-            className="press-scale h-[52px] squircle-btn w-full text-white font-bold text-[16px] flex items-center justify-center gap-2 disabled:opacity-50 mt-1"
+            className="press-scale h-[52px] squircle-btn w-full text-white font-bold text-[16px] flex items-center justify-center gap-2 disabled:opacity-50"
             style={{
               background: 'linear-gradient(135deg, #007AFF 0%, #5856D6 100%)',
               boxShadow: '0 6px 20px rgba(0,122,255,0.36)',
             }}
           >
-            {isSubmitting ? <Loader2 size={20} className="animate-spin" /> : 'Войти'}
+            {isSubmitting ? <Loader2 size={20} className="animate-spin" /> : 'Войти с паролем'}
           </button>
         </div>
 

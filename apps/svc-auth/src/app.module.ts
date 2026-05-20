@@ -5,6 +5,7 @@ import { DatabaseModule } from '@crm/shared-core';
 import { RedisClientModule } from './redis-client.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
+import { PasskeyModule } from './passkey/passkey.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { UsersModule } from './users/users.module';
     DatabaseModule,
     AuthModule,
     UsersModule,
+    PasskeyModule,
   ],
 })
 export class AppModule {}
