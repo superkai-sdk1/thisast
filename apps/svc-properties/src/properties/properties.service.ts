@@ -1,4 +1,5 @@
-import { Injectable, NotFoundException, ForbiddenException, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+import { RpcException } from '@nestjs/microservices';
 import { InjectDb } from '@crm/shared-core';
 import type { Pool } from 'pg';
 import { SearchService } from '../search/search.service';
@@ -159,11 +160,11 @@ export class PropertiesService {
        GROUP BY p.id, rc.name, rc.developer`,
       [id],
     );
-    if (!result.rows[0]) throw new NotFoundException('Объект не найден');
+    if (!result.rows[0]) throw new RpcException({ statusCode: 404, message: 'Объект не найден' });
 
     const prop = parsePropertyRow(result.rows[0]);
     if (prop['owner_agent_id'] !== actor.sub && prop['visibility_status'] === 'private' && actor.role === 'agent') {
-      throw new ForbiddenException('Нет доступа к этому объекту');
+      throw new RpcException({ statusCode: 403, message: 'Нет доступа к этому объекту' });
     }
     return prop;
   }
@@ -210,7 +211,7 @@ export class PropertiesService {
     const property = await this.findOne(id, actor);
 
     if (property.owner_agent_id !== actor.sub && actor.role === 'agent') {
-      throw new ForbiddenException('Нельзя редактировать чужой объект');
+      throw new RpcException({ statusCode: 403, message: 'Нельзя редактировать чужой объект' });
     }
 
     const fields: string[] = [];
@@ -254,7 +255,7 @@ export class PropertiesService {
   async updateVisibility(id: string, visibility: string, actor: ActorPayload) {
     const property = await this.findOne(id, actor);
     if (property.owner_agent_id !== actor.sub && actor.role === 'agent') {
-      throw new ForbiddenException('Нельзя изменить видимость чужого объекта');
+      throw new RpcException({ statusCode: 403, message: 'Нельзя изменить видимость чужого объекта' });
     }
     const result = await this.db.query(
       'UPDATE properties SET visibility_status = $1 WHERE id = $2 RETURNING *',
@@ -267,7 +268,7 @@ export class PropertiesService {
     const property = await this.findOne(id, actor);
     const canDelete = await this.checkPermission(actor.sub, 'can_delete_records');
     if (property.owner_agent_id !== actor.sub && !canDelete && actor.role === 'agent') {
-      throw new ForbiddenException('Нет прав на удаление');
+      throw new RpcException({ statusCode: 403, message: 'Нет прав на удаление' });
     }
     await this.db.query('UPDATE properties SET deleted_at = NOW() WHERE id = $1', [id]);
     await this.searchService.deleteProperty(id).catch((e) => this.logger.error('search delete failed', e));
@@ -298,7 +299,7 @@ export class PropertiesService {
        WHERE id = $1 AND deleted_at IS NOT NULL RETURNING *`,
       [id],
     );
-    if (!result.rows[0]) throw new NotFoundException('Объект не найден в корзине');
+    if (!result.rows[0]) throw new RpcException({ statusCode: 404, message: 'Объект не найден в корзине' });
     return result.rows[0];
   }
 

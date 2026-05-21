@@ -206,7 +206,7 @@ function PropertyCard({ property: p, compact = false }: { property: Property; co
           {/* Photo */}
           <div className="relative aspect-[4/3] bg-[var(--fill-tertiary)]">
             {cover ? (
-              <Image src={cover.url} alt={p.street ?? ''} fill className="object-cover" sizes="50vw" />
+              <Image src={cover.url} alt={p.street ?? ''} fill unoptimized className="object-cover" sizes="50vw" />
             ) : (
               <div className="absolute inset-0 flex items-center justify-center">
                 <MapPin size={16} style={{ color: 'var(--label-quaternary)' }} />
@@ -262,7 +262,7 @@ function PropertyCard({ property: p, compact = false }: { property: Property; co
         {/* Photo */}
         <div className="relative h-48 bg-[var(--fill-tertiary)]">
           {cover ? (
-            <Image src={cover.url} alt={p.street ?? ''} fill className="object-cover" sizes="(max-width:768px) 100vw, 50vw" />
+            <Image src={cover.url} alt={p.street ?? ''} fill unoptimized className="object-cover" sizes="(max-width:768px) 100vw, 50vw" />
           ) : (
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ background: 'var(--fill-secondary)' }}>

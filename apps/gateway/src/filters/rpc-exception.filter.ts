@@ -16,13 +16,22 @@ export class RpcToHttpExceptionFilter implements ExceptionFilter {
       return;
     }
 
-    const err = exception as Record<string, unknown>;
+    // RpcException sends { statusCode, message } as the error object
+    // Non-RpcException gets sanitized by Redis transport to { status: 'error', message: 'Internal server error' }
+    const err = (exception && typeof exception === 'object') ? exception as Record<string, unknown> : {};
+    const innerErr = (err['error'] && typeof err['error'] === 'object')
+      ? err['error'] as Record<string, unknown>
+      : err;
+
     const statusCode =
-      (typeof err?.statusCode === 'number' ? err.statusCode : null) ??
-      (typeof err?.status === 'number' ? err.status : null) ??
+      (typeof innerErr['statusCode'] === 'number' ? innerErr['statusCode'] : null) ??
+      (typeof err['statusCode'] === 'number' ? err['statusCode'] : null) ??
       HttpStatus.INTERNAL_SERVER_ERROR;
+
     const message =
-      (typeof err?.message === 'string' ? err.message : null) ?? 'Internal server error';
+      (typeof innerErr['message'] === 'string' ? innerErr['message'] : null) ??
+      (typeof err['message'] === 'string' ? err['message'] : null) ??
+      'Internal server error';
 
     if (statusCode >= 500) {
       this.logger.error(exception);

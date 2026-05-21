@@ -59,6 +59,7 @@ export function PropertyGallery({ photos, className }: PropertyGalleryProps) {
             src={photos[index].url}
             alt={`Фото ${index + 1}`}
             fill
+            unoptimized
             className="object-cover"
             priority={index === 0}
           />
