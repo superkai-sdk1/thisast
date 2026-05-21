@@ -342,6 +342,17 @@ function PropertyFilterForm({ value, onChange, onClose }: {
   function set<K extends keyof typeof local>(k: K, v: (typeof local)[K]) {
     setLocal(p => ({ ...p, [k]: v }));
   }
+  function toggle<K extends keyof typeof local>(k: K, v: (typeof local)[K]) {
+    setLocal(p => ({ ...p, [k]: p[k] === v ? undefined : v }));
+  }
+
+  const RENOVATIONS = [
+    { v: 'none',     l: 'Без отделки'   },
+    { v: 'rough',    l: 'Черновая'      },
+    { v: 'cosmetic', l: 'Косметический' },
+    { v: 'euro',     l: 'Евро'          },
+    { v: 'designer', l: 'Дизайнерский'  },
+  ];
 
   return (
     <div className="flex flex-col gap-5 py-2">
@@ -349,6 +360,49 @@ function PropertyFilterForm({ value, onChange, onClose }: {
         <input type="text" placeholder="Улица, район..." className="input-field"
           value={local.q ?? ''}
           onChange={e => set('q', e.target.value || undefined)} />
+      </FilterSection>
+
+      <FilterSection label="Вид сделки">
+        <div className="flex gap-2">
+          {([['sale', 'Продажа'], ['rent', 'Аренда']] as const).map(([v, l]) => (
+            <button key={v} onClick={() => toggle('listing_type', v)}
+              className={`chip press-scale ${local.listing_type === v ? 'chip-active' : ''}`}>{l}</button>
+          ))}
+        </div>
+      </FilterSection>
+
+      <FilterSection label="Статус объекта">
+        <div className="flex gap-2 flex-wrap">
+          {([['active', 'Активный'], ['sold', 'Продан'], ['withdrawn', 'Снят']] as const).map(([v, l]) => (
+            <button key={v} onClick={() => toggle('property_status', v)}
+              className={`chip press-scale ${local.property_status === v ? 'chip-active' : ''}`}>{l}</button>
+          ))}
+        </div>
+      </FilterSection>
+
+      <FilterSection label="Ремонт">
+        <div className="flex gap-2 flex-wrap">
+          {RENOVATIONS.map(({ v, l }) => (
+            <button key={v} onClick={() => toggle('renovation', v)}
+              className={`chip press-scale ${local.renovation === v ? 'chip-active' : ''}`}>{l}</button>
+          ))}
+        </div>
+      </FilterSection>
+
+      <FilterSection label="Особенности">
+        <div className="flex gap-2 flex-wrap">
+          {([
+            ['has_loggia',    'Лоджия'],
+            ['has_balcony',   'Балкон'],
+            ['has_wardrobe',  'Гардероб'],
+            ['has_panoramic', 'Панорамные'],
+            ['from_realtor',  'От риэлтора'],
+          ] as const).map(([k, l]) => (
+            <button key={k}
+              onClick={() => set(k, local[k] ? undefined : true as never)}
+              className={`chip press-scale ${local[k] ? 'chip-active' : ''}`}>{l}</button>
+          ))}
+        </div>
       </FilterSection>
 
       <FilterSection label="Цена, ₽">

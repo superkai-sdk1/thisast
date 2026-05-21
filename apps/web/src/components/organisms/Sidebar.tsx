@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   LayoutDashboard, Building2, Building, Users, Handshake, Settings,
-  Shield, Eye, EyeOff, LogOut, ChevronLeft, ClipboardList, BarChart2,
+  Shield, Eye, EyeOff, LogOut, ChevronLeft, ClipboardList,
 } from 'lucide-react';
 import { useAppStore } from '@/lib/store/useAppStore';
 import { authApi } from '@/lib/api/auth';
@@ -17,7 +17,6 @@ const NAV = [
   { href: '/clients',    Icon: Users,            label: 'Клиенты'    },
   { href: '/tasks',      Icon: ClipboardList,    label: 'Задачи'     },
   { href: '/deals',      Icon: Handshake,        label: 'Сделки'     },
-  { href: '/reports',    Icon: BarChart2,        label: 'Отчёты'     },
   { href: '/admin',      Icon: Shield,           label: 'Управление' },
   { href: '/settings',   Icon: Settings,         label: 'Настройки'  },
 ] as const;

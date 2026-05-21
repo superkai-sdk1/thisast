@@ -45,6 +45,7 @@ export class AnalyticsService {
 
   async getDashboardStats(actorId: string, isAdmin: boolean) {
     const agentFilter = isAdmin ? '' : `AND agent_id = '${actorId}'`;
+    const dealAgentFilter = isAdmin ? '' : `AND created_by = '${actorId}'`;
 
     const [taskStats, leadStats, dealStats] = await Promise.all([
       this.db.query(`
@@ -61,9 +62,9 @@ export class AnalyticsService {
       `),
       this.db.query(`
         SELECT
-          COUNT(*) FILTER (WHERE status NOT IN ('closed_won','closed_lost') ${agentFilter})::int AS active_deals,
-          COUNT(*) FILTER (WHERE status = 'closed_won' ${agentFilter})::int AS closed_deals,
-          COALESCE(SUM(commission_amount) FILTER (WHERE status = 'closed_won' ${agentFilter}), 0) AS earned_commissions
+          COUNT(*) FILTER (WHERE status = 'in_progress' ${dealAgentFilter})::int AS active_deals,
+          COUNT(*) FILTER (WHERE status = 'closed' ${dealAgentFilter})::int AS closed_deals,
+          COALESCE(SUM(my_commission) FILTER (WHERE status = 'closed' ${dealAgentFilter}), 0) AS earned_commissions
         FROM deals
       `),
     ]);
@@ -97,6 +98,7 @@ export class AnalyticsService {
   ) {
     const { dateFrom, dateTo } = resolvePeriod(period, from_date, to_date);
     const agentFilter = isAdmin ? '' : `AND agent_id = '${actorId}'`;
+    const dealAgentFilter = isAdmin ? '' : `AND created_by = '${actorId}'`;
 
     const [contactsResult, clientsResult, propertiesResult, dealsResult, activityResult] =
       await Promise.all([
@@ -110,7 +112,7 @@ export class AnalyticsService {
         this.db.query(`
           SELECT COUNT(*)::int AS count
           FROM demands
-          WHERE kanban_status IN ('client', 'closed')
+          WHERE kanban_status = 'deal'
             AND updated_at BETWEEN $1 AND $2
             ${agentFilter}
         `, [dateFrom, dateTo]),
@@ -127,13 +129,13 @@ export class AnalyticsService {
           SELECT COUNT(*)::int AS count
           FROM deals
           WHERE created_at BETWEEN $1 AND $2
-            ${agentFilter}
+            ${dealAgentFilter}
         `, [dateFrom, dateTo]),
 
         this.db.query(`
-          SELECT ee.*, u.full_name AS actor_name
+          SELECT ee.event_type, ee.description, ee.created_at, u.full_name AS user_name
           FROM entity_events ee
-          LEFT JOIN users u ON u.id = ee.actor_id
+          LEFT JOIN users u ON u.id = ee.user_id
           WHERE ee.created_at BETWEEN $1 AND $2
           ORDER BY ee.created_at DESC
           LIMIT 50

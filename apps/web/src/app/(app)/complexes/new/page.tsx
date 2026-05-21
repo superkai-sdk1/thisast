@@ -38,6 +38,25 @@ export default function NewComplexPage() {
   const [yearDelivery, setYearDelivery] = useState('');
   const [totalFloors, setTotalFloors] = useState('');
 
+  const [ceilingHeight, setCeilingHeight] = useState('');
+  const [entrancesCount, setEntrancesCount] = useState('');
+  const [apartmentsCount, setApartmentsCount] = useState('');
+  const [parkingSpots, setParkingSpots] = useState('');
+  const [buildingType, setBuildingType] = useState('');
+  const [finishType, setFinishType] = useState('');
+  const [parkingTypes, setParkingTypes] = useState<string[]>([]);
+  const [amenities, setAmenities] = useState({
+    hasClosedTerritory: false,
+    hasPlayground: false,
+    hasSportsGround: false,
+    hasPanoramicWindows: false,
+    hasGas: false,
+  });
+  const [paymentCashSqm, setPaymentCashSqm] = useState('');
+  const [paymentMortSqm, setPaymentMortSqm] = useState('');
+  const [paymentInstSqm, setPaymentInstSqm] = useState('');
+  const [paymentInstMonths, setPaymentInstMonths] = useState('');
+
   async function handleSubmit() {
     if (!name.trim()) return;
     const complex = await createComplex.mutateAsync({
@@ -49,6 +68,22 @@ export default function NewComplexPage() {
       description: description || undefined,
       year_delivery: yearDelivery ? Number(yearDelivery) : undefined,
       total_floors: totalFloors ? Number(totalFloors) : undefined,
+      ceiling_height: Number(ceilingHeight) || undefined,
+      entrances_count: Number(entrancesCount) || undefined,
+      apartments_count: Number(apartmentsCount) || undefined,
+      parking_spots: Number(parkingSpots) || undefined,
+      building_type: buildingType || undefined,
+      finish_type: finishType || undefined,
+      parking_types: parkingTypes.length ? parkingTypes : undefined,
+      has_closed_territory: amenities.hasClosedTerritory,
+      has_playground: amenities.hasPlayground,
+      has_sports_ground: amenities.hasSportsGround,
+      has_panoramic_windows: amenities.hasPanoramicWindows,
+      has_gas: amenities.hasGas,
+      payment_cash_sqm: Number(paymentCashSqm) || undefined,
+      payment_mort_sqm: Number(paymentMortSqm) || undefined,
+      payment_inst_sqm: Number(paymentInstSqm) || undefined,
+      payment_inst_months: Number(paymentInstMonths) || undefined,
     } as never);
     router.replace(`/complexes/${complex.id}`);
   }
@@ -154,6 +189,115 @@ export default function NewComplexPage() {
             value={description}
             onChange={e => setDescription(e.target.value)}
           />
+        </Section>
+
+        <Section label="Характеристики здания">
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <p className="text-[12px] mb-1" style={{ color: 'var(--label-tertiary)' }}>Высота потолков, м</p>
+              <input type="number" step="0.1" className="input-field" placeholder="2.7"
+                value={ceilingHeight} onChange={e => setCeilingHeight(e.target.value)} />
+            </div>
+            <div>
+              <p className="text-[12px] mb-1" style={{ color: 'var(--label-tertiary)' }}>Секций</p>
+              <input type="number" className="input-field" placeholder="4"
+                value={entrancesCount} onChange={e => setEntrancesCount(e.target.value)} />
+            </div>
+            <div>
+              <p className="text-[12px] mb-1" style={{ color: 'var(--label-tertiary)' }}>Квартир</p>
+              <input type="number" className="input-field" placeholder="120"
+                value={apartmentsCount} onChange={e => setApartmentsCount(e.target.value)} />
+            </div>
+            <div>
+              <p className="text-[12px] mb-1" style={{ color: 'var(--label-tertiary)' }}>Парковочных мест</p>
+              <input type="number" className="input-field" placeholder="0"
+                value={parkingSpots} onChange={e => setParkingSpots(e.target.value)} />
+            </div>
+          </div>
+        </Section>
+
+        <Section label="Тип конструкции">
+          <div className="flex gap-2 flex-wrap">
+            {[
+              { v: 'monolith_brick', l: 'Монолит-кирпич' },
+              { v: 'monolith_block', l: 'Монолит-блок' },
+              { v: 'panel', l: 'Панель' },
+            ].map(({ v, l }) => (
+              <button key={v} onClick={() => setBuildingType(buildingType === v ? '' : v)}
+                className={`chip press-scale ${buildingType === v ? 'chip-active' : ''}`}>{l}</button>
+            ))}
+          </div>
+        </Section>
+
+        <Section label="Отделка">
+          <div className="flex gap-2 flex-wrap">
+            {[
+              { v: 'none', l: 'Без отделки' },
+              { v: 'rough', l: 'Черновая' },
+              { v: 'clean', l: 'Чистовая' },
+              { v: 'turnkey', l: 'Под ключ' },
+            ].map(({ v, l }) => (
+              <button key={v} onClick={() => setFinishType(finishType === v ? '' : v)}
+                className={`chip press-scale ${finishType === v ? 'chip-active' : ''}`}>{l}</button>
+            ))}
+          </div>
+        </Section>
+
+        <Section label="Парковка">
+          <div className="flex gap-2 flex-wrap">
+            {[
+              { v: 'open', l: 'Открытая' },
+              { v: 'underground_1', l: 'Подземная 1 ур.' },
+              { v: 'underground_2', l: 'Подземная 2 ур.' },
+              { v: 'barrier', l: 'Шлагбаум' },
+            ].map(({ v, l }) => (
+              <button key={v}
+                onClick={() => setParkingTypes(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v])}
+                className={`chip press-scale ${parkingTypes.includes(v) ? 'chip-active' : ''}`}>{l}</button>
+            ))}
+          </div>
+        </Section>
+
+        <Section label="Инфраструктура">
+          <div className="flex gap-2 flex-wrap">
+            {[
+              { key: 'hasClosedTerritory', label: 'Закрытая территория' },
+              { key: 'hasPlayground',      label: 'Детская площадка' },
+              { key: 'hasSportsGround',    label: 'Спортплощадка' },
+              { key: 'hasPanoramicWindows',label: 'Панорамные окна' },
+              { key: 'hasGas',             label: 'Газ' },
+            ].map(({ key, label }) => (
+              <button key={key}
+                onClick={() => setAmenities(p => ({ ...p, [key]: !p[key as keyof typeof p] }))}
+                className={`chip press-scale ${amenities[key as keyof typeof amenities] ? 'chip-active' : ''}`}
+              >{label}</button>
+            ))}
+          </div>
+        </Section>
+
+        <Section label="Цены (за м²)">
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <p className="text-[12px] mb-1" style={{ color: 'var(--label-tertiary)' }}>Наличные, ₽/м²</p>
+              <input type="number" className="input-field" placeholder="0"
+                value={paymentCashSqm} onChange={e => setPaymentCashSqm(e.target.value)} />
+            </div>
+            <div>
+              <p className="text-[12px] mb-1" style={{ color: 'var(--label-tertiary)' }}>Ипотека, ₽/м²</p>
+              <input type="number" className="input-field" placeholder="0"
+                value={paymentMortSqm} onChange={e => setPaymentMortSqm(e.target.value)} />
+            </div>
+            <div>
+              <p className="text-[12px] mb-1" style={{ color: 'var(--label-tertiary)' }}>Рассрочка, ₽/м²</p>
+              <input type="number" className="input-field" placeholder="0"
+                value={paymentInstSqm} onChange={e => setPaymentInstSqm(e.target.value)} />
+            </div>
+            <div>
+              <p className="text-[12px] mb-1" style={{ color: 'var(--label-tertiary)' }}>Рассрочка, мес.</p>
+              <input type="number" className="input-field" placeholder="24"
+                value={paymentInstMonths} onChange={e => setPaymentInstMonths(e.target.value)} />
+            </div>
+          </div>
         </Section>
       </div>
 

@@ -4,6 +4,7 @@ import { use, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ChevronLeft, Share2, Trash2, Lock, Pencil, MapPin, BedDouble, Maximize2, Layers } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import { useProperty, useDeleteProperty } from '@/lib/hooks/queries/useProperties';
 import { useRequestAccess } from '@/lib/hooks/queries/useSharing';
 import { PropertyGallery } from '@/components/organisms/PropertyGallery';
@@ -12,6 +13,13 @@ import { PermissionGate } from '@/components/molecules/PermissionGate';
 import { Badge } from '@/components/atoms/Badge';
 import { Button } from '@/components/atoms/Button';
 import { formatPrice } from '@/lib/utils/format';
+import { propertiesApi } from '@/lib/api/properties';
+
+interface EntityEvent {
+  event_type: string;
+  description: string;
+  created_at: string;
+}
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -29,6 +37,11 @@ export default function PropertyDetailPage({ params }: Props) {
   const { data: property, isLoading } = useProperty(id);
   const deleteMutation = useDeleteProperty();
   const requestAccess = useRequestAccess();
+  const { data: events = [] } = useQuery({
+    queryKey: ['property-events', id],
+    queryFn: () => propertiesApi.getEvents(id),
+    enabled: !!id,
+  });
   const [accessRequested, setAccessRequested] = useState(false);
   const [accessError, setAccessError] = useState(false);
 
@@ -51,6 +64,19 @@ export default function PropertyDetailPage({ params }: Props) {
 
   const vis = VISIBILITY_LABELS[property.visibility_status ?? 'private'] ?? VISIBILITY_LABELS.private;
 
+  const LISTING_TYPE_LABELS: Record<string, string> = {
+    sale: 'Продажа',
+    rent: 'Аренда',
+  };
+
+  const RENOVATION_LABELS: Record<string, string> = {
+    none:     'Без отделки',
+    rough:    'Черновая',
+    cosmetic: 'Косметический',
+    euro:     'Евро',
+    designer: 'Дизайнерский',
+  };
+
   const specs = [
     property.rooms      && { icon: BedDouble, label: 'Комнат',   value: `${property.rooms} комн.`     },
     property.area_sqm   && { icon: Maximize2, label: 'Площадь',  value: `${property.area_sqm} м²`     },
@@ -58,6 +84,18 @@ export default function PropertyDetailPage({ params }: Props) {
       icon: Layers, label: 'Этаж', value: `${property.floor} / ${property.floor_total}`,
     },
     property.price      && { icon: null, label: 'Цена',       value: formatPrice(property.price)    },
+    property.listing_type && {
+      icon: null, label: 'Вид',
+      value: LISTING_TYPE_LABELS[property.listing_type] ?? property.listing_type,
+    },
+    property.renovation && {
+      icon: null, label: 'Ремонт',
+      value: RENOVATION_LABELS[property.renovation] ?? property.renovation,
+    },
+    property.net_price && {
+      icon: null, label: 'На руки',
+      value: formatPrice(property.net_price),
+    },
   ].filter(Boolean) as { icon: React.ElementType | null; label: string; value: string }[];
 
   return (
@@ -82,9 +120,16 @@ export default function PropertyDetailPage({ params }: Props) {
         <div>
           <div className="flex items-start justify-between gap-3 mb-1">
             <PermissionGate hideInSafeMode>
-              <p className="text-[26px] font-bold leading-tight" style={{ color: 'var(--label-primary)' }}>
-                {formatPrice(property.price)}
-              </p>
+              <div>
+                <p className="text-[26px] font-bold leading-tight" style={{ color: 'var(--label-primary)' }}>
+                  {formatPrice(property.price)}
+                </p>
+                {property.display_id && (
+                  <p className="text-[12px] font-mono mt-0.5" style={{ color: 'var(--label-tertiary)' }}>
+                    #{property.display_id}
+                  </p>
+                )}
+              </div>
             </PermissionGate>
             <Badge variant={vis.variant} size="sm" className="flex-shrink-0 mt-1">{vis.label}</Badge>
           </div>
@@ -134,6 +179,16 @@ export default function PropertyDetailPage({ params }: Props) {
           </div>
         )}
 
+        {/* Feature badges */}
+        {(property.has_loggia || property.has_balcony || property.has_wardrobe || property.has_panoramic) && (
+          <div className="flex gap-1.5 flex-wrap">
+            {property.has_loggia    && <span className="chip text-[12px] py-0.5">Лоджия</span>}
+            {property.has_balcony   && <span className="chip text-[12px] py-0.5">Балкон</span>}
+            {property.has_wardrobe  && <span className="chip text-[12px] py-0.5">Гардероб</span>}
+            {property.has_panoramic && <span className="chip text-[12px] py-0.5">Панорамные окна</span>}
+          </div>
+        )}
+
         {/* Description */}
         {property.description && (
           <div
@@ -161,6 +216,25 @@ export default function PropertyDetailPage({ params }: Props) {
             </div>
           )}
         </PermissionGate>
+
+        {/* Events history */}
+        {events.length > 0 && (
+          <div className="squircle-card p-4"
+            style={{ background: 'var(--bg-elevated)', border: '0.5px solid var(--separator)', boxShadow: 'var(--shadow-card)' }}>
+            <p className="section-label">История</p>
+            <div className="flex flex-col gap-2 mt-2">
+              {(events as EntityEvent[]).map((e, i) => (
+                <div key={i} className="flex items-start justify-between gap-3"
+                  style={{ borderBottom: '0.5px solid var(--separator)', paddingBottom: 8 }}>
+                  <p className="text-[13px]" style={{ color: 'var(--label-secondary)' }}>{e.description}</p>
+                  <span className="text-[11px] flex-shrink-0" style={{ color: 'var(--label-tertiary)' }}>
+                    {new Date(e.created_at).toLocaleDateString('ru-RU')}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Actions */}
         <div className="flex flex-wrap gap-2">

@@ -13,7 +13,11 @@ export interface DashboardStats {
 
 export const analyticsApi = {
   dashboard: () =>
-    apiClient.get<DashboardStats>('/analytics/dashboard').then(r => r.data),
+    apiClient.get<DashboardStats | { data: DashboardStats }>('/analytics/dashboard').then(r =>
+      (r.data as { data: DashboardStats }).data ?? (r.data as DashboardStats)
+    ),
   reports: (period = 'month', from?: string, to?: string) =>
-    apiClient.get('/analytics/reports', { params: { period, from, to } }).then(r => r.data),
+    apiClient.get<unknown>('/analytics/reports', { params: { period, from, to } }).then(r =>
+      (r.data as { data: unknown }).data ?? r.data
+    ),
 };

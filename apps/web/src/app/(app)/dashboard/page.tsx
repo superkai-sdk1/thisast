@@ -1,23 +1,59 @@
 'use client';
 
 import Link from 'next/link';
+import { useState } from 'react';
 import {
   TrendingUp, Building2, Users, Handshake, ArrowRight,
-  Zap, Target, Plus, BarChart3, Clock,
+  Zap, Target, Plus, BarChart3, ClipboardList,
 } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import { useAppStore } from '@/lib/store/useAppStore';
 import { useDealsSummary } from '@/lib/hooks/queries/useDeals';
 import { useProperties } from '@/lib/hooks/queries/useProperties';
 import { useDemands } from '@/lib/hooks/queries/useDemands';
+import { analyticsApi } from '@/lib/api/analytics';
 import { GlassNavBar } from '@/components/organisms/GlassNavBar';
 import { PermissionGate } from '@/components/molecules/PermissionGate';
 import { formatPrice } from '@/lib/utils/format';
+
+const PERIOD_OPTIONS = [
+  { value: 'day',     label: 'Сегодня'   },
+  { value: 'week',    label: 'Неделя'    },
+  { value: 'month',   label: 'Месяц'     },
+  { value: 'quarter', label: 'Квартал'   },
+  { value: 'year',    label: 'Год'       },
+  { value: 'all',     label: 'Всё время' },
+] as const;
+
+interface ReportStats {
+  period: string;
+  from_date: string;
+  to_date: string;
+  contacts: number;
+  clients: number;
+  properties: number;
+  deals: number;
+  activity: { event_type: string; description: string; created_at: string; user_name?: string }[];
+}
 
 export default function DashboardPage() {
   const user                      = useAppStore(s => s.user);
   const { data: summary }         = useDealsSummary();
   const { data: propertiesPage }  = useProperties({ page: 1, limit: 1 });
   const { data: demands }         = useDemands();
+  const [period, setPeriod]       = useState<string>('month');
+
+  const { data: analyticsData } = useQuery({
+    queryKey: ['analytics-dashboard'],
+    queryFn: analyticsApi.dashboard,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const { data: reportStats } = useQuery({
+    queryKey: ['analytics-reports', period],
+    queryFn: () => analyticsApi.reports(period) as Promise<ReportStats>,
+    staleTime: 2 * 60 * 1000,
+  });
 
   const newLeads    = demands?.filter(d => d.kanban_status === 'new').length ?? 0;
   const activeDeals = demands?.filter(
@@ -69,8 +105,8 @@ export default function DashboardPage() {
               <UrgentCard newLeads={newLeads} activeDeals={activeDeals} />
             </div>
 
-            {/* 3 metric cards — 4+4+4 */}
-            <div className="md:col-span-4">
+            {/* 4 metric cards — 3+3+3+3 */}
+            <div className="md:col-span-3">
               <MetricCard
                 label="Объектов"
                 value={propertiesPage?.total ?? '—'}
@@ -80,7 +116,7 @@ export default function DashboardPage() {
                 glow="rgba(99,102,241,0.40)"
               />
             </div>
-            <div className="md:col-span-4">
+            <div className="md:col-span-3">
               <MetricCard
                 label="Клиентов"
                 value={demands?.length ?? '—'}
@@ -90,7 +126,7 @@ export default function DashboardPage() {
                 glow="rgba(139,92,246,0.38)"
               />
             </div>
-            <div className="md:col-span-4">
+            <div className="md:col-span-3">
               <MetricCard
                 label="Закрыто сделок"
                 value={summary?.closed_count ?? '—'}
@@ -98,6 +134,16 @@ export default function DashboardPage() {
                 color="var(--neon-teal)"
                 bg="rgba(6,239,197,0.10)"
                 glow="rgba(6,239,197,0.35)"
+              />
+            </div>
+            <div className="md:col-span-3">
+              <MetricCard
+                label="Задач выполнено"
+                value={analyticsData ? `${analyticsData.task_completion_pct}%` : '—'}
+                icon={<ClipboardList size={18} />}
+                color="var(--ios-green)"
+                bg="rgba(52,199,89,0.12)"
+                glow="rgba(52,199,89,0.38)"
               />
             </div>
 
@@ -147,6 +193,67 @@ export default function DashboardPage() {
                   glow="rgba(6,239,197,0.35)"
                 />
               </div>
+            </div>
+
+            {/* ── Отчёты ── */}
+            <div className="md:col-span-12">
+              <div className="flex items-center justify-between mb-3">
+                <p className="section-label px-0.5 mb-0">Отчёты</p>
+                <div className="flex gap-1.5 overflow-x-auto no-scrollbar">
+                  {PERIOD_OPTIONS.map(opt => (
+                    <button key={opt.value} onClick={() => setPeriod(opt.value)}
+                      className={`chip text-[12px] py-1 px-2.5 flex-shrink-0 press-scale ${period === opt.value ? 'chip-active' : ''}`}>
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              {reportStats && (
+                <>
+                  {reportStats.from_date && (
+                    <p className="text-[12px] mb-3" style={{ color: 'var(--label-tertiary)' }}>
+                      {new Date(reportStats.from_date).toLocaleDateString('ru-RU')} — {new Date(reportStats.to_date).toLocaleDateString('ru-RU')}
+                    </p>
+                  )}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                    {([
+                      { label: 'Новые клиенты', value: reportStats.clients,    color: 'var(--neon-purple)', icon: <Users size={16} /> },
+                      { label: 'Объекты',        value: reportStats.properties, color: 'var(--neon-blue)',   icon: <Building2 size={16} /> },
+                      { label: 'Сделки',          value: reportStats.deals,      color: 'var(--neon-teal)',   icon: <Handshake size={16} /> },
+                      { label: 'Активности',      value: reportStats.contacts,   color: 'var(--ios-orange)', icon: <ClipboardList size={16} /> },
+                    ] as const).map(({ label, value, color, icon }) => (
+                      <div key={label} className="squircle-card p-4"
+                        style={{ background: 'var(--bg-elevated)', border: '0.5px solid var(--separator)', boxShadow: 'var(--shadow-card)' }}>
+                        <div className="flex items-center gap-1.5 mb-2">
+                          <span style={{ color }}>{icon}</span>
+                          <p className="text-[11px]" style={{ color: 'var(--label-tertiary)' }}>{label}</p>
+                        </div>
+                        <p className="text-[24px] font-bold tabular-nums" style={{ color: 'var(--label-primary)' }}>{value}</p>
+                      </div>
+                    ))}
+                  </div>
+                  {reportStats.activity.length > 0 && (
+                    <div className="squircle-card p-4"
+                      style={{ background: 'var(--bg-elevated)', border: '0.5px solid var(--separator)', boxShadow: 'var(--shadow-card)' }}>
+                      <p className="section-label mb-2">История действий</p>
+                      <div className="flex flex-col gap-0">
+                        {reportStats.activity.slice(0, 10).map((e, i) => (
+                          <div key={i} className="flex items-start justify-between gap-3 py-2"
+                            style={{ borderBottom: i < reportStats.activity.slice(0,10).length - 1 ? '0.5px solid var(--separator)' : 'none' }}>
+                            <div className="min-w-0">
+                              <p className="text-[13px]" style={{ color: 'var(--label-primary)' }}>{e.description}</p>
+                              {e.user_name && <p className="text-[11px] mt-0.5" style={{ color: 'var(--label-tertiary)' }}>{e.user_name}</p>}
+                            </div>
+                            <span className="text-[11px] flex-shrink-0" style={{ color: 'var(--label-tertiary)' }}>
+                              {new Date(e.created_at).toLocaleDateString('ru-RU')}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
             </div>
 
           </div>
@@ -217,7 +324,7 @@ function UrgentCard({ newLeads, activeDeals }: { newLeads: number; activeDeals: 
       {hasUrgent ? (
         <div className="flex flex-col gap-2 flex-1">
           {newLeads > 0 && (
-            <Link href="/demand">
+            <Link href="/clients">
               <div
                 className="flex items-center gap-2 p-3 rounded-[12px] press-scale"
                 style={{ background: 'rgba(245,158,11,0.10)', border: '1px solid rgba(245,158,11,0.18)' }}
@@ -233,7 +340,7 @@ function UrgentCard({ newLeads, activeDeals }: { newLeads: number; activeDeals: 
             </Link>
           )}
           {activeDeals > 0 && (
-            <Link href="/demand">
+            <Link href="/clients">
               <div
                 className="flex items-center gap-2 p-3 rounded-[12px] press-scale"
                 style={{ background: 'rgba(99,102,241,0.10)', border: '1px solid rgba(99,102,241,0.20)' }}

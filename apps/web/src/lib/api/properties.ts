@@ -5,6 +5,14 @@ import type { PaginatedResponse } from '@crm/shared-types';
 export interface PropertyFilter {
   type?: string;
   status?: 'private' | 'shared' | 'public';
+  listing_type?: 'sale' | 'rent';
+  property_status?: 'active' | 'sold' | 'withdrawn';
+  renovation?: string;
+  has_loggia?: boolean;
+  has_balcony?: boolean;
+  has_wardrobe?: boolean;
+  has_panoramic?: boolean;
+  from_realtor?: boolean;
   base?: 'own' | 'global' | 'agency';
   price_min?: number;
   price_max?: number;
@@ -64,4 +72,7 @@ export const propertiesApi = {
 
   reorderPhotos: (propertyId: string, order: { id: string; display_order: number }[]) =>
     apiClient.patch(`/properties/${propertyId}/photos/reorder`, { order }),
+
+  getEvents: (id: string) =>
+    apiClient.get<{ data: unknown[] }>(`/properties/${id}/events`).then(r => r.data.data ?? []),
 };

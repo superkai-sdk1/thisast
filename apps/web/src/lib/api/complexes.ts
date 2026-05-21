@@ -8,6 +8,21 @@ export interface ComplexFilter {
   year_delivery?: number;
 }
 
+export interface ComplexApartment {
+  id: string;
+  area: number;
+  floor?: number;
+  rooms?: number;
+  status: 'free' | 'reserved' | 'sold';
+}
+
+export interface CreateApartmentInput {
+  area: number;
+  floor?: number;
+  rooms?: number;
+  status: 'free' | 'reserved' | 'sold';
+}
+
 export const complexesApi = {
   list: (filter?: ComplexFilter) =>
     apiClient
@@ -37,4 +52,14 @@ export const complexesApi = {
 
   deletePhoto: (photoId: string) =>
     apiClient.delete(`/complexes/photos/${photoId}`),
+
+  getApartments: (id: string) =>
+    apiClient
+      .get<{ data: ComplexApartment[] }>(`/complexes/${id}/apartments`)
+      .then(r => r.data.data),
+
+  createApartment: (id: string, data: CreateApartmentInput) =>
+    apiClient
+      .post<{ data: ComplexApartment }>(`/complexes/${id}/apartments`, data)
+      .then(r => r.data.data),
 };

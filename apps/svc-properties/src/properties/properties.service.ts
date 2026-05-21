@@ -96,6 +96,11 @@ export class PropertiesService {
     }
     if (filter.complex_id) { whereClause += ` AND p.complex_id = $${idx++}`; params.push(filter.complex_id); }
     if (filter.payment_form) { whereClause += ` AND $${idx++} = ANY(p.conditions::text[])`; params.push(filter.payment_form); }
+    if (filter.q) {
+      const qLike = `%${filter.q}%`;
+      whereClause += ` AND (p.street ILIKE $${idx++} OR p.district ILIKE $${idx++} OR p.city ILIKE $${idx++} OR p.description ILIKE $${idx++} OR p.house_number ILIKE $${idx++})`;
+      params.push(qLike, qLike, qLike, qLike, qLike);
+    }
 
     const [rows, count] = await Promise.all([
       this.db.query(

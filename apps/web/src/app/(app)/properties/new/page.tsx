@@ -16,6 +16,7 @@ const DRAFT_ID = 'new-property';
 
 interface PropertyFormValues {
   property_type: PropertyType | '';
+  listing_type: 'sale' | 'rent';
   city: string;
   district: string;
   street: string;
@@ -28,10 +29,18 @@ interface PropertyFormValues {
   description: string;
   conditions: PaymentForm[];
   tags: string;
+  renovation: string;
+  has_loggia: boolean;
+  has_balcony: boolean;
+  has_wardrobe: boolean;
+  has_panoramic: boolean;
+  net_price: string;
+  from_realtor: boolean;
 }
 
 const INITIAL: PropertyFormValues = {
   property_type: '',
+  listing_type: 'sale',
   city: 'Махачкала',
   district: '',
   street: '',
@@ -44,6 +53,13 @@ const INITIAL: PropertyFormValues = {
   description: '',
   conditions: [],
   tags: '',
+  renovation: '',
+  has_loggia: false,
+  has_balcony: false,
+  has_wardrobe: false,
+  has_panoramic: false,
+  net_price: '',
+  from_realtor: false,
 };
 
 const TYPE_OPTIONS: { value: PropertyType; label: string }[] = [
@@ -133,11 +149,29 @@ export default function NewPropertyPage() {
       tags: values.tags ? values.tags.split(',').map(t => t.trim()).filter(Boolean) : [],
       visibility_status: 'private',
       complex_id: selectedComplexId,
+      listing_type: values.listing_type,
+      renovation: values.renovation || undefined,
+      has_loggia: values.has_loggia,
+      has_balcony: values.has_balcony,
+      has_wardrobe: values.has_wardrobe,
+      has_panoramic: values.has_panoramic,
+      net_price: values.net_price ? Number(values.net_price) : undefined,
+      from_realtor: values.from_realtor,
     } as Parameters<typeof propertiesApi.create>[0]);
   }
 
   const showRoomFloor = !values.property_type || ['apartment', 'resale', 'new_building', 'house'].includes(values.property_type);
   const showFloor = !values.property_type || ['apartment', 'resale', 'new_building'].includes(values.property_type);
+  const showRenovation = !values.property_type || ['apartment', 'resale', 'new_building', 'house'].includes(values.property_type);
+  const showFeatures = !values.property_type || ['apartment', 'resale', 'new_building'].includes(values.property_type);
+
+  const RENOVATION_OPTIONS = [
+    { value: 'none', label: 'Без отделки' },
+    { value: 'rough', label: 'Черновая' },
+    { value: 'cosmetic', label: 'Косметический' },
+    { value: 'euro', label: 'Евро' },
+    { value: 'designer', label: 'Дизайнерский' },
+  ];
 
   if (!restored) return null;
 
@@ -269,6 +303,91 @@ export default function NewPropertyPage() {
                 {label}
               </button>
             ))}
+          </div>
+        </FormSection>
+
+        <FormSection label="Вид сделки *">
+          <div className="flex gap-2 flex-wrap">
+            <button
+              onClick={() => set('listing_type', 'sale')}
+              className={`chip press-scale ${values.listing_type === 'sale' ? 'chip-active' : ''}`}
+            >
+              Продажа
+            </button>
+            <button
+              onClick={() => set('listing_type', 'rent')}
+              className={`chip press-scale ${values.listing_type === 'rent' ? 'chip-active' : ''}`}
+            >
+              Аренда
+            </button>
+          </div>
+        </FormSection>
+
+        {showRenovation && (
+          <FormSection label="Ремонт">
+            <div className="flex gap-2 flex-wrap">
+              {RENOVATION_OPTIONS.map(({ value, label }) => (
+                <button
+                  key={value}
+                  onClick={() => set('renovation', values.renovation === value ? '' : value)}
+                  className={`chip press-scale ${values.renovation === value ? 'chip-active' : ''}`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </FormSection>
+        )}
+
+        {showFeatures && (
+          <FormSection label="Особенности">
+            <div className="flex gap-2 flex-wrap">
+              <button
+                onClick={() => set('has_loggia', !values.has_loggia)}
+                className={`chip press-scale ${values.has_loggia ? 'chip-active' : ''}`}
+              >
+                Лоджия
+              </button>
+              <button
+                onClick={() => set('has_balcony', !values.has_balcony)}
+                className={`chip press-scale ${values.has_balcony ? 'chip-active' : ''}`}
+              >
+                Балкон
+              </button>
+              <button
+                onClick={() => set('has_wardrobe', !values.has_wardrobe)}
+                className={`chip press-scale ${values.has_wardrobe ? 'chip-active' : ''}`}
+              >
+                Гардероб
+              </button>
+              <button
+                onClick={() => set('has_panoramic', !values.has_panoramic)}
+                className={`chip press-scale ${values.has_panoramic ? 'chip-active' : ''}`}
+              >
+                Панорамные окна
+              </button>
+            </div>
+          </FormSection>
+        )}
+
+        <FormSection label="Цена на руки, ₽">
+          <input
+            type="number"
+            className="input-field"
+            placeholder="0"
+            value={values.net_price}
+            onChange={e => set('net_price', e.target.value)}
+          />
+        </FormSection>
+
+        <FormSection label="Источник">
+          <div className="flex gap-2 flex-wrap">
+            <button
+              onClick={() => set('from_realtor', !values.from_realtor)}
+              className={`chip press-scale ${values.from_realtor ? 'chip-active' : ''}`}
+            >
+              От риэлтора
+            </button>
           </div>
         </FormSection>
 
