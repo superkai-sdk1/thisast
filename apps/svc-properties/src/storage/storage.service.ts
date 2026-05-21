@@ -43,11 +43,10 @@ export class StorageService {
     return `${proto}://${endpoint}:${port}/${bucket}/${objectName}`;
   }
 
-  getImgproxyUrl(objectName: string, bucket: string, width?: number, height?: number): string {
+  getImgproxyUrl(objectName: string, bucket: string): string {
     const base = process.env.IMGPROXY_BASE_URL ?? 'http://localhost:8080';
     const s3Path = `s3://${bucket}/${objectName}`;
     const encoded = Buffer.from(s3Path).toString('base64url');
-    const resize = width && height ? `/rs:fill:${width}:${height}` : '';
-    return `${base}/insecure${resize}/plain/${encoded}`;
+    return `${base}/insecure/rs:fit:1200:0/f:webp/${encoded}`;
   }
 }

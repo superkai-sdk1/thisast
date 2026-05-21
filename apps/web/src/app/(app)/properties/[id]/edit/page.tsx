@@ -59,6 +59,7 @@ export default function EditPropertyPage({ params }: Props) {
   const [tags, setTags] = useState('');
   const [conditions, setConditions] = useState<PaymentForm[]>([]);
   const [visibility, setVisibility] = useState<VisibilityStatus>('private');
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!property) return;
@@ -84,6 +85,7 @@ export default function EditPropertyPage({ params }: Props) {
       qc.invalidateQueries({ queryKey: propertyKeys.lists() });
       router.back();
     },
+    onError: (e: unknown) => setSaveError((e as Error)?.message ?? 'Ошибка сохранения'),
   });
 
   const photoDeleteMutation = useMutation({
@@ -103,6 +105,7 @@ export default function EditPropertyPage({ params }: Props) {
   }
 
   function handleSubmit() {
+    setSaveError(null);
     updateMutation.mutate({
       price: price ? Number(price) : undefined,
       district: district || undefined,
@@ -261,6 +264,9 @@ export default function EditPropertyPage({ params }: Props) {
 
       <div className="fixed bottom-0 inset-x-0 px-4 pt-4"
         style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))', background: 'linear-gradient(to top, var(--bg-primary) 60%, transparent)' }}>
+        {saveError && (
+          <p className="text-[13px] mb-2" style={{ color: 'var(--ios-red)' }}>{saveError}</p>
+        )}
         <Button className="w-full" onClick={handleSubmit} loading={updateMutation.isPending}>
           Сохранить изменения
         </Button>

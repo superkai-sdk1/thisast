@@ -46,6 +46,7 @@ export class DemandsService {
        FROM demands d
        JOIN users u ON u.id = d.agent_id
        WHERE ($1::boolean OR d.agent_id = $2)
+         AND d.deleted_at IS NULL
          ${whereExtra}
        ORDER BY d.updated_at DESC
        LIMIT $${idx++} OFFSET $${idx++}`,
@@ -58,7 +59,7 @@ export class DemandsService {
     const result = await this.db.query(
       `SELECT d.*, u.full_name AS agent_name FROM demands d
        JOIN users u ON u.id = d.agent_id
-       WHERE d.id = $1`,
+       WHERE d.id = $1 AND d.deleted_at IS NULL`,
       [id],
     );
     if (!result.rows[0]) throw new NotFoundException('Заявка не найдена');
@@ -172,8 +173,35 @@ export class DemandsService {
   async delete(id: string, actor: JwtPayload) {
     await this.findOne(id, actor);
     await this.writeEvent(id, 'deleted', actor.sub, 'Клиент удалён');
-    await this.db.query('DELETE FROM demands WHERE id = $1', [id]);
+    await this.db.query('UPDATE demands SET deleted_at = NOW() WHERE id = $1', [id]);
     return { success: true };
+  }
+
+  async listTrashed(actor: JwtPayload) {
+    const isAdmin = [Role.ADMIN, Role.SUPERADMIN].includes(actor.role as Role);
+    const cutoff = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString();
+    const result = await this.db.query(
+      `SELECT d.*, u.full_name AS agent_name
+       FROM demands d
+       JOIN users u ON u.id = d.agent_id
+       WHERE d.deleted_at IS NOT NULL AND d.deleted_at >= $1
+         AND ($2::boolean OR d.agent_id = $3)
+       ORDER BY d.deleted_at DESC`,
+      [cutoff, isAdmin, actor.sub],
+    );
+    return result.rows;
+  }
+
+  async restore(id: string, actor: JwtPayload) {
+    const isAdmin = [Role.ADMIN, Role.SUPERADMIN].includes(actor.role as Role);
+    const result = await this.db.query(
+      `UPDATE demands SET deleted_at = NULL
+       WHERE id = $1 AND deleted_at IS NOT NULL AND ($2::boolean OR agent_id = $3)
+       RETURNING *`,
+      [id, isAdmin, actor.sub],
+    );
+    if (!result.rows[0]) throw new NotFoundException('Заявка не найдена в корзине');
+    return result.rows[0];
   }
 
   async getMatches(demandId: string, limit = 10) {

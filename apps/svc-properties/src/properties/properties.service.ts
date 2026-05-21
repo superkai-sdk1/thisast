@@ -243,6 +243,34 @@ export class PropertiesService {
     return { success: true };
   }
 
+  async listTrashed(actor: ActorPayload) {
+    const cutoff = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString();
+    let where = `p.deleted_at IS NOT NULL AND p.deleted_at >= '${cutoff}'`;
+    const params: unknown[] = [];
+    const canViewGlobal = await this.checkPermission(actor.sub, 'can_view_global_database');
+    if (!canViewGlobal) {
+      where += ` AND p.owner_agent_id = $1`;
+      params.push(actor.sub);
+    }
+    const r = await this.db.query(
+      `SELECT p.*, json_agg(pp ORDER BY pp.display_order) FILTER (WHERE pp.id IS NOT NULL) AS photos
+       FROM properties p LEFT JOIN property_photos pp ON pp.property_id = p.id
+       WHERE ${where} GROUP BY p.id ORDER BY p.deleted_at DESC`,
+      params,
+    );
+    return r.rows.map(parsePropertyRow);
+  }
+
+  async restore(id: string, actor: ActorPayload) {
+    const result = await this.db.query(
+      `UPDATE properties SET deleted_at = NULL
+       WHERE id = $1 AND deleted_at IS NOT NULL RETURNING *`,
+      [id],
+    );
+    if (!result.rows[0]) throw new NotFoundException('Объект не найден в корзине');
+    return result.rows[0];
+  }
+
   async getMatches(propertyId: string, limit = 10) {
     const result = await this.db.query(
       `SELECT dpm.*, d.buyer_name, d.buyer_phone, d.budget_max, d.kanban_status

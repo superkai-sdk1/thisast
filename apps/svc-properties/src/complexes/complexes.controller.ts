@@ -15,6 +15,8 @@ import {
   MSG_COMPLEXES_DOCUMENT_LIST,
   MSG_COMPLEXES_DOCUMENT_UPLOAD,
   MSG_COMPLEXES_DOCUMENT_DELETE,
+  MSG_COMPLEXES_TRASH_LIST,
+  MSG_COMPLEXES_RESTORE,
 } from '@crm/shared-types';
 import { ComplexesService } from './complexes.service';
 import { StorageService } from '../storage/storage.service';
@@ -50,6 +52,16 @@ export class ComplexesController {
   @MessagePattern(MSG_COMPLEXES_DELETE)
   delete(@Payload() data: { id: string }) {
     return this.complexesService.delete(data.id);
+  }
+
+  @MessagePattern(MSG_COMPLEXES_TRASH_LIST)
+  listTrash() {
+    return this.complexesService.listTrashed();
+  }
+
+  @MessagePattern(MSG_COMPLEXES_RESTORE)
+  restore(@Payload() data: { id: string }) {
+    return this.complexesService.restore(data.id);
   }
 
   @MessagePattern(MSG_COMPLEXES_PHOTO_UPLOAD)

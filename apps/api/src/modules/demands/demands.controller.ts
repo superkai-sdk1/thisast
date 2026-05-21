@@ -13,6 +13,16 @@ import type { JwtPayload } from '../../common/types/jwt-payload.type';
 export class DemandsController {
   constructor(private demandsService: DemandsService) {}
 
+  @Get('trash')
+  listTrashed(@CurrentUser() actor: JwtPayload) {
+    return this.demandsService.listTrashed(actor);
+  }
+
+  @Post(':id/restore')
+  restore(@Param('id') id: string, @CurrentUser() actor: JwtPayload) {
+    return this.demandsService.restore(id, actor);
+  }
+
   @Get()
   findAll(
     @CurrentUser() actor: JwtPayload,

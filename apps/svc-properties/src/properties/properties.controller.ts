@@ -12,6 +12,8 @@ import {
   MSG_PROPS_PHOTO_UPLOAD,
   MSG_PROPS_PHOTO_DELETE,
   MSG_PROPS_PHOTO_REORDER,
+  MSG_PROPS_TRASH_LIST,
+  MSG_PROPS_RESTORE,
   EVT_PROPERTY_CREATED,
   EVT_PROPERTY_UPDATED,
   EVT_PROPERTY_PRICE_DROP,
@@ -140,6 +142,16 @@ export class PropertiesController {
   @MessagePattern(MSG_PROPS_GET_MATCHES)
   async getMatches(@Payload() data: { id: string; limit?: number }) {
     return this.propertiesService.getMatches(data.id, data.limit);
+  }
+
+  @MessagePattern(MSG_PROPS_TRASH_LIST)
+  async listTrash(@Payload() data: { actor: any }) {
+    return this.propertiesService.listTrashed(data.actor);
+  }
+
+  @MessagePattern(MSG_PROPS_RESTORE)
+  async restore(@Payload() data: { id: string; actor: any }) {
+    return this.propertiesService.restore(data.id, data.actor);
   }
 
   @MessagePattern(MSG_PROPS_PHOTO_UPLOAD)

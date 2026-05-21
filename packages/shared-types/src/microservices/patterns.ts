@@ -31,6 +31,8 @@ export const MSG_PROPS_GET_MATCHES       = 'properties:getMatches';
 export const MSG_PROPS_PHOTO_UPLOAD      = 'properties:photoUpload';
 export const MSG_PROPS_PHOTO_DELETE      = 'properties:photoDelete';
 export const MSG_PROPS_PHOTO_REORDER     = 'properties:photoReorder';
+export const MSG_PROPS_TRASH_LIST        = 'props:trash:list';
+export const MSG_PROPS_RESTORE           = 'props:restore';
 
 // ── Owners service (part of svc-properties) ──────────────────────────────────
 export const MSG_OWNERS_LIST     = 'owners:list';
@@ -49,6 +51,8 @@ export const MSG_DEMANDS_UPDATE_STATUS = 'demands:updateStatus';
 export const MSG_DEMANDS_GET_MATCHES   = 'demands:getMatches';
 export const MSG_DEMANDS_GET_ACTIVITY  = 'demands:getActivity';
 export const MSG_DEMANDS_ADD_ACTIVITY  = 'demands:addActivity';
+export const MSG_DEMANDS_TRASH_LIST    = 'demands:trash:list';
+export const MSG_DEMANDS_RESTORE       = 'demands:restore';
 
 // ── Deals service ─────────────────────────────────────────────────────────────
 export const MSG_DEALS_LIST    = 'deals:list';
@@ -79,6 +83,8 @@ export const MSG_COMPLEXES_UPDATE       = 'complexes:update';
 export const MSG_COMPLEXES_DELETE       = 'complexes:delete';
 export const MSG_COMPLEXES_PHOTO_UPLOAD = 'complexes:photoUpload';
 export const MSG_COMPLEXES_PHOTO_DELETE = 'complexes:photoDelete';
+export const MSG_COMPLEXES_TRASH_LIST   = 'complexes:trash:list';
+export const MSG_COMPLEXES_RESTORE      = 'complexes:restore';
 
 // ── Tasks (part of svc-demands) ──────────────────────────────────────────────
 export const MSG_TASKS_LIST         = 'tasks:list';

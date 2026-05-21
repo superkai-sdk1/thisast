@@ -23,6 +23,16 @@ export class ComplexesController {
     return firstValueFrom(this.client.send(P.MSG_COMPLEXES_LIST, { filter }));
   }
 
+  @Get('trash')
+  listTrash() {
+    return firstValueFrom(this.client.send(P.MSG_COMPLEXES_TRASH_LIST, {}));
+  }
+
+  @Post(':id/restore')
+  restore(@Param('id') id: string) {
+    return firstValueFrom(this.client.send(P.MSG_COMPLEXES_RESTORE, { id }));
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return firstValueFrom(this.client.send(P.MSG_COMPLEXES_FIND_ONE, { id }));

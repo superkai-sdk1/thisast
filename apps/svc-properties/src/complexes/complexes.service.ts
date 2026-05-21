@@ -62,7 +62,7 @@ export class ComplexesService {
   constructor(@InjectDb() private db: Pool) {}
 
   async findAll(filter: ComplexFilter = {}) {
-    const conditions: string[] = ['rc.is_active = true'];
+    const conditions: string[] = ['rc.deleted_at IS NULL'];
     const params: unknown[] = [];
     let i = 1;
 
@@ -110,7 +110,7 @@ export class ComplexesService {
        FROM residential_complexes rc
        LEFT JOIN properties p ON p.complex_id = rc.id
        LEFT JOIN complex_photos cp ON cp.complex_id = rc.id
-       WHERE rc.id = $1
+       WHERE rc.id = $1 AND rc.deleted_at IS NULL
        GROUP BY rc.id`,
       [id],
     );
@@ -260,8 +260,32 @@ export class ComplexesService {
   }
 
   async delete(id: string) {
-    await this.db.query('UPDATE residential_complexes SET is_active = false WHERE id = $1', [id]);
+    await this.db.query('UPDATE residential_complexes SET deleted_at = NOW() WHERE id = $1', [id]);
     return { success: true };
+  }
+
+  async listTrashed() {
+    const cutoff = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString();
+    const r = await this.db.query(
+      `SELECT rc.*,
+         (SELECT url FROM complex_photos WHERE complex_id = rc.id AND is_cover = true LIMIT 1) AS cover_url,
+         COUNT(p.id) FILTER (WHERE p.deleted_at IS NULL)::int AS property_count
+       FROM residential_complexes rc
+       LEFT JOIN properties p ON p.complex_id = rc.id
+       WHERE rc.deleted_at IS NOT NULL AND rc.deleted_at >= $1
+       GROUP BY rc.id ORDER BY rc.deleted_at DESC`,
+      [cutoff],
+    );
+    return r.rows;
+  }
+
+  async restore(id: string) {
+    const r = await this.db.query(
+      'UPDATE residential_complexes SET deleted_at = NULL WHERE id = $1 AND deleted_at IS NOT NULL RETURNING *',
+      [id],
+    );
+    if (!r.rows[0]) throw new NotFoundException('ЖК не найден в корзине');
+    return r.rows[0];
   }
 
   async addPhoto(complexId: string, url: string, isCover: boolean) {

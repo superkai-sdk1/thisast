@@ -24,6 +24,16 @@ export class PropertiesController {
     return firstValueFrom(this.client.send(P.MSG_PROPS_LIST, { filter, actor: user }));
   }
 
+  @Get('trash')
+  listTrash(@CurrentUser() user: JwtPayload) {
+    return firstValueFrom(this.client.send(P.MSG_PROPS_TRASH_LIST, { actor: user }));
+  }
+
+  @Post(':id/restore')
+  restore(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
+    return firstValueFrom(this.client.send(P.MSG_PROPS_RESTORE, { id, actor: user }));
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
     return firstValueFrom(this.client.send(P.MSG_PROPS_FIND_ONE, { id, actor: user }));
