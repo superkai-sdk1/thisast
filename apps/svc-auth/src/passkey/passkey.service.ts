@@ -193,7 +193,7 @@ export class PasskeyService {
     const rawRefresh = require('crypto').randomBytes(32).toString('hex');
     const tokenHash = createHash('sha256').update(rawRefresh).digest('hex');
     await this.db.query(
-      `INSERT INTO refresh_tokens (user_id, token_hash, expires_at, ip, user_agent)
+      `INSERT INTO refresh_tokens (user_id, token_hash, expires_at, ip_address, user_agent)
        VALUES ($1, $2, NOW() + INTERVAL '30 days', $3, $4)`,
       [cred.uid, tokenHash, ip, userAgent],
     );

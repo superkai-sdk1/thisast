@@ -38,16 +38,22 @@ export interface TaskFilter {
 
 export const tasksApi = {
   list: (filter?: TaskFilter) =>
-    apiClient.get<Task[]>('/tasks', { params: filter }).then(r => r.data),
+    apiClient.get<{ data: Task[] } | Task[]>('/tasks', { params: filter })
+      .then(r => Array.isArray(r.data) ? r.data : (r.data as { data: Task[] }).data ?? []),
   detail: (id: string) =>
-    apiClient.get<Task>(`/tasks/${id}`).then(r => r.data),
+    apiClient.get<{ data: Task } | Task>(`/tasks/${id}`)
+      .then(r => ((r.data as { data: Task }).data ?? r.data) as Task),
   create: (data: Partial<Task>) =>
-    apiClient.post<Task>('/tasks', data).then(r => r.data),
+    apiClient.post<{ data: Task } | Task>('/tasks', data)
+      .then(r => ((r.data as { data: Task }).data ?? r.data) as Task),
   update: (id: string, data: Partial<Task>) =>
-    apiClient.patch<Task>(`/tasks/${id}`, data).then(r => r.data),
+    apiClient.patch<{ data: Task } | Task>(`/tasks/${id}`, data)
+      .then(r => ((r.data as { data: Task }).data ?? r.data) as Task),
   delete: (id: string) => apiClient.delete(`/tasks/${id}`),
   getComments: (id: string) =>
-    apiClient.get<TaskComment[]>(`/tasks/${id}/comments`).then(r => r.data),
+    apiClient.get<{ data: TaskComment[] } | TaskComment[]>(`/tasks/${id}/comments`)
+      .then(r => Array.isArray(r.data) ? r.data : (r.data as { data: TaskComment[] }).data ?? []),
   addComment: (id: string, body: string) =>
-    apiClient.post<TaskComment>(`/tasks/${id}/comments`, { body }).then(r => r.data),
+    apiClient.post<{ data: TaskComment } | TaskComment>(`/tasks/${id}/comments`, { body })
+      .then(r => ((r.data as { data: TaskComment }).data ?? r.data) as TaskComment),
 };
