@@ -1,8 +1,8 @@
-import { Injectable, NotFoundException, ForbiddenException, Inject } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
+import { RpcException, ClientProxy } from '@nestjs/microservices';
 import type { Pool } from 'pg';
 import { InjectDb } from '@crm/shared-core';
 import type { JwtPayload } from '@crm/shared-core';
-import { ClientProxy } from '@nestjs/microservices';
 import { EVT_DEMAND_CREATED, EVT_DEMAND_UPDATED } from '@crm/shared-types';
 import { REDIS_CLIENT } from '../redis-client.module';
 
@@ -102,7 +102,7 @@ export class DemandsService {
        RETURNING *`,
       [id, ([Role.ADMIN, Role.SUPERADMIN] as string[]).includes(actor.role), actor.sub],
     );
-    if (!result.rows[0]) throw new NotFoundException('Заявка не найдена');
+    if (!result.rows[0]) throw new RpcException({ statusCode: 404, message: 'Заявка не найдена' });
     return parseDemandRow(result.rows[0]);
   }
 
@@ -113,10 +113,10 @@ export class DemandsService {
        WHERE d.id = $1 AND d.deleted_at IS NULL`,
       [id],
     );
-    if (!result.rows[0]) throw new NotFoundException('Заявка не найдена');
+    if (!result.rows[0]) throw new RpcException({ statusCode: 404, message: 'Заявка не найдена' });
     const demand = parseDemandRow(result.rows[0]);
     if (demand['agent_id'] !== actor.sub && actor.role === Role.AGENT) {
-      throw new ForbiddenException('Нет доступа к этой заявке');
+      throw new RpcException({ statusCode: 403, message: 'Нет доступа к этой заявке' });
     }
     return demand;
   }
@@ -204,7 +204,7 @@ export class DemandsService {
 
   async getMatches(demandId: string, limit = 10) {
     const result = await this.db.query(
-      `SELECT dm.*, p.address_district, p.address_street, p.price
+      `SELECT dm.*, p.district, p.street, p.house_number, p.price, p.area_sqm, p.rooms
        FROM demand_property_matches dm
        JOIN properties p ON p.id = dm.property_id
        WHERE dm.demand_id = $1 AND dm.is_dismissed = false

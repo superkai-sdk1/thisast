@@ -177,13 +177,28 @@ function ClientList({ demands, isLoading }: { demands: Demand[]; isLoading?: boo
               e.stopPropagation();
               toggleActive.mutate({ id: d.id, is_active: !((d as any).is_active ?? true) });
             }}
-            className="absolute top-3 right-3 text-[11px] px-2 py-1 rounded-full press-scale z-10"
+            className="absolute top-3 right-3 z-10 flex items-center gap-0 rounded-full p-0.5"
             style={{
-              background: (d as any).is_active !== false ? 'rgba(52,199,89,0.15)' : 'var(--fill-tertiary)',
-              color: (d as any).is_active !== false ? 'var(--ios-green)' : 'var(--label-quaternary)',
+              width: 56,
+              height: 28,
+              background: (d as any).is_active !== false ? 'var(--ios-green)' : 'rgba(120,120,128,0.32)',
+              transition: 'background 0.2s',
+              flexShrink: 0,
             }}
+            aria-label={(d as any).is_active !== false ? 'Активен' : 'Неактивен'}
           >
-            {(d as any).is_active !== false ? 'Активен' : 'Неактивен'}
+            <span
+              style={{
+                display: 'block',
+                width: 23,
+                height: 23,
+                borderRadius: '50%',
+                background: 'white',
+                boxShadow: '0 1px 4px rgba(0,0,0,0.25)',
+                transform: (d as any).is_active !== false ? 'translateX(28px)' : 'translateX(0px)',
+                transition: 'transform 0.2s',
+              }}
+            />
           </button>
         </div>
       ))}
