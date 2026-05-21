@@ -14,8 +14,18 @@ export class DemandsController {
   constructor(@Inject(REDIS_CLIENT) private readonly client: ClientProxy) {}
 
   @Get()
-  findAll(@Query('status') status: string, @CurrentUser() user: JwtPayload) {
-    return firstValueFrom(this.client.send(P.MSG_DEMANDS_LIST, { status, actor: user }));
+  findAll(@Query() filter: Record<string, unknown>, @CurrentUser() user: JwtPayload) {
+    return firstValueFrom(this.client.send(P.MSG_DEMANDS_LIST, { filter, actor: user }));
+  }
+
+  @Get('trash')
+  listTrash(@CurrentUser() user: JwtPayload) {
+    return firstValueFrom(this.client.send(P.MSG_DEMANDS_TRASH_LIST, { actor: user }));
+  }
+
+  @Post(':id/restore')
+  restore(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
+    return firstValueFrom(this.client.send(P.MSG_DEMANDS_RESTORE, { id, actor: user }));
   }
 
   @Get(':id')

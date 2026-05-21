@@ -116,6 +116,11 @@ export interface Property {
   tags: string[];
   description: string | null;
   complex_id: string | null;
+  complex_name?: string | null;
+  complex_developer?: string | null;
+  mortgage_rate?: number | null;
+  mortgage_initial_pct?: number | null;
+  installment_plans?: Array<{ months: number; price_sqm: number; initial_pct: number }>;
   created_at_manual: string | null;
   updated_at_manual: string | null;
   photos: PropertyPhoto[];

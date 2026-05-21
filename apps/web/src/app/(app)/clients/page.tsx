@@ -133,6 +133,13 @@ export default function ClientsPage() {
 }
 
 function ClientList({ demands, isLoading }: { demands: Demand[]; isLoading?: boolean }) {
+  const qc = useQueryClient();
+  const toggleActive = useMutation({
+    mutationFn: ({ id, is_active }: { id: string; is_active: boolean }) =>
+      demandsApi.update(id, { is_active } as never),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['demands'] }),
+  });
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-16">
@@ -160,9 +167,25 @@ function ClientList({ demands, isLoading }: { demands: Demand[]; isLoading?: boo
   return (
     <div className="px-4 pt-3 pb-6 flex flex-col gap-3">
       {demands.map((d) => (
-        <Link key={d.id} href={`/clients/${d.id}`}>
-          <ClientCard demand={d} />
-        </Link>
+        <div key={d.id} className="relative">
+          <Link href={`/clients/${d.id}`}>
+            <ClientCard demand={d} />
+          </Link>
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              toggleActive.mutate({ id: d.id, is_active: !((d as any).is_active ?? true) });
+            }}
+            className="absolute top-3 right-3 text-[11px] px-2 py-1 rounded-full press-scale z-10"
+            style={{
+              background: (d as any).is_active !== false ? 'rgba(52,199,89,0.15)' : 'var(--fill-tertiary)',
+              color: (d as any).is_active !== false ? 'var(--ios-green)' : 'var(--label-quaternary)',
+            }}
+          >
+            {(d as any).is_active !== false ? 'Активен' : 'Неактивен'}
+          </button>
+        </div>
       ))}
     </div>
   );

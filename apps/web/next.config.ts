@@ -6,7 +6,9 @@ const config: NextConfig = {
   images: {
     formats: ['image/webp', 'image/avif'],
     remotePatterns: [
-      { protocol: 'http', hostname: 'localhost' },
+      { protocol: 'http',  hostname: 'localhost' },
+      { protocol: 'http',  hostname: 'imgproxy' },
+      { protocol: 'https', hostname: 'thisast.ru' },
       { protocol: 'https', hostname: '*.yourdomain.com' },
     ],
   },

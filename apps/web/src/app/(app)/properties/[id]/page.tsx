@@ -3,8 +3,8 @@
 import { use, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ChevronLeft, Share2, Trash2, Lock, Pencil, MapPin, BedDouble, Maximize2, Layers } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
+import { ChevronLeft, Share2, Trash2, Lock, Pencil, MapPin, BedDouble, Maximize2, Layers, Building, ClipboardList, Plus } from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useProperty, useDeleteProperty } from '@/lib/hooks/queries/useProperties';
 import { useRequestAccess } from '@/lib/hooks/queries/useSharing';
 import { PropertyGallery } from '@/components/organisms/PropertyGallery';
@@ -14,6 +14,9 @@ import { Badge } from '@/components/atoms/Badge';
 import { Button } from '@/components/atoms/Button';
 import { formatPrice } from '@/lib/utils/format';
 import { propertiesApi } from '@/lib/api/properties';
+import { tasksApi, type Task } from '@/lib/api/tasks';
+import { MortgageCalculator } from '@/components/organisms/MortgageCalculator';
+import { InstallmentCalculator } from '@/components/organisms/InstallmentCalculator';
 
 interface EntityEvent {
   event_type: string;
@@ -41,6 +44,17 @@ export default function PropertyDetailPage({ params }: Props) {
     queryKey: ['property-events', id],
     queryFn: () => propertiesApi.getEvents(id),
     enabled: !!id,
+  });
+  const { data: tasks = [] } = useQuery({
+    queryKey: ['tasks', { property_id: id }],
+    queryFn: () => tasksApi.list({ entity_type: 'property', entity_id: id } as Parameters<typeof tasksApi.list>[0]),
+    enabled: !!id,
+  });
+  const qc = useQueryClient();
+  const updateTaskMutation = useMutation({
+    mutationFn: ({ taskId, status }: { taskId: string; status: string }) =>
+      tasksApi.update(taskId, { status: status as Task['status'] }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['tasks'] }),
   });
   const [accessRequested, setAccessRequested] = useState(false);
   const [accessError, setAccessError] = useState(false);
@@ -201,6 +215,96 @@ export default function PropertyDetailPage({ params }: Props) {
             </p>
           </div>
         )}
+
+        {/* Complex block */}
+        {property.complex_id && property.complex_name && (
+          <Link href={`/complexes/${property.complex_id}`}>
+            <div className="squircle-card p-4 flex items-center gap-3 press-scale"
+              style={{ background: 'var(--bg-elevated)', border: '0.5px solid var(--separator)', boxShadow: 'var(--shadow-card)' }}>
+              <div className="w-9 h-9 rounded-[11px] flex items-center justify-center flex-shrink-0"
+                style={{ background: 'rgba(99,102,241,0.12)' }}>
+                <Building size={16} style={{ color: 'var(--neon-blue)' }} />
+              </div>
+              <div className="min-w-0">
+                <p className="text-[12px]" style={{ color: 'var(--label-tertiary)' }}>Жилой комплекс</p>
+                <p className="text-[14px] font-semibold truncate" style={{ color: 'var(--label-primary)' }}>
+                  {property.complex_name}
+                </p>
+                {property.complex_developer && (
+                  <p className="text-[12px] truncate" style={{ color: 'var(--label-secondary)' }}>
+                    {property.complex_developer}
+                  </p>
+                )}
+              </div>
+            </div>
+          </Link>
+        )}
+
+        {/* Calculators */}
+        {(property.conditions as string[] | undefined)?.includes('mortgage') && property.price && (
+          <MortgageCalculator
+            price={property.price}
+            rate={property.mortgage_rate ?? undefined}
+            initialPct={property.mortgage_initial_pct ?? undefined}
+          />
+        )}
+        {(property.conditions as string[] | undefined)?.includes('installment') && property.price && (
+          <InstallmentCalculator
+            plans={property.installment_plans ?? []}
+            area={property.area_sqm ?? undefined}
+            price={property.price}
+          />
+        )}
+
+        {/* Tasks */}
+        <div className="squircle-card p-4 flex flex-col gap-3"
+          style={{ background: 'var(--bg-elevated)', border: '0.5px solid var(--separator)', boxShadow: 'var(--shadow-card)' }}>
+          <div className="flex items-center justify-between">
+            <p className="section-label">Задачи</p>
+            <Link href={`/tasks/new?property_id=${id}`}>
+              <button className="w-7 h-7 rounded-full flex items-center justify-center press-scale"
+                style={{ background: 'rgba(99,102,241,0.12)', color: 'var(--neon-blue)' }}>
+                <Plus size={14} />
+              </button>
+            </Link>
+          </div>
+          {(tasks as Task[]).length === 0 ? (
+            <div className="flex items-center gap-2 py-2">
+              <ClipboardList size={16} style={{ color: 'var(--label-quaternary)' }} />
+              <p className="text-[13px]" style={{ color: 'var(--label-tertiary)' }}>Нет задач по этому объекту</p>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-2">
+              {(tasks as Task[]).map(task => (
+                <div key={task.id} className="flex items-center justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[13px] font-medium truncate" style={{ color: 'var(--label-primary)' }}>
+                      {task.title}
+                    </p>
+                    {task.due_at && (
+                      <p className="text-[11px]" style={{ color: 'var(--label-tertiary)' }}>
+                        {new Date(task.due_at).toLocaleDateString('ru-RU')}
+                      </p>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => updateTaskMutation.mutate({
+                      taskId: task.id,
+                      status: task.status === 'done' ? 'new' : 'done',
+                    })}
+                    className="flex-shrink-0 text-[11px] px-2 py-1 rounded-full press-scale"
+                    style={{
+                      background: task.status === 'done' ? 'rgba(52,199,89,0.15)' : 'var(--fill-tertiary)',
+                      color: task.status === 'done' ? 'var(--ios-green)' : 'var(--label-secondary)',
+                    }}
+                  >
+                    {task.status === 'done' ? 'Готово' : 'В работе'}
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
 
         {/* Owner contacts */}
         <PermissionGate hideInSafeMode>

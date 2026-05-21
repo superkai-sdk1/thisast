@@ -14,6 +14,7 @@ import {
   MSG_PROPS_PHOTO_REORDER,
   MSG_PROPS_TRASH_LIST,
   MSG_PROPS_RESTORE,
+  MSG_PROPS_GET_EVENTS,
   EVT_PROPERTY_CREATED,
   EVT_PROPERTY_UPDATED,
   EVT_PROPERTY_PRICE_DROP,
@@ -152,6 +153,11 @@ export class PropertiesController {
   @MessagePattern(MSG_PROPS_RESTORE)
   async restore(@Payload() data: { id: string; actor: any }) {
     return this.propertiesService.restore(data.id, data.actor);
+  }
+
+  @MessagePattern(MSG_PROPS_GET_EVENTS)
+  async getEvents(@Payload() data: { id: string }) {
+    return this.propertiesService.getEvents(data.id);
   }
 
   @MessagePattern(MSG_PROPS_PHOTO_UPLOAD)

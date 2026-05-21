@@ -37,25 +37,80 @@ export class DemandsService {
     @Inject(REDIS_CLIENT) private redisClient: ClientProxy,
   ) {}
 
-  async findAll(actor: JwtPayload, status?: string) {
+  async findAll(actor: JwtPayload, filter: Record<string, unknown> = {}) {
+    const isAdmin = ([Role.ADMIN, Role.SUPERADMIN] as string[]).includes(actor.role);
+
+    const conditions: string[] = [
+      '($1::boolean OR d.agent_id = $2)',
+      'd.deleted_at IS NULL',
+    ];
+    const params: unknown[] = [isAdmin, actor.sub];
+    let idx = 3;
+
+    if (filter['status']) {
+      conditions.push(`d.kanban_status = $${idx++}::kanban_status`);
+      params.push(filter['status']);
+    }
+    if (filter['client_type']) {
+      conditions.push(`d.client_type = $${idx++}`);
+      params.push(filter['client_type']);
+    }
+    if (filter['is_active'] !== undefined && filter['is_active'] !== '') {
+      conditions.push(`d.is_active = $${idx++}`);
+      params.push(filter['is_active'] === 'true' || filter['is_active'] === true);
+    }
+    if (filter['temperature']) {
+      conditions.push(`d.temperature = $${idx++}`);
+      params.push(filter['temperature']);
+    }
+    if (filter['q']) {
+      conditions.push(`(d.buyer_name ILIKE $${idx} OR d.buyer_phone ILIKE $${idx})`);
+      params.push(`%${filter['q']}%`);
+      idx++;
+    }
+
+    const result = await this.db.query(
+      `SELECT d.*, u.full_name AS agent_name
+       FROM demands d
+       JOIN users u ON u.id = d.agent_id
+       WHERE ${conditions.join(' AND ')}
+       ORDER BY d.updated_at DESC`,
+      params,
+    );
+    return result.rows.map(parseDemandRow);
+  }
+
+  async listTrashed(actor: JwtPayload) {
     const isAdmin = ([Role.ADMIN, Role.SUPERADMIN] as string[]).includes(actor.role);
     const result = await this.db.query(
       `SELECT d.*, u.full_name AS agent_name
        FROM demands d
        JOIN users u ON u.id = d.agent_id
        WHERE ($1::boolean OR d.agent_id = $2)
-         AND ($3::text IS NULL OR d.kanban_status = $3::kanban_status)
-       ORDER BY d.updated_at DESC`,
-      [isAdmin, actor.sub, status ?? null],
+         AND d.deleted_at IS NOT NULL
+         AND d.deleted_at >= NOW() - INTERVAL '14 days'
+       ORDER BY d.deleted_at DESC`,
+      [isAdmin, actor.sub],
     );
     return result.rows.map(parseDemandRow);
+  }
+
+  async restore(id: string, actor: JwtPayload) {
+    const result = await this.db.query(
+      `UPDATE demands SET deleted_at = NULL, updated_at = NOW()
+       WHERE id = $1 AND ($2::boolean OR agent_id = $3)
+       RETURNING *`,
+      [id, ([Role.ADMIN, Role.SUPERADMIN] as string[]).includes(actor.role), actor.sub],
+    );
+    if (!result.rows[0]) throw new NotFoundException('Заявка не найдена');
+    return parseDemandRow(result.rows[0]);
   }
 
   async findOne(id: string, actor: JwtPayload) {
     const result = await this.db.query(
       `SELECT d.*, u.full_name AS agent_name FROM demands d
        JOIN users u ON u.id = d.agent_id
-       WHERE d.id = $1`,
+       WHERE d.id = $1 AND d.deleted_at IS NULL`,
       [id],
     );
     if (!result.rows[0]) throw new NotFoundException('Заявка не найдена');
@@ -143,7 +198,7 @@ export class DemandsService {
 
   async delete(id: string, actor: JwtPayload) {
     await this.findOne(id, actor);
-    await this.db.query('DELETE FROM demands WHERE id = $1', [id]);
+    await this.db.query('UPDATE demands SET deleted_at = NOW() WHERE id = $1', [id]);
     return { success: true };
   }
 

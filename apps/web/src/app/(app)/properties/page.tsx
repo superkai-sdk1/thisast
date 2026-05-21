@@ -100,9 +100,10 @@ export default function PropertiesPage() {
                 </button>
               ))}
             </div>
+            {/* Mobile-only filter button */}
             <button
               onClick={() => setFilterOpen(true)}
-              className="w-8 h-8 rounded-full flex items-center justify-center press-scale relative"
+              className="md:hidden w-8 h-8 rounded-full flex items-center justify-center press-scale relative"
               style={{ color: hasActiveFilters ? 'var(--ios-blue)' : 'var(--label-tertiary)' }}
             >
               <SlidersHorizontal size={18} />
@@ -129,31 +130,54 @@ export default function PropertiesPage() {
         </div>
       </div>
 
-      <div className="gradient-mesh min-h-full">
-        <div className={`px-4 pt-3 pb-6 ${
-          viewMode === 'list'  ? 'flex flex-col gap-3' :
-          viewMode === 'grid2' ? 'grid grid-cols-2 gap-3' :
-                                 'grid grid-cols-3 gap-2'
-        }`}>
+      {/* Desktop: sidebar + content / Mobile: content only */}
+      <div className="md:flex gradient-mesh min-h-full">
 
-          {properties.length === 0 && !isFetchingNextPage && (
-            <div className={viewMode !== 'list' ? 'col-span-full' : ''}>
-              <EmptyState />
-            </div>
-          )}
+        {/* Desktop filter sidebar */}
+        <aside
+          className="hidden md:flex flex-col w-72 flex-shrink-0 overflow-y-auto no-scrollbar px-4 pt-4 pb-24"
+          style={{
+            borderRight: '0.5px solid var(--separator)',
+            background: 'var(--bg-secondary)',
+            minHeight: 'calc(100vh - 88px)',
+          }}
+        >
+          <p className="section-label mb-3">Фильтры</p>
+          <PropertyFilterForm
+            value={filter}
+            onChange={setFilter}
+            onClose={() => {}}
+            inline
+          />
+        </aside>
 
-          {properties.map((p) => (
-            <PropertyCard key={p.id} property={p} compact={viewMode !== 'list'} />
-          ))}
+        {/* Properties grid */}
+        <div className="flex-1">
+          <div className={`px-4 pt-3 pb-6 ${
+            viewMode === 'list'  ? 'flex flex-col gap-3' :
+            viewMode === 'grid2' ? 'grid grid-cols-2 gap-3' :
+                                   'grid grid-cols-3 gap-2'
+          }`}>
 
-          <div ref={sentinelRef} className={viewMode !== 'list' ? 'col-span-full' : ''} />
+            {properties.length === 0 && !isFetchingNextPage && (
+              <div className={viewMode !== 'list' ? 'col-span-full' : ''}>
+                <EmptyState />
+              </div>
+            )}
 
-          {isFetchingNextPage && (
-            <div className={`flex justify-center py-4 ${viewMode !== 'list' ? 'col-span-full' : ''}`}>
-              <div className="w-5 h-5 border-2 rounded-full animate-spin"
-                style={{ borderColor: 'var(--separator)', borderTopColor: 'var(--ios-blue)' }} />
-            </div>
-          )}
+            {properties.map((p) => (
+              <PropertyCard key={p.id} property={p} compact={viewMode !== 'list'} />
+            ))}
+
+            <div ref={sentinelRef} className={viewMode !== 'list' ? 'col-span-full' : ''} />
+
+            {isFetchingNextPage && (
+              <div className={`flex justify-center py-4 ${viewMode !== 'list' ? 'col-span-full' : ''}`}>
+                <div className="w-5 h-5 border-2 rounded-full animate-spin"
+                  style={{ borderColor: 'var(--separator)', borderTopColor: 'var(--ios-blue)' }} />
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -162,7 +186,7 @@ export default function PropertiesPage() {
         <Plus size={24} strokeWidth={2.2} />
       </Link>
 
-      {/* Filter sheet */}
+      {/* Mobile-only filter sheet */}
       <BottomSheet isOpen={filterOpen} onClose={() => setFilterOpen(false)} title="Фильтр" snapPoints={[0.75, 0.92]}>
         <PropertyFilterForm value={filter} onChange={setFilter} onClose={() => setFilterOpen(false)} />
       </BottomSheet>
@@ -333,17 +357,23 @@ function EmptyState() {
   );
 }
 
-function PropertyFilterForm({ value, onChange, onClose }: {
+function PropertyFilterForm({ value, onChange, onClose, inline = false }: {
   value: Omit<PropertyFilter, 'page' | 'type'>;
   onChange: (v: Omit<PropertyFilter, 'page' | 'type'>) => void;
   onClose: () => void;
+  inline?: boolean;
 }) {
   const [local, setLocal] = useState(value);
+
   function set<K extends keyof typeof local>(k: K, v: (typeof local)[K]) {
-    setLocal(p => ({ ...p, [k]: v }));
+    const next = { ...local, [k]: v };
+    setLocal(next);
+    if (inline) onChange(next);
   }
   function toggle<K extends keyof typeof local>(k: K, v: (typeof local)[K]) {
-    setLocal(p => ({ ...p, [k]: p[k] === v ? undefined : v }));
+    const next = { ...local, [k]: local[k] === v ? undefined : v };
+    setLocal(next);
+    if (inline) onChange(next);
   }
 
   const RENOVATIONS = [
@@ -351,11 +381,14 @@ function PropertyFilterForm({ value, onChange, onClose }: {
     { v: 'rough',    l: 'Черновая'      },
     { v: 'cosmetic', l: 'Косметический' },
     { v: 'euro',     l: 'Евро'          },
+    { v: 'clean',    l: 'Чистовая'      },
     { v: 'designer', l: 'Дизайнерский'  },
   ];
 
+  const ROOMS_OPTIONS = [1, 2, 3, 4];
+
   return (
-    <div className="flex flex-col gap-5 py-2">
+    <div className="flex flex-col gap-4 py-2">
       <FilterSection label="Поиск">
         <input type="text" placeholder="Улица, район..." className="input-field"
           value={local.q ?? ''}
@@ -371,12 +404,70 @@ function PropertyFilterForm({ value, onChange, onClose }: {
         </div>
       </FilterSection>
 
-      <FilterSection label="Статус объекта">
+      <FilterSection label="Статус">
         <div className="flex gap-2 flex-wrap">
           {([['active', 'Активный'], ['sold', 'Продан'], ['withdrawn', 'Снят']] as const).map(([v, l]) => (
             <button key={v} onClick={() => toggle('property_status', v)}
               className={`chip press-scale ${local.property_status === v ? 'chip-active' : ''}`}>{l}</button>
           ))}
+        </div>
+      </FilterSection>
+
+      <FilterSection label="Комнаты">
+        <div className="flex gap-2 flex-wrap">
+          {ROOMS_OPTIONS.map(r => (
+            <button key={r}
+              onClick={() => {
+                const current = local.rooms ?? [];
+                const next = current.includes(r) ? current.filter(x => x !== r) : [...current, r];
+                set('rooms', next.length ? next : undefined);
+              }}
+              className={`chip press-scale ${(local.rooms ?? []).includes(r) ? 'chip-active' : ''}`}>
+              {r}к
+            </button>
+          ))}
+          <button
+            onClick={() => {
+              const current = local.rooms ?? [];
+              const next = current.includes(0) ? current.filter(x => x !== 0) : [...current, 0];
+              set('rooms', next.length ? next : undefined);
+            }}
+            className={`chip press-scale ${(local.rooms ?? []).includes(0) ? 'chip-active' : ''}`}>
+            Студия
+          </button>
+        </div>
+      </FilterSection>
+
+      <FilterSection label="Цена, ₽">
+        <div className="grid grid-cols-2 gap-2">
+          <input type="number" placeholder="От" className="input-field"
+            value={String(local.price_min ?? '')}
+            onChange={e => set('price_min', e.target.value ? Number(e.target.value) : undefined)} />
+          <input type="number" placeholder="До" className="input-field"
+            value={String(local.price_max ?? '')}
+            onChange={e => set('price_max', e.target.value ? Number(e.target.value) : undefined)} />
+        </div>
+      </FilterSection>
+
+      <FilterSection label="Площадь, м²">
+        <div className="grid grid-cols-2 gap-2">
+          <input type="number" placeholder="От" className="input-field"
+            value={String(local.area_min ?? '')}
+            onChange={e => set('area_min', e.target.value ? Number(e.target.value) : undefined)} />
+          <input type="number" placeholder="До" className="input-field"
+            value={String(local.area_max ?? '')}
+            onChange={e => set('area_max', e.target.value ? Number(e.target.value) : undefined)} />
+        </div>
+      </FilterSection>
+
+      <FilterSection label="Этаж">
+        <div className="grid grid-cols-2 gap-2">
+          <input type="number" placeholder="От" className="input-field"
+            value={String(local.floor_min ?? '')}
+            onChange={e => set('floor_min', e.target.value ? Number(e.target.value) : undefined)} />
+          <input type="number" placeholder="До" className="input-field"
+            value={String(local.floor_max ?? '')}
+            onChange={e => set('floor_max', e.target.value ? Number(e.target.value) : undefined)} />
         </div>
       </FilterSection>
 
@@ -405,25 +496,25 @@ function PropertyFilterForm({ value, onChange, onClose }: {
         </div>
       </FilterSection>
 
-      <FilterSection label="Цена, ₽">
-        <div className="grid grid-cols-2 gap-2">
-          <input type="number" placeholder="От" className="input-field"
-            value={String((local as Record<string, unknown>).price_min ?? '')}
-            onChange={e => set('price_min' as keyof typeof local, e.target.value ? Number(e.target.value) : undefined as never)} />
-          <input type="number" placeholder="До" className="input-field"
-            value={String((local as Record<string, unknown>).price_max ?? '')}
-            onChange={e => set('price_max' as keyof typeof local, e.target.value ? Number(e.target.value) : undefined as never)} />
+      {!inline && (
+        <div className="flex gap-3 pt-2">
+          <Button variant="secondary" className="flex-1" onClick={() => { setLocal({}); onChange({}); onClose(); }}>
+            Сбросить
+          </Button>
+          <Button className="flex-1" onClick={() => { onChange(local); onClose(); }}>
+            Применить
+          </Button>
         </div>
-      </FilterSection>
-
-      <div className="flex gap-3 pt-2">
-        <Button variant="secondary" className="flex-1" onClick={() => { setLocal({}); onChange({}); onClose(); }}>
-          Сбросить
-        </Button>
-        <Button className="flex-1" onClick={() => { onChange(local); onClose(); }}>
-          Применить
-        </Button>
-      </div>
+      )}
+      {inline && Object.values(local).some(v => v !== undefined && (Array.isArray(v) ? v.length > 0 : true)) && (
+        <button
+          onClick={() => { setLocal({}); onChange({}); }}
+          className="text-[13px] text-center press-scale"
+          style={{ color: 'var(--ios-red)' }}
+        >
+          Сбросить фильтры
+        </button>
+      )}
     </div>
   );
 }

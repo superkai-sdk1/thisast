@@ -13,11 +13,21 @@ export interface PropertyFilter {
   rooms?: number[];
   area_min?: number;
   area_max?: number;
+  floor_min?: number;
+  floor_max?: number;
   q?: string;
   page?: number;
   limit?: number;
   complex_id?: string;
   payment_form?: string;
+  listing_type?: string;
+  property_status?: string;
+  renovation?: string;
+  from_realtor?: boolean;
+  has_loggia?: boolean;
+  has_balcony?: boolean;
+  has_wardrobe?: boolean;
+  has_panoramic?: boolean;
 }
 
 export interface ActorPayload {
@@ -90,12 +100,22 @@ export class PropertiesService {
     if (filter.district) { whereClause += ` AND p.district = $${idx++}`; params.push(filter.district); }
     if (filter.area_min) { whereClause += ` AND p.area_sqm >= $${idx++}`; params.push(filter.area_min); }
     if (filter.area_max) { whereClause += ` AND p.area_sqm <= $${idx++}`; params.push(filter.area_max); }
+    if (filter.floor_min) { whereClause += ` AND p.floor >= $${idx++}`; params.push(filter.floor_min); }
+    if (filter.floor_max) { whereClause += ` AND p.floor <= $${idx++}`; params.push(filter.floor_max); }
     if (filter.rooms?.length) {
       whereClause += ` AND p.rooms = ANY($${idx++}::smallint[])`;
       params.push(filter.rooms);
     }
     if (filter.complex_id) { whereClause += ` AND p.complex_id = $${idx++}`; params.push(filter.complex_id); }
     if (filter.payment_form) { whereClause += ` AND $${idx++} = ANY(p.conditions::text[])`; params.push(filter.payment_form); }
+    if (filter.listing_type) { whereClause += ` AND p.listing_type = $${idx++}`; params.push(filter.listing_type); }
+    if (filter.property_status) { whereClause += ` AND p.status = $${idx++}`; params.push(filter.property_status); }
+    if (filter.renovation) { whereClause += ` AND p.renovation = $${idx++}`; params.push(filter.renovation); }
+    if (filter.from_realtor) { whereClause += ` AND p.from_realtor = true`; }
+    if (filter.has_loggia) { whereClause += ` AND p.has_loggia = true`; }
+    if (filter.has_balcony) { whereClause += ` AND p.has_balcony = true`; }
+    if (filter.has_wardrobe) { whereClause += ` AND p.has_wardrobe = true`; }
+    if (filter.has_panoramic) { whereClause += ` AND p.has_panoramic = true`; }
     if (filter.q) {
       const qLike = `%${filter.q}%`;
       whereClause += ` AND (p.street ILIKE $${idx++} OR p.district ILIKE $${idx++} OR p.city ILIKE $${idx++} OR p.description ILIKE $${idx++} OR p.house_number ILIKE $${idx++})`;
@@ -129,11 +149,14 @@ export class PropertiesService {
   async findOne(id: string, actor: ActorPayload) {
     const result = await this.db.query(
       `SELECT p.*,
+              rc.name        AS complex_name,
+              rc.developer   AS complex_developer,
               json_agg(pp ORDER BY pp.display_order) FILTER (WHERE pp.id IS NOT NULL) AS photos
        FROM properties p
        LEFT JOIN property_photos pp ON pp.property_id = p.id
+       LEFT JOIN residential_complexes rc ON rc.id = p.complex_id
        WHERE p.id = $1 AND p.deleted_at IS NULL
-       GROUP BY p.id`,
+       GROUP BY p.id, rc.name, rc.developer`,
       [id],
     );
     if (!result.rows[0]) throw new NotFoundException('Объект не найден');
@@ -183,7 +206,7 @@ export class PropertiesService {
     return property;
   }
 
-  async update(id: string, dto: Partial<CreatePropertyDto>, actor: ActorPayload) {
+  async update(id: string, dto: Partial<CreatePropertyDto> | Record<string, unknown>, actor: ActorPayload) {
     const property = await this.findOne(id, actor);
 
     if (property.owner_agent_id !== actor.sub && actor.role === 'agent') {
@@ -194,15 +217,23 @@ export class PropertiesService {
     const params: unknown[] = [];
     let idx = 1;
 
-    const updatable: (keyof CreatePropertyDto)[] = [
+    const updatable: string[] = [
       'price', 'area_sqm', 'rooms', 'floor', 'floor_total', 'description',
       'district', 'street', 'house_number', 'conditions', 'tags', 'visibility_status', 'complex_id',
+      'net_price', 'agent_commission', 'commission_type', 'status', 'listing_type',
+      'subtype', 'building_status', 'delivery_year', 'delivery_quarter',
+      'kitchen_area', 'living_area', 'bathroom_type', 'room_type',
+      'windows', 'renovation', 'warm_floor', 'furniture',
+      'has_loggia', 'has_balcony', 'has_wardrobe', 'has_panoramic',
+      'plot_area', 'second_house_area', 'house_floors', 'utilities',
+      'cadastral_number', 'from_realtor', 'apartment_number', 'city',
     ];
 
+    const dtoAny = dto as Record<string, unknown>;
     for (const key of updatable) {
-      if (dto[key] !== undefined) {
+      if (dtoAny[key] !== undefined) {
         fields.push(`${key} = $${idx++}`);
-        params.push(dto[key]);
+        params.push(dtoAny[key]);
       }
     }
 
@@ -280,6 +311,19 @@ export class PropertiesService {
        ORDER BY dpm.score DESC
        LIMIT $2`,
       [propertyId, limit],
+    );
+    return result.rows;
+  }
+
+  async getEvents(id: string) {
+    const result = await this.db.query(
+      `SELECT ee.*, u.full_name AS user_name
+       FROM entity_events ee
+       LEFT JOIN users u ON u.id = ee.user_id
+       WHERE ee.entity_type = 'property' AND ee.entity_id = $1
+       ORDER BY ee.created_at DESC
+       LIMIT 100`,
+      [id],
     );
     return result.rows;
   }

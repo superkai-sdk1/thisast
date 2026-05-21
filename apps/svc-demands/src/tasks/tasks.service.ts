@@ -22,6 +22,9 @@ export interface TaskFilter {
   due_before?: string;
   entity_type?: string;
   entity_id?: string;
+  property_id?: string;
+  demand_id?: string;
+  complex_id?: string;
   agent_id?: string;
   assigned_to?: string;
   page?: number;
@@ -57,12 +60,17 @@ export class TasksService {
       conditions.push(`t.assigned_to = $${i++}`);
       params.push(filter.assigned_to);
     }
-    if (filter.entity_type) {
-      conditions.push(`t.entity_type = $${i++}`);
-      params.push(filter.entity_type);
-    }
-    if (filter.entity_id) {
-      conditions.push(`t.entity_id = $${i++}`);
+    if (filter.property_id) {
+      conditions.push(`t.property_id = $${i++}`);
+      params.push(filter.property_id);
+    } else if (filter.entity_type === 'property' && filter.entity_id) {
+      conditions.push(`t.property_id = $${i++}`);
+      params.push(filter.entity_id);
+    } else if (filter.entity_type === 'demand' && filter.entity_id) {
+      conditions.push(`t.demand_id = $${i++}`);
+      params.push(filter.entity_id);
+    } else if (filter.entity_type === 'complex' && filter.entity_id) {
+      conditions.push(`t.complex_id = $${i++}`);
       params.push(filter.entity_id);
     }
 

@@ -59,6 +59,11 @@ export class PropertiesController {
     return firstValueFrom(this.client.send(P.MSG_PROPS_UPDATE_VISIBILITY, { id, visibility: body.visibility, actor: user }));
   }
 
+  @Get(':id/events')
+  getEvents(@Param('id') id: string) {
+    return firstValueFrom(this.client.send(P.MSG_PROPS_GET_EVENTS, { id }));
+  }
+
   @Get(':id/matches')
   getMatches(@Param('id') id: string) {
     return firstValueFrom(this.client.send(P.MSG_MATCHING_GET_PROPERTY_MATCHES, { propertyId: id }));

@@ -10,6 +10,8 @@ import {
   MSG_DEMANDS_GET_MATCHES,
   MSG_DEMANDS_GET_ACTIVITY,
   MSG_DEMANDS_ADD_ACTIVITY,
+  MSG_DEMANDS_TRASH_LIST,
+  MSG_DEMANDS_RESTORE,
 } from '@crm/shared-types';
 import type { JwtPayload } from '@crm/shared-core';
 import { DemandsService } from './demands.service';
@@ -19,8 +21,18 @@ export class DemandsController {
   constructor(private readonly demandsService: DemandsService) {}
 
   @MessagePattern(MSG_DEMANDS_LIST)
-  findAll(@Payload() payload: { actor: JwtPayload; status?: string }) {
-    return this.demandsService.findAll(payload.actor, payload.status);
+  findAll(@Payload() payload: { actor: JwtPayload; filter?: Record<string, unknown> }) {
+    return this.demandsService.findAll(payload.actor, payload.filter ?? {});
+  }
+
+  @MessagePattern(MSG_DEMANDS_TRASH_LIST)
+  listTrash(@Payload() payload: { actor: JwtPayload }) {
+    return this.demandsService.listTrashed(payload.actor);
+  }
+
+  @MessagePattern(MSG_DEMANDS_RESTORE)
+  restore(@Payload() payload: { id: string; actor: JwtPayload }) {
+    return this.demandsService.restore(payload.id, payload.actor);
   }
 
   @MessagePattern(MSG_DEMANDS_FIND_ONE)
