@@ -164,9 +164,7 @@ export class MatchingService implements OnModuleInit, OnModuleDestroy {
        JOIN properties p ON p.id = dpm.property_id
        LEFT JOIN property_photos pp ON pp.property_id = p.id
        WHERE dpm.demand_id = $1 AND NOT dpm.is_dismissed AND p.deleted_at IS NULL
-       GROUP BY dpm.demand_id, dpm.property_id, dpm.score, dpm.match_details,
-                dpm.is_dismissed, dpm.notified_at, dpm.dismissed_at, dpm.created_at,
-                p.city, p.district, p.price, p.rooms, p.area_sqm, p.property_type
+       GROUP BY dpm.id, p.city, p.district, p.price, p.rooms, p.area_sqm, p.property_type
        ORDER BY dpm.score DESC
        LIMIT $2`,
       [demandId, limit],

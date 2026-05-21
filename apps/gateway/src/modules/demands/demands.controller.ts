@@ -29,8 +29,8 @@ export class DemandsController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return firstValueFrom(this.client.send(P.MSG_DEMANDS_FIND_ONE, { id }));
+  findOne(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
+    return firstValueFrom(this.client.send(P.MSG_DEMANDS_FIND_ONE, { id, actor: user }));
   }
 
   @Post()
@@ -44,13 +44,13 @@ export class DemandsController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return firstValueFrom(this.client.send(P.MSG_DEMANDS_DELETE, { id }));
+  remove(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
+    return firstValueFrom(this.client.send(P.MSG_DEMANDS_DELETE, { id, actor: user }));
   }
 
   @Patch(':id/kanban-status')
-  updateStatus(@Param('id') id: string, @Body() body: { status: string }) {
-    return firstValueFrom(this.client.send(P.MSG_DEMANDS_UPDATE_STATUS, { id, status: body.status }));
+  updateStatus(@Param('id') id: string, @Body() body: { status: string }, @CurrentUser() user: JwtPayload) {
+    return firstValueFrom(this.client.send(P.MSG_DEMANDS_UPDATE_STATUS, { id, status: body.status, actor: user }));
   }
 
   @Get(':id/matches')
@@ -60,13 +60,13 @@ export class DemandsController {
 
   @Get(':id/activity')
   getActivity(@Param('id') id: string) {
-    return firstValueFrom(this.client.send(P.MSG_DEMANDS_GET_ACTIVITY, { id }));
+    return firstValueFrom(this.client.send(P.MSG_DEMANDS_GET_ACTIVITY, { demandId: id }));
   }
 
   @Post(':id/activity')
   addActivity(@Param('id') id: string, @Body() body: { type: string; body: string }, @CurrentUser() user: JwtPayload) {
     return firstValueFrom(
-      this.client.send(P.MSG_DEMANDS_ADD_ACTIVITY, { id, type: body.type, body: body.body, actor: user }),
+      this.client.send(P.MSG_DEMANDS_ADD_ACTIVITY, { demandId: id, type: body.type, body: body.body, actor: user }),
     );
   }
 
