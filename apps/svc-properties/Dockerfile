@@ -1,6 +1,8 @@
 FROM node:20-alpine AS deps
 RUN corepack enable && corepack prepare pnpm@9 --activate
 WORKDIR /app
+ENV PUPPETEER_SKIP_DOWNLOAD=true
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
 COPY packages/shared-types/package.json ./packages/shared-types/
 COPY packages/shared-core/package.json  ./packages/shared-core/
