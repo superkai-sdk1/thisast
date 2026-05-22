@@ -47,9 +47,11 @@ export class DemandsService {
     const params: unknown[] = [isAdmin, actor.sub];
     let idx = 3;
 
-    if (filter['status']) {
+    // kanban_status filter (frontend may send as 'kanban_status' or 'status')
+    const kanbanVal = filter['kanban_status'] ?? filter['status'];
+    if (kanbanVal) {
       conditions.push(`d.kanban_status = $${idx++}::kanban_status`);
-      params.push(filter['status']);
+      params.push(kanbanVal);
     }
     if (filter['client_type']) {
       conditions.push(`d.client_type = $${idx++}`);
@@ -62,6 +64,22 @@ export class DemandsService {
     if (filter['temperature']) {
       conditions.push(`d.temperature = $${idx++}`);
       params.push(filter['temperature']);
+    }
+    if (filter['property_type']) {
+      conditions.push(`d.property_type = $${idx++}`);
+      params.push(filter['property_type']);
+    }
+    if (filter['budget_max']) {
+      conditions.push(`d.budget_max <= $${idx++}`);
+      params.push(Number(filter['budget_max']));
+    }
+    if (Array.isArray(filter['districts']) && (filter['districts'] as unknown[]).length > 0) {
+      conditions.push(`d.districts && $${idx++}::text[]`);
+      params.push(filter['districts']);
+    }
+    if (Array.isArray(filter['payment_forms']) && (filter['payment_forms'] as unknown[]).length > 0) {
+      conditions.push(`d.payment_forms && $${idx++}::text[]`);
+      params.push(filter['payment_forms']);
     }
     if (filter['q']) {
       conditions.push(`(d.buyer_name ILIKE $${idx} OR d.buyer_phone ILIKE $${idx})`);
@@ -164,7 +182,10 @@ export class DemandsService {
     const updatable = [
       'buyer_name', 'buyer_phone', 'budget_min', 'budget_max',
       'rooms', 'districts', 'repair_types', 'payment_forms',
-      'area_min', 'area_max', 'notes',
+      'area_min', 'area_max', 'notes', 'is_active',
+      'temperature', 'client_type', 'property_type',
+      'next_contact_at', 'first_contact_at', 'demand_notes',
+      'net_price', 'rent_price', 'deposit',
     ];
 
     for (const key of updatable) {

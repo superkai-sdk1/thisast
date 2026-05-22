@@ -3,7 +3,7 @@
 import { use, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ChevronLeft, MessageSquare, Phone, Eye, Sparkles, MapPin, Thermometer, Calendar, Wallet, Home, Ruler, Clock } from 'lucide-react';
+import { ChevronLeft, MessageSquare, Phone, Eye, Sparkles, MapPin, Thermometer, Calendar, Wallet, Home, Ruler, Clock, Pencil } from 'lucide-react';
 import { useDemand, useDemandMatches, useDemandActivity } from '@/lib/hooks/queries/useDemands';
 import { useQuery } from '@tanstack/react-query';
 import { Badge } from '@/components/atoms/Badge';
@@ -143,7 +143,12 @@ export default function ClientDetailPage({ params }: Props) {
               <span className="text-[11px]" style={{ color: 'var(--label-tertiary)' }}>#{(demand as any).display_id}</span>
             )}
           </div>
-          <Badge variant={stageBadge} size="sm">{stageLabel}</Badge>
+          <Link href={`/clients/${id}/edit`}>
+            <button className="w-8 h-8 rounded-full flex items-center justify-center press-scale"
+              style={{ color: 'var(--ios-blue)' }}>
+              <Pencil size={16} />
+            </button>
+          </Link>
         </div>
       </div>
 
@@ -155,6 +160,7 @@ export default function ClientDetailPage({ params }: Props) {
             style={{ background: 'var(--bg-elevated)', border: '0.5px solid var(--separator)', boxShadow: 'var(--shadow-card)' }}>
             {/* Type + temp row */}
             <div className="flex items-center gap-2 flex-wrap mb-3">
+              <Badge variant={stageBadge} size="sm">{stageLabel}</Badge>
               <span className="text-[12px] px-2.5 py-1 rounded-full font-semibold"
                 style={{ background: 'rgba(0,122,255,0.10)', color: 'var(--ios-blue)' }}>
                 {CLIENT_TYPE_LABELS[clientType] ?? clientType}
