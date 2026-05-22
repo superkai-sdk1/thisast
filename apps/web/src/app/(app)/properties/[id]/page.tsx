@@ -3,7 +3,7 @@
 import { use, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ChevronLeft, Share2, Trash2, Lock, Pencil, MapPin, BedDouble, Maximize2, Layers, Building, ClipboardList, Plus } from 'lucide-react';
+import { ChevronLeft, Share2, Trash2, Lock, Pencil, MapPin, BedDouble, Maximize2, Layers, Building, ClipboardList, Plus, Phone, User } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useProperty, useDeleteProperty } from '@/lib/hooks/queries/useProperties';
 import { useRequestAccess } from '@/lib/hooks/queries/useSharing';
@@ -314,9 +314,39 @@ export default function PropertyDetailPage({ params }: Props) {
               style={{ background: 'var(--bg-elevated)', border: '0.5px solid var(--separator)', boxShadow: 'var(--shadow-card)' }}
             >
               <p className="section-label">Собственник</p>
-              <p className="text-[14px]" style={{ color: 'var(--label-secondary)' }}>
-                Откройте карточку собственника для просмотра контактов
-              </p>
+              <div className="flex items-center justify-between gap-3 mt-1">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+                    style={{ background: 'rgba(0,122,255,0.10)' }}>
+                    <User size={18} style={{ color: 'var(--ios-blue)' }} />
+                  </div>
+                  <div className="min-w-0">
+                    {property.owner_name ? (
+                      <p className="text-[15px] font-semibold truncate" style={{ color: 'var(--label-primary)' }}>
+                        {property.owner_name}
+                      </p>
+                    ) : (
+                      <p className="text-[14px]" style={{ color: 'var(--label-tertiary)' }}>Имя не указано</p>
+                    )}
+                    {property.owner_phone && (
+                      <p className="text-[13px] font-mono mt-0.5" style={{ color: 'var(--ios-blue)' }}>
+                        {property.owner_phone}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                {property.owner_phone && (
+                  <a href={`tel:${property.owner_phone}`} className="flex-shrink-0">
+                    <button
+                      className="flex items-center gap-1.5 px-4 py-2 rounded-full text-white text-[13px] font-semibold press-scale"
+                      style={{ background: 'var(--ios-green)' }}
+                    >
+                      <Phone size={14} />
+                      Позвонить
+                    </button>
+                  </a>
+                )}
+              </div>
             </div>
           )}
         </PermissionGate>

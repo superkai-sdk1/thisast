@@ -3,7 +3,7 @@
 import { use, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ChevronLeft, MessageSquare, Phone, Eye, Sparkles, MapPin, Thermometer, Calendar } from 'lucide-react';
+import { ChevronLeft, MessageSquare, Phone, Eye, Sparkles, MapPin, Thermometer, Calendar, Wallet, Home, Ruler, Clock } from 'lucide-react';
 import { useDemand, useDemandMatches, useDemandActivity } from '@/lib/hooks/queries/useDemands';
 import { useQuery } from '@tanstack/react-query';
 import { Badge } from '@/components/atoms/Badge';
@@ -32,6 +32,16 @@ const STAGE_BADGES: Record<string, 'default' | 'success' | 'warning' | 'info' | 
 
 const CLIENT_TYPE_LABELS: Record<string, string> = {
   buyer: 'Покупатель', seller: 'Продавец', renter: 'Арендатор', landlord: 'Арендодатель',
+};
+
+const PROPERTY_TYPE_LABELS: Record<string, string> = {
+  apartment: 'Квартира', house: 'Дом', land: 'Участок',
+  commercial: 'Коммерция', new_building: 'Новостройка',
+};
+
+const PAYMENT_LABELS: Record<string, string> = {
+  cash: 'Наличные', mortgage: 'Ипотека', installment: 'Рассрочка',
+  trade_in: 'Trade-in', matcapital: 'Маткапитал', military_mortgage: 'Воен. ипотека',
 };
 
 const TEMPERATURE_INFO: Record<string, { label: string; color: string }> = {
@@ -140,32 +150,108 @@ export default function ClientDetailPage({ params }: Props) {
       <div className="gradient-mesh min-h-full">
         <div className="px-4 py-4 pb-6 flex flex-col gap-4">
 
-          {/* Type + temperature row */}
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-[13px] px-2.5 py-1 rounded-full font-medium"
-              style={{ background: 'rgba(0,122,255,0.10)', color: 'var(--ios-blue)' }}>
-              {CLIENT_TYPE_LABELS[clientType] ?? clientType}
-            </span>
-            {temp && (
-              <span className="flex items-center gap-1 text-[13px] font-medium" style={{ color: temp.color }}>
-                <Thermometer size={14} />
-                {temp.label}
-              </span>
-            )}
-            {(demand as any).is_contact_overdue && (
+          {/* Hero contact card */}
+          <div className="squircle-card p-4"
+            style={{ background: 'var(--bg-elevated)', border: '0.5px solid var(--separator)', boxShadow: 'var(--shadow-card)' }}>
+            {/* Type + temp row */}
+            <div className="flex items-center gap-2 flex-wrap mb-3">
               <span className="text-[12px] px-2.5 py-1 rounded-full font-semibold"
-                style={{ background: 'rgba(255,59,48,0.12)', color: 'var(--ios-red)' }}>
-                Контакт просрочен
+                style={{ background: 'rgba(0,122,255,0.10)', color: 'var(--ios-blue)' }}>
+                {CLIENT_TYPE_LABELS[clientType] ?? clientType}
               </span>
+              {temp && (
+                <span className="flex items-center gap-1.5 text-[12px] font-semibold px-2.5 py-1 rounded-full"
+                  style={{ background: `${temp.color}18`, color: temp.color }}>
+                  <Thermometer size={12} />
+                  {temp.label}
+                </span>
+              )}
+              {(demand as any).is_contact_overdue && (
+                <span className="text-[12px] px-2.5 py-1 rounded-full font-semibold"
+                  style={{ background: 'rgba(255,59,48,0.12)', color: 'var(--ios-red)' }}>
+                  ⚠ Контакт просрочен
+                </span>
+              )}
+            </div>
+
+            {/* Phone */}
+            {demand.buyer_phone && (
+              <div className="flex items-center gap-3 mb-3 pb-3" style={{ borderBottom: '0.5px solid var(--separator)' }}>
+                <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
+                  style={{ background: 'rgba(52,199,89,0.12)' }}>
+                  <Phone size={16} style={{ color: 'var(--ios-green)' }} />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[11px]" style={{ color: 'var(--label-tertiary)' }}>Телефон</p>
+                  <p className="text-[16px] font-semibold font-mono" style={{ color: 'var(--label-primary)' }}>
+                    {demand.buyer_phone}
+                  </p>
+                </div>
+                <a href={`tel:${demand.buyer_phone}`} className="flex-shrink-0">
+                  <button className="px-4 py-2 rounded-full text-white text-[13px] font-semibold press-scale"
+                    style={{ background: 'var(--ios-green)' }}>
+                    Позвонить
+                  </button>
+                </a>
+              </div>
             )}
+
+            {/* Dates */}
+            <div className="flex gap-4 flex-wrap">
+              {(demand as any).first_contact_at && (
+                <div>
+                  <p className="text-[11px]" style={{ color: 'var(--label-tertiary)' }}>Первый контакт</p>
+                  <p className="text-[13px] font-medium" style={{ color: 'var(--label-secondary)' }}>
+                    {new Date((demand as any).first_contact_at).toLocaleDateString('ru-RU')}
+                  </p>
+                </div>
+              )}
+              {(demand as any).next_contact_at && (
+                <div>
+                  <p className="text-[11px]" style={{ color: 'var(--label-tertiary)' }}>Следующий контакт</p>
+                  <p className="text-[13px] font-medium"
+                    style={{ color: (demand as any).is_contact_overdue ? 'var(--ios-red)' : 'var(--label-secondary)' }}>
+                    <Clock size={11} className="inline mr-1" />
+                    {new Date((demand as any).next_contact_at).toLocaleDateString('ru-RU')}
+                  </p>
+                </div>
+              )}
+              {(demand as any).created_at && !(demand as any).first_contact_at && (
+                <div>
+                  <p className="text-[11px]" style={{ color: 'var(--label-tertiary)' }}>В базе с</p>
+                  <p className="text-[13px] font-medium" style={{ color: 'var(--label-secondary)' }}>
+                    {new Date((demand as any).created_at).toLocaleDateString('ru-RU')}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Action buttons */}
+          <div className="flex gap-3">
+            <Button variant="secondary" className="flex-1" onClick={() => { setActivityType('note'); setActivityOpen(true); }}>
+              <MessageSquare size={16} />Заметка
+            </Button>
+            <Button variant="secondary" className="flex-1" onClick={() => { setActivityType('viewing'); setActivityOpen(true); }}>
+              <Eye size={16} />Показ
+            </Button>
           </div>
 
           {/* Main info card */}
           <div className="squircle-card p-4"
             style={{ background: 'var(--bg-elevated)', border: '0.5px solid var(--separator)', boxShadow: 'var(--shadow-card)' }}>
-            <div className="grid grid-cols-2 gap-4">
-              {demand.budget_max && (
-                <InfoRow label="Бюджет" value={`${demand.budget_min ? formatPrice(demand.budget_min) + ' — ' : ''}${formatPrice(demand.budget_max)}`} />
+            <p className="section-label">Параметры поиска</p>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+              {(demand.budget_max || demand.budget_min) && (
+                <div className="col-span-2 flex items-center gap-2">
+                  <Wallet size={14} style={{ color: 'var(--label-tertiary)', flexShrink: 0 }} />
+                  <div>
+                    <p className="text-[11px]" style={{ color: 'var(--label-tertiary)' }}>Бюджет</p>
+                    <p className="text-[15px] font-bold" style={{ color: 'var(--label-primary)' }}>
+                      {demand.budget_min ? formatPrice(demand.budget_min) + ' — ' : ''}{formatPrice(demand.budget_max ?? 0)}
+                    </p>
+                  </div>
+                </div>
               )}
               {(demand as any).net_price && (
                 <InfoRow label="Цена на руки" value={formatPrice((demand as any).net_price)} />
@@ -177,49 +263,58 @@ export default function ClientDetailPage({ params }: Props) {
                 <InfoRow label="Залог" value={formatPrice((demand as any).deposit)} />
               )}
               {demand.property_type && (
-                <InfoRow label="Тип" value={demand.property_type} />
+                <InfoRow label="Тип объекта" value={PROPERTY_TYPE_LABELS[demand.property_type] ?? demand.property_type} />
               )}
               {demand.rooms && demand.rooms.length > 0 && (
                 <InfoRow label="Комнат" value={(demand.rooms as number[]).join(', ')} />
               )}
-              {demand.districts && demand.districts.length > 0 && (
-                <InfoRow label="Районы" value={(demand.districts as string[]).join(', ')} />
-              )}
-              {demand.area_min && demand.area_max && (
-                <InfoRow label="Площадь" value={`${demand.area_min}–${demand.area_max} м²`} />
-              )}
-              {(demand as any).next_contact_at && (
-                <InfoRow label="Следующий контакт" value={new Date((demand as any).next_contact_at).toLocaleDateString('ru-RU')} />
+              {(demand.area_min || demand.area_max) && (
+                <InfoRow label="Площадь" value={
+                  demand.area_min && demand.area_max
+                    ? `${demand.area_min}–${demand.area_max} м²`
+                    : demand.area_min ? `от ${demand.area_min} м²` : `до ${demand.area_max} м²`
+                } />
               )}
             </div>
 
-            {demand.payment_forms && demand.payment_forms.length > 0 && (
-              <div className="flex flex-wrap gap-1 mt-3 pt-3" style={{ borderTop: '0.5px solid var(--separator)' }}>
-                {(demand.payment_forms as string[]).map(p => (
-                  <span key={p} className="text-[11px] font-medium px-2 py-0.5 rounded-full"
-                    style={{ background: 'rgba(0,122,255,0.10)', color: 'var(--ios-blue)' }}>{p}</span>
-                ))}
+            {/* Districts */}
+            {demand.districts && demand.districts.length > 0 && (
+              <div className="mt-3 pt-3" style={{ borderTop: '0.5px solid var(--separator)' }}>
+                <p className="text-[11px] mb-1.5" style={{ color: 'var(--label-tertiary)' }}>Районы</p>
+                <div className="flex flex-wrap gap-1">
+                  {(demand.districts as string[]).map(d => (
+                    <span key={d} className="text-[12px] font-medium px-2.5 py-0.5 rounded-full"
+                      style={{ background: 'var(--fill-secondary)', color: 'var(--label-secondary)' }}>{d}</span>
+                  ))}
+                </div>
               </div>
             )}
 
+            {/* Payment forms */}
+            {demand.payment_forms && demand.payment_forms.length > 0 && (
+              <div className="mt-3 pt-3" style={{ borderTop: '0.5px solid var(--separator)' }}>
+                <p className="text-[11px] mb-1.5" style={{ color: 'var(--label-tertiary)' }}>Форма оплаты</p>
+                <div className="flex flex-wrap gap-1">
+                  {(demand.payment_forms as string[]).map(p => (
+                    <span key={p} className="text-[12px] font-medium px-2.5 py-0.5 rounded-full"
+                      style={{ background: 'rgba(0,122,255,0.10)', color: 'var(--ios-blue)' }}>
+                      {PAYMENT_LABELS[p] ?? p}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Notes */}
             {(demand.notes || (demand as any).demand_notes) && (
               <div className="mt-3 pt-3" style={{ borderTop: '0.5px solid var(--separator)' }}>
-                {demand.notes && <p className="text-[13px]" style={{ color: 'var(--label-primary)' }}>{demand.notes}</p>}
+                <p className="text-[11px] mb-1" style={{ color: 'var(--label-tertiary)' }}>Заметки</p>
+                {demand.notes && <p className="text-[13px] leading-relaxed" style={{ color: 'var(--label-primary)' }}>{demand.notes}</p>}
                 {(demand as any).demand_notes && (
-                  <p className="text-[12px] mt-1" style={{ color: 'var(--label-secondary)' }}>{(demand as any).demand_notes}</p>
+                  <p className="text-[12px] mt-1 leading-relaxed" style={{ color: 'var(--label-secondary)' }}>{(demand as any).demand_notes}</p>
                 )}
               </div>
             )}
-          </div>
-
-          {/* Contact actions */}
-          <div className="flex gap-3">
-            <a href={`tel:${demand.buyer_phone}`} className="flex-1">
-              <Button variant="secondary" className="w-full"><Phone size={16} />Позвонить</Button>
-            </a>
-            <Button variant="secondary" className="flex-1" onClick={() => setActivityOpen(true)}>
-              <MessageSquare size={16} />Заметка
-            </Button>
           </div>
 
           {/* AI Matches */}

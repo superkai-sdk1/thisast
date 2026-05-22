@@ -152,12 +152,15 @@ export class PropertiesService {
       `SELECT p.*,
               rc.name        AS complex_name,
               rc.developer   AS complex_developer,
+              o.full_name    AS owner_name,
+              o.phone        AS owner_phone,
               json_agg(pp ORDER BY pp.display_order) FILTER (WHERE pp.id IS NOT NULL) AS photos
        FROM properties p
        LEFT JOIN property_photos pp ON pp.property_id = p.id
        LEFT JOIN residential_complexes rc ON rc.id = p.complex_id
+       LEFT JOIN owners o ON o.id = p.owner_id
        WHERE p.id = $1 AND p.deleted_at IS NULL
-       GROUP BY p.id, rc.name, rc.developer`,
+       GROUP BY p.id, rc.name, rc.developer, o.full_name, o.phone`,
       [id],
     );
     if (!result.rows[0]) throw new RpcException({ statusCode: 404, message: 'Объект не найден' });

@@ -51,11 +51,26 @@ const PAYMENT_LABELS: Record<string, string> = {
   trade_in: 'Trade-in', matcapital: 'Маткапитал', military_mortgage: 'Воен. ипотека',
 };
 
+const DISTRICT_OPTIONS = [
+  'Центр', 'Стрелка', 'Горная', 'Хасанья', 'Белая Речка',
+  'Кожзавод', 'Затишье', 'Нальчик', 'Пригород',
+];
+
+const PROPERTY_TYPE_LABELS: Record<string, string> = {
+  apartment: 'Квартира', house: 'Дом', land: 'Участок',
+  commercial: 'Коммерция', new_building: 'Новостройка',
+};
+
 interface ClientFilter {
   client_type?: string;
   temperature?: string;
   is_active?: string;
   kanban_status?: string;
+  property_type?: string;
+  budget_max?: number;
+  districts?: string[];
+  payment_forms?: string[];
+  q?: string;
 }
 
 export default function ClientsPage() {
@@ -66,10 +81,17 @@ export default function ClientsPage() {
 
   const { data: demands = [], isLoading } = useQuery({
     queryKey: ['demands', { client_type: clientType, ...filter }],
-    queryFn: () => demandsApi.list({ client_type: clientType || undefined, ...filter } as never),
+    queryFn: () => demandsApi.list({
+      client_type: clientType || undefined,
+      ...filter,
+      districts: filter.districts && filter.districts.length > 0 ? filter.districts : undefined,
+      payment_forms: filter.payment_forms && filter.payment_forms.length > 0 ? filter.payment_forms : undefined,
+    } as never),
   });
 
-  const hasActiveFilters = clientType !== '' || Object.values(filter).some(v => v !== undefined && v !== '');
+  const hasActiveFilters = clientType !== '' || Object.entries(filter).some(([, v]) =>
+    v !== undefined && v !== '' && !(Array.isArray(v) && v.length === 0)
+  );
 
   return (
     <>
@@ -213,6 +235,7 @@ function ClientCard({ demand }: { demand: Demand }) {
   const clientTypeLabel: Record<string, string> = {
     buyer: 'Покупатель', seller: 'Продавец', renter: 'Арендатор', landlord: 'Арендодатель',
   };
+  const phone = demand.buyer_phone;
 
   return (
     <article
@@ -220,6 +243,7 @@ function ClientCard({ demand }: { demand: Demand }) {
       style={{ background: 'var(--bg-elevated)', border: '0.5px solid var(--separator)', boxShadow: 'var(--shadow-card)' }}
     >
       <div className="p-4 flex flex-col gap-2.5">
+        {/* Header row */}
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-center gap-2 min-w-0">
             <div className={`w-2 h-2 rounded-full flex-shrink-0 ${stageInfo.dot}`} />
@@ -232,7 +256,7 @@ function ClientCard({ demand }: { demand: Demand }) {
               )}
             </div>
           </div>
-          <div className="flex flex-col items-end gap-1">
+          <div className="flex flex-col items-end gap-1 flex-shrink-0">
             <Badge variant={stageInfo.badge} size="sm">{stageLabel}</Badge>
             {(demand as any).client_type && (
               <span className="text-[10px] px-2 py-0.5 rounded-full font-medium"
@@ -261,15 +285,34 @@ function ClientCard({ demand }: { demand: Demand }) {
           </div>
         )}
 
-        {/* Budget */}
-        {(demand.budget_min !== null || demand.budget_max !== null) && (
-          <div className="flex items-center gap-1.5">
-            <Wallet size={12} style={{ color: 'var(--label-tertiary)' }} />
-            <span className="text-[13px] font-medium" style={{ color: 'var(--label-secondary)' }}>
-              {demand.budget_min ? formatPrice(demand.budget_min) + ' — ' : ''}{formatPrice(demand.budget_max ?? 0)}
-            </span>
-          </div>
-        )}
+        {/* Phone + Budget row */}
+        <div className="flex items-center justify-between gap-2">
+          {/* Budget */}
+          {(demand.budget_min !== null || demand.budget_max !== null) && (
+            <div className="flex items-center gap-1.5 min-w-0">
+              <Wallet size={12} style={{ color: 'var(--label-tertiary)', flexShrink: 0 }} />
+              <span className="text-[13px] font-medium truncate" style={{ color: 'var(--label-secondary)' }}>
+                {demand.budget_min ? formatPrice(demand.budget_min) + ' — ' : ''}{formatPrice(demand.budget_max ?? 0)}
+              </span>
+            </div>
+          )}
+          {/* Phone call button — on the right, stops link navigation */}
+          {phone && (
+            <a
+              href={`tel:${phone}`}
+              className="flex-shrink-0"
+              onClick={e => e.stopPropagation()}
+            >
+              <span
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold press-scale"
+                style={{ background: 'rgba(52,199,89,0.12)', color: 'var(--ios-green)' }}
+              >
+                <Phone size={12} />
+                {phone}
+              </span>
+            </a>
+          )}
+        </div>
 
         {/* Districts / payment forms */}
         {(() => {
@@ -375,13 +418,59 @@ function ClientKanban({ demands, isLoading }: { demands: Demand[]; isLoading?: b
 
 function ClientFilterForm({ value, onChange, onClose }: { value: ClientFilter; onChange: (v: ClientFilter) => void; onClose: () => void }) {
   const [local, setLocal] = useState(value);
+
   function set<K extends keyof ClientFilter>(key: K, val: ClientFilter[K]) {
     setLocal(prev => ({ ...prev, [key]: val }));
   }
+
+  function toggleDistrict(d: string) {
+    setLocal(prev => {
+      const cur = prev.districts ?? [];
+      return { ...prev, districts: cur.includes(d) ? cur.filter(x => x !== d) : [...cur, d] };
+    });
+  }
+
+  function togglePayment(p: string) {
+    setLocal(prev => {
+      const cur = prev.payment_forms ?? [];
+      return { ...prev, payment_forms: cur.includes(p) ? cur.filter(x => x !== p) : [...cur, p] };
+    });
+  }
+
+  const activeCount = Object.entries(local).filter(([, v]) =>
+    v !== undefined && v !== '' && !(Array.isArray(v) && v.length === 0)
+  ).length;
+
   return (
     <div className="flex flex-col gap-5 py-2">
+
+      {/* Search */}
       <div className="flex flex-col gap-2">
-        <span className="section-label">Температура</span>
+        <span className="section-label">Поиск по имени</span>
+        <input
+          className="input-field"
+          placeholder="Имя или телефон..."
+          value={local.q ?? ''}
+          onChange={e => set('q', e.target.value || undefined)}
+        />
+      </div>
+
+      {/* Stage */}
+      <div className="flex flex-col gap-2">
+        <span className="section-label">Этап сделки</span>
+        <div className="flex gap-2 flex-wrap">
+          {KANBAN_STAGES.map(s => (
+            <button key={s.value} onClick={() => set('kanban_status', local.kanban_status === s.value ? undefined : s.value)}
+              className={`chip press-scale ${local.kanban_status === s.value ? 'chip-active' : ''}`}>
+              {s.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Temperature */}
+      <div className="flex flex-col gap-2">
+        <span className="section-label">Температура клиента</span>
         <div className="flex gap-2 flex-wrap">
           {Object.entries(TEMPERATURE_LABELS).map(([k, v]) => (
             <button key={k} onClick={() => set('temperature', local.temperature === k ? undefined : k)}
@@ -391,6 +480,59 @@ function ClientFilterForm({ value, onChange, onClose }: { value: ClientFilter; o
           ))}
         </div>
       </div>
+
+      {/* Property type */}
+      <div className="flex flex-col gap-2">
+        <span className="section-label">Тип объекта</span>
+        <div className="flex gap-2 flex-wrap">
+          {Object.entries(PROPERTY_TYPE_LABELS).map(([k, v]) => (
+            <button key={k} onClick={() => set('property_type', local.property_type === k ? undefined : k)}
+              className={`chip press-scale ${local.property_type === k ? 'chip-active' : ''}`}>
+              {v}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Budget max */}
+      <div className="flex flex-col gap-2">
+        <span className="section-label">Макс. бюджет, ₽</span>
+        <input
+          type="number"
+          className="input-field"
+          placeholder="например 5000000"
+          value={local.budget_max ?? ''}
+          onChange={e => set('budget_max', e.target.value ? Number(e.target.value) : undefined)}
+        />
+      </div>
+
+      {/* Districts */}
+      <div className="flex flex-col gap-2">
+        <span className="section-label">Районы</span>
+        <div className="flex gap-2 flex-wrap">
+          {DISTRICT_OPTIONS.map(d => (
+            <button key={d} onClick={() => toggleDistrict(d)}
+              className={`chip press-scale ${(local.districts ?? []).includes(d) ? 'chip-active' : ''}`}>
+              {d}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Payment forms */}
+      <div className="flex flex-col gap-2">
+        <span className="section-label">Форма оплаты</span>
+        <div className="flex gap-2 flex-wrap">
+          {Object.entries(PAYMENT_LABELS).map(([k, v]) => (
+            <button key={k} onClick={() => togglePayment(k)}
+              className={`chip press-scale ${(local.payment_forms ?? []).includes(k) ? 'chip-active' : ''}`}>
+              {v}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Активность */}
       <div className="flex flex-col gap-2">
         <span className="section-label">Активность</span>
         <div className="flex gap-2">
@@ -400,8 +542,11 @@ function ClientFilterForm({ value, onChange, onClose }: { value: ClientFilter; o
             className={`chip press-scale ${local.is_active === 'false' ? 'chip-active' : ''}`}>Неактивные</button>
         </div>
       </div>
+
       <div className="flex gap-3 pt-2">
-        <Button variant="secondary" className="flex-1" onClick={() => { setLocal({}); onChange({}); onClose(); }}>Сбросить</Button>
+        <Button variant="secondary" className="flex-1" onClick={() => { setLocal({}); onChange({}); onClose(); }}>
+          Сбросить {activeCount > 0 && `(${activeCount})`}
+        </Button>
         <Button className="flex-1" onClick={() => { onChange(local); onClose(); }}>Применить</Button>
       </div>
     </div>

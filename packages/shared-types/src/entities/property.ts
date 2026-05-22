@@ -118,6 +118,8 @@ export interface Property {
   complex_id: string | null;
   complex_name?: string | null;
   complex_developer?: string | null;
+  owner_name?: string | null;
+  owner_phone?: string | null;
   mortgage_rate?: number | null;
   mortgage_initial_pct?: number | null;
   installment_plans?: Array<{ months: number; price_sqm: number; initial_pct: number }>;
