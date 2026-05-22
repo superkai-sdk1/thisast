@@ -26,7 +26,7 @@ export function BottomTabBar() {
         borderRadius: '24px',
       }}
     >
-      <div className="flex h-[64px] items-center px-1">
+      <div className="flex h-[64px] items-center px-1 overflow-x-auto no-scrollbar">
         {TABS.map(({ href, Icon, label }) => {
           const active =
             pathname === href ||
@@ -36,7 +36,7 @@ export function BottomTabBar() {
             <Link
               key={href}
               href={href}
-              className="flex-1 flex flex-col items-center justify-center gap-[3px] relative press-scale py-2"
+              className="flex-shrink-0 flex flex-col items-center justify-center gap-[3px] relative press-scale py-2 px-4"
             >
               <Icon
                 size={22}
