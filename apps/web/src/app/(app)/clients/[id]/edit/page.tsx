@@ -132,7 +132,7 @@ export default function EditClientPage({ params }: Props) {
 
   useEffect(() => {
     if (!demand) return;
-    const d = demand as Record<string, unknown>;
+    const d = demand as unknown as Record<string, unknown>;
     setClientType((d.client_type as string) ?? 'buyer');
     setName((d.buyer_name as string) ?? '');
     setPhone((d.buyer_phone as string) ?? '');
