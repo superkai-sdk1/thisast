@@ -177,7 +177,7 @@ export default function EditClientPage({ params }: Props) {
 
   function handleSubmit() {
     setSaveError(null);
-    const currentStatus = (demand as Record<string, unknown>)?.kanban_status as string;
+    const currentStatus = (demand as unknown as Record<string, unknown>)?.kanban_status as string;
     if (kanbanStatus !== currentStatus) {
       updateStatusMutation.mutate(kanbanStatus);
     }
