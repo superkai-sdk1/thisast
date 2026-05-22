@@ -2,15 +2,18 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Building2, Building, Users, Handshake, Settings, ClipboardList } from 'lucide-react';
+import { LayoutDashboard, Building2, Building, Users, Handshake, Settings, ClipboardList, Trash2, Shield } from 'lucide-react';
 
 const TABS = [
-  { href: '/dashboard',  Icon: LayoutDashboard, label: 'Главная'  },
-  { href: '/properties', Icon: Building2,        label: 'Объекты'  },
-  { href: '/clients',    Icon: Users,            label: 'Клиенты'  },
-  { href: '/tasks',      Icon: ClipboardList,    label: 'Задачи'   },
-  { href: '/deals',      Icon: Handshake,        label: 'Сделки'   },
-  { href: '/settings',   Icon: Settings,         label: 'Профиль'  },
+  { href: '/dashboard',  Icon: LayoutDashboard, label: 'Главная'    },
+  { href: '/properties', Icon: Building2,        label: 'Объекты'   },
+  { href: '/complexes',  Icon: Building,         label: 'ЖК'        },
+  { href: '/clients',    Icon: Users,            label: 'Клиенты'   },
+  { href: '/tasks',      Icon: ClipboardList,    label: 'Задачи'    },
+  { href: '/deals',      Icon: Handshake,        label: 'Сделки'    },
+  { href: '/trash',      Icon: Trash2,           label: 'Корзина'   },
+  { href: '/admin',      Icon: Shield,           label: 'Управление'},
+  { href: '/settings',   Icon: Settings,         label: 'Профиль'   },
 ] as const;
 
 export function BottomTabBar() {
