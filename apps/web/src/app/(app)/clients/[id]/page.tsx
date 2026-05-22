@@ -129,21 +129,21 @@ export default function ClientDetailPage({ params }: Props) {
     <div className="min-h-dvh" style={{ background: 'var(--bg-primary)' }}>
       {/* Header */}
       <div className="glass-nav sticky top-0 z-20" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
-        <div className="flex items-center justify-between h-11 px-4">
+        <div className="flex items-center h-11 px-4 gap-2">
           <button onClick={() => router.back()}
-            className="w-8 h-8 rounded-full flex items-center justify-center press-scale"
+            className="w-8 h-8 rounded-full flex items-center justify-center press-scale flex-shrink-0"
             style={{ color: 'var(--ios-blue)' }}>
             <ChevronLeft size={20} />
           </button>
-          <div className="flex flex-col items-center">
-            <h1 className="text-[16px] font-semibold truncate max-w-[55%]" style={{ color: 'var(--label-primary)' }}>
+          <div className="flex flex-col items-center flex-1 min-w-0">
+            <h1 className="text-[16px] font-semibold truncate w-full text-center" style={{ color: 'var(--label-primary)' }}>
               {demand.buyer_name}
             </h1>
             {(demand as any).display_id && (
               <span className="text-[11px]" style={{ color: 'var(--label-tertiary)' }}>#{(demand as any).display_id}</span>
             )}
           </div>
-          <Link href={`/clients/${id}/edit`}>
+          <Link href={`/clients/${id}/edit`} className="flex-shrink-0">
             <button className="w-8 h-8 rounded-full flex items-center justify-center press-scale"
               style={{ color: 'var(--ios-blue)' }}>
               <Pencil size={16} />
